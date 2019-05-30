@@ -1,5 +1,7 @@
 
 html, body, :global(#root) {
+  /* max-width: 1024px; */
+  margin: 0 auto;
   height: 100%;
 }
 
