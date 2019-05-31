@@ -49,7 +49,7 @@ const menus = [
 export default class NavBar extends Component {
 
     render() {
-        const selectedKeys = this.setSelectKeys(this.props.location.pathname);
+        const selectedKeys = this.setSelectKeys(this.props.location.pathname || 'home');
         return (
             <nav className={styles.navbar}>
                 <Menu
