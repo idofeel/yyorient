@@ -30,20 +30,6 @@ const menus = [
         path: '/city',
         name: '城市'
     },
-    // {
-    //     key: 'login',
-    //     path: '/login',
-    //     name: '登录',
-    //     // className: style.login,
-    //     isAuthority: true
-    // },
-    // {
-    //     key: 'register',
-    //     path: '/register',
-    //     name: '注册',
-    //     // className: style.register,
-    //     isAuthority: true
-    // }
 ];
 
 export default class NavBar extends Component {
