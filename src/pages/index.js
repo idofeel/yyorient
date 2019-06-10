@@ -5,7 +5,7 @@ import { Row } from 'antd';
 import { Switch } from 'dva/router';
 import Header from './Header/Header';
 import SubRoutes, { RedirectRoute, NoMatchRoute } from '../utils/SubRoute';
-
+import './global.less'; //全局样式覆盖
 function IndexPage(props) {
   const { routes } = props;
   return (

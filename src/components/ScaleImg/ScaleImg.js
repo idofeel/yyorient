@@ -1,8 +1,3 @@
-import React from 'react';
-import logo from 'images/logo.png';
-
-import './ScaleImg.less'
-
 /**
  * 图片查看器组件
  *
@@ -16,23 +11,39 @@ import './ScaleImg.less'
  * --------------------------------------------------------------------------------
  * uri         |    String      |     ''        |     * 必填 图片的地址
  * options     |    Object      |     {}        |     可选参数 (见下方说明)
+ * AerialView  |    Number      |     200       |     可选参数
+ * 
+ * --------------------------------------------------------------------------------
+ * options 参数  Object
+ * 
+ *  bounding   默认值：false   设置边界
+ *             类型：Boolean     true 有边界，以可显示区域的边为边界；false 无边界，可任意拖拽
+ *             类型：Obejct      { offsetLeft: Number, offsetTop: Number } 图片在屏幕中剩余的宽度/高度 (最大值为图片的宽度高度，超出按图片最大值)
+ *   
+ *  offset  默认值：0    边界偏移量    * 当bounding为Bool时也可以使用  当有边界时，又想留一点边界时使用
+ *          类型：Number      当前边界的总偏移量 
+ *  
+ * --------------------------------------------------------------------------------
+ * AerialView 参数  Object / Number     默认值 200
+ *  当为Object 时结束以下两个参数；
+ *      width       Number        默认值：200
+ *      height      Number        默认值：200
  * 
  * 
  * 
- *         
- * options 的属性说明
- *  设置边界
- *      bounding    类型：Boolean     true 有边界，以可显示区域的边为边界；false 无边界，可任意拖拽
- *                  类型：Obejct      {offsetLeft: Number, offsetTop: Number} 图片在屏幕中剩余的宽度/高度 (最大值为图片的宽度高度，超出按图片最大值)
- *      
  */
+
+import React from 'react';
+import logo from 'images/logo.png';
+
+import './ScaleImg.less'
 
 
 // const imgs = require('../../assets/images/3.jpg')
 export default class extends React.Component {
     constructor(props) {
         super(props);
-        const { options = { bounding: false }, onDrag = () => { } } = props; //接收参数
+        const { options = { bounding: false }, onDrag = () => { }, AerialView = 200 } = props; //接收参数,设置默认值；
         this.state = {
             top: 0,//图片离顶部的距离
             left: 0,//图片左边界的距离
@@ -45,14 +56,19 @@ export default class extends React.Component {
             width: 0, //图片宽
             height: 0, //图片高
             rows: [],
-            aerialLeft: 10,
-            aerialTop: 0,
-            aerialWidth: 0,
-            aerialHeight: 0
+            aerialLeft: 0, //鸟瞰图左边界的距离
+            aerialTop: 0, //鸟瞰图离顶部的距离
+            aerialWidth: 0, //鸟瞰图显示区域
+            aerialHeight: 0, //鸟瞰图显示区域
+            aerialViewShow: true // 显示鸟瞰图  注：（暂由图片超宽超高控制）
         }
-        this.resizeBind = this.resize.bind(this);
+        // 初始化一些需要用的参数；
+        this.resizeBind = this.resize.bind(this); //绑定窗口改变事件
         this.bounding = options.bounding === undefined ? false : options.bounding; //设置是否允许边界
-        this.onDrag = onDrag;
+        this.maxOffset = options.offset ? options.offset : 0; // 兼容边界的偏移量
+        this.onDrag = onDrag; // 拖动图片时的事件 
+        this.AerialViewWidth = typeof AerialView === 'number' ? AerialView : AerialView.width || 200; //鸟瞰图容器宽度
+        this.AerialViewHeight = typeof AerialView === 'number' ? AerialView : AerialView.height || 200; //鸟瞰图容器高度
     }
     scales = [1, 2, 1, 3]; //缩放比例
     currentScale = 1; //当前比例
@@ -92,7 +108,6 @@ export default class extends React.Component {
             { width, height, } = this.state,
             top = (visivbleHeight - imgHeight) / 2,
             left = (visivbleWidth - imgWidth) / 2;
-
         // 图片超宽超高 或 宽高某项小于2倍
         // if (minScale < 1 || minScale > 2) { 
 
@@ -161,7 +176,7 @@ export default class extends React.Component {
                     {this.renderPictureBlock()}
                 </div>
                 {this.renderTools()}
-                {this.AerialView()}
+                {this.renderAerialView()}
             </div>);
 
     }
@@ -170,7 +185,10 @@ export default class extends React.Component {
         return null;
     }
 
-    AerialView() {
+    renderAerialView() {
+
+        if (this.state.aerialViewShow !== true) return null;
+
         const src = logo;
         // const left = 
         const pos = {
@@ -179,13 +197,18 @@ export default class extends React.Component {
             width: this.state.aerialWidth,
             height: this.state.aerialHeight
         }
+
+        // width = 200 * (width / height);
+        // height = 200;
         return (
-            <div ref="arerialView" className="arerialView" >
-                <div className="arerialImgBox">
-                    <img src={src} draggable={false} ref="arerialImg" />
+            <div ref="aerialView" className="aerialView" style={{ width: this.AerialViewWidth, height: this.AerialViewHeight }}>
+                <div className="aerialImgBox">
+                    <div ref="aerialImg" className="aerialImg" style={this.aerialImgSize()}>
+                        <img src={src} draggable={false} className="notSelect" />
+                    </div>
                     <div
-                        ref="arerial"
-                        className="arerial"
+                        ref="aerial"
+                        className="aerial"
                         style={{ ...pos }}
                         onMouseDown={this.AerialTouchStrat.bind(this)}
                         // onMouseMove={this.touchMove.bind(this)}
@@ -209,7 +232,8 @@ export default class extends React.Component {
         if (!position) return;
         const { left: aerialLeft, top: aerialTop } = position;
 
-        const { offsetWidth: aerialImgWidth, offsetHeight: aerialImgHeight } = this.refs.arerialImg; // 鸟瞰图宽高
+        const { offsetWidth: aerialImgWidth, offsetHeight: aerialImgHeight } = this.refs.aerialImg; // 鸟瞰图宽高
+        console.log(aerialImgWidth, aerialImgHeight)
         const { showWidth, showHeight } = this.getShowWidthAndHeight();// 图片高度
 
         const states = this.ViewBounding({
@@ -251,7 +275,7 @@ export default class extends React.Component {
         }
         this.touch = true;
         this.handleClick({ x: this.state.left, y: this.state.top }, e);
-        // 绑定一个 独有的移动事件
+        // 绑定一个其它移动事件
         this.BindTouchMove = this.ViewerTouchMove;
     }
     // 移动事件
@@ -259,6 +283,7 @@ export default class extends React.Component {
         this.BindTouchMove(e);
     }
 
+    // 视图中移动
     ViewerTouchMove(e) {
         const position = this.handleMove(e);
         if (!position) return;
@@ -272,14 +297,14 @@ export default class extends React.Component {
         this.onDrag(false);
     }
 
-
+    // 鼠标点击、触摸事件处理
     handleClick(currentPos, event) {
         this.touch = true;
         const pos = this.getClientPos(event);
         this.x = pos.x + currentPos.x * -1;
         this.y = pos.y + currentPos.y * -1;
     }
-
+    // 鼠标、触摸 移动事件处理
     handleMove(event) {
         if (!this.touch) return;
         const { x, y } = this.getClientPos(event),
@@ -289,6 +314,7 @@ export default class extends React.Component {
         return { left, top };
     }
 
+    // 鼠标、触摸 结束事件处理
     handleEnd(event) {
         this.touch = false;
         this.BindTouchMove = () => { };//
@@ -333,23 +359,18 @@ export default class extends React.Component {
 
     }
 
-    AerialVisible(imgPosition) {
+    // 鸟瞰图大小
+    aerialImgSize() {
+        let { AerialViewWidth: width, AerialViewHeight: height } = this;
+        const { imgWidth, imgHeight } = this.getPictrueWidthAndHeight(); // 图片高度
 
-        const { showWidth, showHeight } = this.getShowWidthAndHeight();// 图片高度
-        const { left, top } = imgPosition || this.state;
-        const { visivbleWidth, visivbleHeight } = this.getVisivbleWidthAndHeight();// 可显示区域高度
+        if (imgWidth > imgHeight) {
+            height = width / (imgWidth / imgHeight); // 当图片宽度大于高度 
+        } else {
+            width = height / (imgWidth / imgHeight); // 当图片高度大于宽度 
+        }
 
-        let { offsetWidth: aerialImgWidth, offsetHeight: aerialImgHeight } = this.refs.arerialImg; // 鸟瞰图宽高
-
-        return {
-            aerialWidth: aerialImgWidth / (showWidth / visivbleWidth),
-            aerialHeight: aerialImgHeight / (showHeight / visivbleHeight),
-            aerialLeft: 0 - (aerialImgWidth / (showWidth / left)),
-            aerialTop: 0 - (aerialImgHeight / (showHeight / top)),
-            left,
-            top
-        };
-
+        return { width, height };
     }
 
     // 拖动放大进度条时的放大缩小
@@ -364,6 +385,7 @@ export default class extends React.Component {
         return this.ViewBounding(this.handleMove(e));
     }
 
+    // 视图边界
     ViewBounding(pos) {
         if (this.bounding === false) return this.AerialVisible(pos); //无边界，可任意拖拽
         const { visivbleWidth, visivbleHeight } = this.getVisivbleWidthAndHeight(),
@@ -373,29 +395,58 @@ export default class extends React.Component {
                 offsetLeft: showWidth,
                 offsetTop: showHeight
             } : this.bounding;
-
         if (bounding.offsetLeft > showWidth) bounding.offsetLeft = showWidth;
         if (bounding.offsetTop > showHeight) bounding.offsetTop = showHeight;
 
-        let MaxLeft = bounding.offsetLeft - showWidth,
+        // 增加偏移量
+        let MaxLeft = bounding.offsetLeft - showWidth - this.maxOffset,
             MaxTop = bounding.offsetTop - showHeight,
             MaxRight = visivbleWidth - bounding.offsetLeft,
             MaxBottom = visivbleHeight - bounding.offsetTop;
 
         if (showWidth > visivbleWidth && isBound) {
-            left = left > 0 ? 0 : left < MaxRight ? MaxRight : left;
+            MaxRight -= this.maxOffset;
+            left = left > this.maxOffset ? this.maxOffset : left < MaxRight ? MaxRight : left;
         } else {
+            MaxRight += this.maxOffset
             left = left < MaxLeft ? MaxLeft : left > MaxRight ? MaxRight : left;
         }
 
         if (showHeight > visivbleHeight && isBound) {
-            top = top > 0 ? 0 : top < MaxBottom ? MaxBottom : top;
+            MaxBottom -= this.maxOffset;
+            top = top > this.maxOffset ? this.maxOffset : top < MaxBottom ? MaxBottom : top;
         } else {
+            MaxTop -= this.maxOffset;
+            MaxBottom += this.maxOffset;
             top = top < MaxTop ? MaxTop : top > MaxBottom ? MaxBottom : top;
         }
         // this.AerialVisible({left,top});
 
         return this.AerialVisible({ left, top });
+    }
+
+    // 鸟瞰图显示
+    AerialVisible(imgPosition) {
+        let aerialState = {};
+        const { left, top } = imgPosition || this.state;
+        const { showWidth, showHeight } = this.getShowWidthAndHeight(); // 图片高度
+        const { visivbleWidth, visivbleHeight } = this.getVisivbleWidthAndHeight(); // 可显示区域高度
+        const { width, height } = this.aerialImgSize() || this.refs.aerialImg; // 鸟瞰图宽高
+
+        aerialState = {
+            aerialWidth: width / (showWidth / visivbleWidth),
+            aerialHeight: height / (showHeight / visivbleHeight),
+            aerialLeft: - (width / (showWidth / left)),
+            aerialTop: - (height / (showHeight / top))
+        }
+
+        return {
+            aerialViewShow: showWidth > visivbleWidth || showHeight > visivbleHeight, //当屏幕显示不全图片时展示 鸟瞰图
+            ...aerialState,
+            left,
+            top
+        };
+
     }
 
     // 获取当前触达的坐标点
@@ -408,6 +459,7 @@ export default class extends React.Component {
         }
         return { x, y }
     }
+
     // 获取可显示区域的宽高
     getVisivbleWidthAndHeight() {
         let { visivbleArea } = this.refs;
@@ -432,8 +484,8 @@ export default class extends React.Component {
 
     // 获取图片的宽高
     getPictrueWidthAndHeight() {
-        let imgWidth = 1480,
-            imgHeight = 410;
+        let imgWidth = 1200,
+            imgHeight = 300;
         // console.log(`图片尺寸：${imgWidth} * ${imgHeight}`)
         return {
             imgWidth,

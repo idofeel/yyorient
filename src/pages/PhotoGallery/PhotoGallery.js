@@ -5,10 +5,8 @@ export default class PhotoGallery extends Component {
     state = {
         visible: false,
         scaleImgOptions: {
-            bounding: {
-                offsetLeft: 40,
-                offsetTop: 40
-            }
+            bounding: true,
+            offset: 80,
         }
     }
     render() {
