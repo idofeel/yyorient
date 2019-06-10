@@ -45,10 +45,10 @@ export default class extends React.Component {
             width: 0, //图片宽
             height: 0, //图片高
             rows: [],
-            arerialLeft: 10,
-            arerialTop: 0,
-            arerialWidth: 0,
-            arerialHeight: 0
+            aerialLeft: 10,
+            aerialTop: 0,
+            aerialWidth: 0,
+            aerialHeight: 0
         }
         this.resizeBind = this.resize.bind(this);
         this.bounding = options.bounding === undefined ? false : options.bounding; //设置是否允许边界
@@ -112,13 +112,13 @@ export default class extends React.Component {
         // 可视区域
         // this.visivbleWidth = visivbleWidth;
         // this.visivbleHeight = visivbleHeight;
+        const aerialState = this.AerialVisible({ left, top });
 
         // 初始化图片宽高，居中显示
         this.setState({
             width,
             height,
-            top,
-            left,
+            ...aerialState,
             // originX: this.currentScale * imgWidth / 2,
             // originY: this.currentScale * imgHeight / 2,
             rows: this.visivbleMatrix(1, { width, height }),
@@ -174,10 +174,10 @@ export default class extends React.Component {
         const src = logo;
         // const left = 
         const pos = {
-            left: this.state.arerialLeft,
-            top: this.state.arerialTop,
-            width: this.state.arerialWidth,
-            height: this.state.arerialHeight
+            left: this.state.aerialLeft,
+            top: this.state.aerialTop,
+            width: this.state.aerialWidth,
+            height: this.state.aerialHeight
         }
         return (
             <div ref="arerialView" className="arerialView" >
@@ -199,7 +199,7 @@ export default class extends React.Component {
     }
 
     AerialTouchStrat(e) {
-        this.handleClick({ x: this.state.arerialLeft, y: this.state.arerialTop }, e);
+        this.handleClick({ x: this.state.aerialLeft, y: this.state.aerialTop }, e);
         //绑定移动事件
         this.BindTouchMove = this.AerialTouchMove;
     }
@@ -207,17 +207,17 @@ export default class extends React.Component {
     AerialTouchMove(e) {
         const position = this.handleMove(e);
         if (!position) return;
-        const { left: arerialLeft, top: arerialTop } = position;
+        const { left: aerialLeft, top: aerialTop } = position;
 
-        const { offsetWidth: arerialImgWidth, offsetHeight: arerialImgHeight } = this.refs.arerialImg; // 鸟瞰图宽高
+        const { offsetWidth: aerialImgWidth, offsetHeight: aerialImgHeight } = this.refs.arerialImg; // 鸟瞰图宽高
         const { showWidth, showHeight } = this.getShowWidthAndHeight();// 图片高度
 
-        this.setState(
-            this.ViewBounding({
-                left: showWidth / (arerialImgWidth / arerialLeft) * -1,
-                top: showHeight / (arerialImgHeight / arerialTop) * -1
-            }),
-        );
+        const states = this.ViewBounding({
+            left: showWidth / (aerialImgWidth / aerialLeft) * -1,
+            top: showHeight / (aerialImgHeight / aerialTop) * -1
+        });
+        // 
+        this.setState(states);
     }
 
     renderPictureBlock() {
@@ -339,19 +339,13 @@ export default class extends React.Component {
         const { left, top } = imgPosition || this.state;
         const { visivbleWidth, visivbleHeight } = this.getVisivbleWidthAndHeight();// 可显示区域高度
 
-        let { offsetWidth: arerialImgWidth, offsetHeight: arerialImgHeight } = this.refs.arerialImg; // 鸟瞰图宽高
-
-        const arerialLeft = 0 - (arerialImgWidth / (showWidth / left));
-        const arerialTop = 0 - (arerialImgHeight / (showHeight / top));
-
-        const arerialWidth = arerialImgWidth / (showWidth / visivbleWidth),
-            arerialHeight = arerialImgHeight / (showHeight / visivbleHeight);
+        let { offsetWidth: aerialImgWidth, offsetHeight: aerialImgHeight } = this.refs.arerialImg; // 鸟瞰图宽高
 
         return {
-            arerialWidth,
-            arerialHeight,
-            arerialLeft,
-            arerialTop,
+            aerialWidth: aerialImgWidth / (showWidth / visivbleWidth),
+            aerialHeight: aerialImgHeight / (showHeight / visivbleHeight),
+            aerialLeft: 0 - (aerialImgWidth / (showWidth / left)),
+            aerialTop: 0 - (aerialImgHeight / (showHeight / top)),
             left,
             top
         };
@@ -482,18 +476,3 @@ export default class extends React.Component {
         clearTimeout(this.bounceTimer)
     }
 }
-
-
-
-
-// 图片和屏幕的关系
-
-/**
-    图片的宽度是固定的。 200px * 200px
-    屏幕的比例 4:3
-    鸟瞰图 200px
-
-
-
-
-*/
