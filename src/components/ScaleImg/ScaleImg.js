@@ -1,7 +1,7 @@
 import React from 'react';
 import logo from 'images/logo.png';
 
-import './picview.less'
+import './ScaleImg.less'
 
 /**
  * 图片查看器组件
@@ -32,6 +32,7 @@ import './picview.less'
 export default class extends React.Component {
     constructor(props) {
         super(props);
+        const { options = { bounding: false }, onDrag = () => { } } = props; //接收参数
         this.state = {
             top: 0,//图片离顶部的距离
             left: 0,//图片左边界的距离
@@ -43,14 +44,15 @@ export default class extends React.Component {
             originY: 0, // 放大Y中心点
             width: 0, //图片宽
             height: 0, //图片高
-            rows: []
+            rows: [],
+            arerialLeft: 10,
+            arerialTop: 0,
+            arerialWidth: 0,
+            arerialHeight: 0
         }
-
-        // 
         this.resizeBind = this.resize.bind(this);
-
-        this.bounding = props.bounding === undefined ? true : props.bounding; //设置是否允许边界
-        this.onDrag = props.onDrag ? props.onDrag : () => { };
+        this.bounding = options.bounding === undefined ? false : options.bounding; //设置是否允许边界
+        this.onDrag = onDrag;
     }
     scales = [1, 2, 1, 3]; //缩放比例
     currentScale = 1; //当前比例
@@ -159,21 +161,71 @@ export default class extends React.Component {
                     {this.renderPictureBlock()}
                 </div>
                 {this.renderTools()}
-
+                {this.AerialView()}
             </div>);
 
     }
 
     renderTools() {
+        return null;
     }
-    renderPictureBlock() {
 
+    AerialView() {
+        const src = logo;
+        // const left = 
+        const pos = {
+            left: this.state.arerialLeft,
+            top: this.state.arerialTop,
+            width: this.state.arerialWidth,
+            height: this.state.arerialHeight
+        }
+        return (
+            <div ref="arerialView" className="arerialView" >
+                <div className="arerialImgBox">
+                    <img src={src} draggable={false} ref="arerialImg" />
+                    <div
+                        ref="arerial"
+                        className="arerial"
+                        style={{ ...pos }}
+                        onMouseDown={this.AerialTouchStrat.bind(this)}
+                        // onMouseMove={this.touchMove.bind(this)}
+                        // onMouseUp={this.AerialTouchEnd.bind(this)}
+                        onTouchStart={this.AerialTouchStrat.bind(this)}
+                    ></div>
+                    <div></div>
+                </div>
+            </div>
+        );
+    }
+
+    AerialTouchStrat(e) {
+        this.handleClick({ x: this.state.arerialLeft, y: this.state.arerialTop }, e);
+        //绑定移动事件
+        this.BindTouchMove = this.AerialTouchMove;
+    }
+
+    AerialTouchMove(e) {
+        const position = this.handleMove(e);
+        if (!position) return;
+        const { left: arerialLeft, top: arerialTop } = position;
+
+        const { offsetWidth: arerialImgWidth, offsetHeight: arerialImgHeight } = this.refs.arerialImg; // 鸟瞰图宽高
+        const { showWidth, showHeight } = this.getShowWidthAndHeight();// 图片高度
+
+        this.setState(
+            this.ViewBounding({
+                left: showWidth / (arerialImgWidth / arerialLeft) * -1,
+                top: showHeight / (arerialImgHeight / arerialTop) * -1
+            }),
+        );
+    }
+
+    renderPictureBlock() {
         const distance = index => this.state.rows[0].w / this.state.scaleX * index;
         return this.scales.map((item, index) =>
             <div className={`scalebox${item}${index} scaleBox`}
                 key={index}
                 hidden={item !== this.state.scaleX}>
-
                 {this.state.rows.map((v, i) =>
                     <div className="imgStyle"
                         key={i}
@@ -190,7 +242,6 @@ export default class extends React.Component {
 
     // 点击、触摸事件
     touchStrat(e) {
-        this.touch = true;
         // 模拟双击事件
         if (e.type === 'touchstart') {
             if (Date.now() - this.touchTime < 300) {
@@ -198,22 +249,49 @@ export default class extends React.Component {
             }
             this.touchTime = Date.now();
         }
-        const pos = this.getClientPos(e);
-        this.x = pos.x + this.state.left * -1;
-        this.y = pos.y + this.state.top * -1;
-
+        this.touch = true;
+        this.handleClick({ x: this.state.left, y: this.state.top }, e);
+        // 绑定一个 独有的移动事件
+        this.BindTouchMove = this.ViewerTouchMove;
     }
+    // 移动事件
+    touchMove(e) {
+        this.BindTouchMove(e);
+    }
+
+    ViewerTouchMove(e) {
+        const position = this.handleMove(e);
+        if (!position) return;
+        this.onDrag(true);
+        this.setState(this.ViewBounding(position));
+    }
+
     // 触摸结束，鼠标抬起事件
     touchEnd(e) {
-        this.touch = false;
+        this.handleEnd(e);
         this.onDrag(false);
     }
 
-    // 移动事件
-    touchMove(e) {
+
+    handleClick(currentPos, event) {
+        this.touch = true;
+        const pos = this.getClientPos(event);
+        this.x = pos.x + currentPos.x * -1;
+        this.y = pos.y + currentPos.y * -1;
+    }
+
+    handleMove(event) {
         if (!this.touch) return;
-        this.onDrag(true);
-        this.setState(this.setPicturePos(e));
+        const { x, y } = this.getClientPos(event),
+            left = (this.x - x) * -1,
+            top = (this.y - y) * -1;
+        // this.touchMoveCallBack(event);
+        return { left, top };
+    }
+
+    handleEnd(event) {
+        this.touch = false;
+        this.BindTouchMove = () => { };//
     }
 
     // 双击事件
@@ -226,6 +304,8 @@ export default class extends React.Component {
         this.scale(nextScale, scale, this.getClientPos(e));
 
     }
+
+    BindTouchMove() { };
 
     // 缩放(放大的倍数，当前倍数，放大起点)
     scale(nextScale, scale, origin) {
@@ -240,7 +320,6 @@ export default class extends React.Component {
             imgTop = (y - imgBounding.top) / scale,
             left = imgBounding.left - scaleDiff * imgLeft,
             top = imgBounding.top - scaleDiff * imgTop;
-
         this.setState({
             ...this.ViewBounding({ left, top }),
             width: this.initWidth * nextScale,
@@ -254,22 +333,45 @@ export default class extends React.Component {
 
     }
 
+    AerialVisible(imgPosition) {
+
+        const { showWidth, showHeight } = this.getShowWidthAndHeight();// 图片高度
+        const { left, top } = imgPosition || this.state;
+        const { visivbleWidth, visivbleHeight } = this.getVisivbleWidthAndHeight();// 可显示区域高度
+
+        let { offsetWidth: arerialImgWidth, offsetHeight: arerialImgHeight } = this.refs.arerialImg; // 鸟瞰图宽高
+
+        const arerialLeft = 0 - (arerialImgWidth / (showWidth / left));
+        const arerialTop = 0 - (arerialImgHeight / (showHeight / top));
+
+        const arerialWidth = arerialImgWidth / (showWidth / visivbleWidth),
+            arerialHeight = arerialImgHeight / (showHeight / visivbleHeight);
+
+        return {
+            arerialWidth,
+            arerialHeight,
+            arerialLeft,
+            arerialTop,
+            left,
+            top
+        };
+
+    }
+
     // 拖动放大进度条时的放大缩小
     dragScale() {
 
     }
 
+
+
     // 设置图片显示的位置
     setPicturePos(e) {
-        let { x, y } = this.getClientPos(e),
-            left = (this.x - x) * -1,
-            top = (this.y - y) * -1;
-        return this.ViewBounding({ left, top });
+        return this.ViewBounding(this.handleMove(e));
     }
 
     ViewBounding(pos) {
-
-        if (this.bounding === false) return pos; //无边界，可任意拖拽
+        if (this.bounding === false) return this.AerialVisible(pos); //无边界，可任意拖拽
         const { visivbleWidth, visivbleHeight } = this.getVisivbleWidthAndHeight(),
             { showWidth, showHeight } = this.getShowWidthAndHeight(), isBound = this.bounding === true;
         let { left, top } = pos,
@@ -297,11 +399,10 @@ export default class extends React.Component {
         } else {
             top = top < MaxTop ? MaxTop : top > MaxBottom ? MaxBottom : top;
         }
+        // this.AerialVisible({left,top});
 
-        return { left, top };
+        return this.AerialVisible({ left, top });
     }
-
-
 
     // 获取当前触达的坐标点
     getClientPos(e) {
@@ -316,30 +417,29 @@ export default class extends React.Component {
     // 获取可显示区域的宽高
     getVisivbleWidthAndHeight() {
         let { visivbleArea } = this.refs;
-        console.log(visivbleArea)
-        console.log(visivbleArea)
-        console.log(visivbleArea)
         // console.log(`可视区域：${visivbleArea.clientWidth} * ${visivbleArea.clientHeight}`)
         return {
             visivbleWidth: visivbleArea.clientWidth,
             visivbleHeight: visivbleArea.clientHeight
         }
     }
+
     genCenterPoint() {
         const { visivbleWidth, visivbleHeight } = this.getVisivbleWidthAndHeight();
 
     }
+
     getShowWidthAndHeight() {
         return {
-            showWidth: this.scales[this.currentScaleIndex] * this.initWidth,
-            showHeight: this.scales[this.currentScaleIndex] * this.initHeight
+            showWidth: (this.scales[this.currentScaleIndex] * this.initWidth).toFixed(2) * 1,
+            showHeight: (this.scales[this.currentScaleIndex] * this.initHeight).toFixed(2) * 1
         }
     }
 
     // 获取图片的宽高
     getPictrueWidthAndHeight() {
-        let imgWidth = 2800,
-            imgHeight = 1400;
+        let imgWidth = 1480,
+            imgHeight = 410;
         // console.log(`图片尺寸：${imgWidth} * ${imgHeight}`)
         return {
             imgWidth,
@@ -382,3 +482,18 @@ export default class extends React.Component {
         clearTimeout(this.bounceTimer)
     }
 }
+
+
+
+
+// 图片和屏幕的关系
+
+/**
+    图片的宽度是固定的。 200px * 200px
+    屏幕的比例 4:3
+    鸟瞰图 200px
+
+
+
+
+*/

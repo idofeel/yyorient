@@ -1,0 +1,92 @@
+:global {
+    .visivbleArea {
+        position: relative;
+        /* margin: '20px'; */
+        flex: 1;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+
+        .pictureArea {
+            position: absolute;
+            overflow: hidden;
+
+            img {
+                width: 100%;
+                height: 100%;
+                user-select: none;
+            }
+        }
+
+        .scaleBox {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+
+        .imgStyle {
+            display: block;
+            user-select: none;
+            overflow: hidden;
+            float: left;
+            font-size: 0;
+            border: none;
+            margin: 0;
+            padding: 0;
+            background: none;
+            position: absolute;
+        }
+
+        // 鸟瞰图
+        .arerialView {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 200px;
+            height: 200px;
+            border: 1px solid @primary-color;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, .3);
+            transition: right .2s ease;
+
+            .arerialImgBox {
+                position: relative;
+
+                img {
+                    background: #fff;
+                    width: 100%;
+                    box-shadow: 0 0 20px 0px @primary-color;
+                }
+
+                .arerial {
+                    position: absolute;
+                    left: 10px;
+                    top: 0;
+                    width: 100px;
+                    height: 100px;
+//                     max-width: 100%;
+// max-height: 100%;
+                    // border: 1px solid @outerline-border;
+                    // box-shadow: 0 0 20px 0px @outerline-border;
+                    box-shadow: 0 0 2px 1px @outerline-border;
+                }
+            }
+
+        }
+
+    }
+
+
+
+
+
+
+
+
+
+}

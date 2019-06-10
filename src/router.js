@@ -1,6 +1,5 @@
-// 根路由
 import React from 'react';
-import { Router, Route, Switch } from 'dva/router';
+import { Router, Switch } from 'dva/router';
 import SubRoutes from './utils/SubRoute';
 
 import index from './pages';
@@ -13,8 +12,7 @@ import Famous from './pages/Famous/Famous';
 import Login from './pages/User/login';
 import Register from './pages/User/register';
 
-
-
+// 顶级路由
 const RoutersConfig = [
 	{
 		path: '/',

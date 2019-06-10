@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { connect } from 'dva';
-import { Row, Carousel } from 'antd';
+import { Row } from 'antd';
 import { Switch } from 'dva/router';
 import Header from './Header/Header';
 import SubRoutes, { RedirectRoute, NoMatchRoute } from '../utils/SubRoute';

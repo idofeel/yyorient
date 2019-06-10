@@ -4,7 +4,7 @@ import logo from 'images/logo.png';
 import { Carousel } from 'antd';
 import './banner.less'
 
-class HomeBanner extends React.Component {
+export default class HomeBanner extends React.Component {
 
     render() {
         return <Carousel autoplay>
@@ -23,4 +23,3 @@ class HomeBanner extends React.Component {
         </Carousel>
     }
 }
-export default HomeBanner;

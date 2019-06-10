@@ -1,6 +1,6 @@
 import React from 'react';
 import { Modal, Button, Icon } from 'antd';
-import PicView from '../../components/pictureViewer/pictureView';
+import PicView from '../../components/PictureViewer';
 import './index.less';
 
 /**

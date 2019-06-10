@@ -3,7 +3,13 @@ import ImgModal from '../ImgModal'
 import HomeBanner from '../Home/Banner';
 export default class PhotoGallery extends Component {
     state = {
-        visible: false
+        visible: false,
+        scaleImgOptions: {
+            bounding: {
+                offsetLeft: 40,
+                offsetTop: 40
+            }
+        }
     }
     render() {
         return (
@@ -12,7 +18,10 @@ export default class PhotoGallery extends Component {
                     <HomeBanner />
                 </a>
 
-                <ImgModal visible={this.state.visible} />
+                <ImgModal
+                    visible={this.state.visible}
+                    options={this.state.scaleImgOptions}
+                />
             </div>
 
         )
