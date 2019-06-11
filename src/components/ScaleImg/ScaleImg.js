@@ -367,7 +367,7 @@ export default class extends React.Component {
         if (imgWidth > imgHeight) {
             height = width / (imgWidth / imgHeight); // 当图片宽度大于高度 
         } else {
-            width = height / (imgWidth / imgHeight); // 当图片高度大于宽度 
+            width = height * (imgWidth / imgHeight); // 当图片高度大于宽度 
         }
 
         return { width, height };
@@ -484,8 +484,8 @@ export default class extends React.Component {
 
     // 获取图片的宽高
     getPictrueWidthAndHeight() {
-        let imgWidth = 1200,
-            imgHeight = 300;
+        let imgWidth = 1300,
+            imgHeight = 100;
         // console.log(`图片尺寸：${imgWidth} * ${imgHeight}`)
         return {
             imgWidth,
