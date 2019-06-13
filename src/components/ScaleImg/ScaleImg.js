@@ -41,7 +41,7 @@ import './ScaleImg.less'
 
 // const imgs = require('../../assets/images/3.jpg')
 export default class extends React.Component {
-    constructor(props) {
+    constructor(props, state) {
         super(props);
         const { options = { bounding: false }, onDrag = () => { }, AerialView = 200 } = props; //接收参数,设置默认值；
         this.state = {
@@ -60,7 +60,8 @@ export default class extends React.Component {
             aerialTop: 0, //鸟瞰图离顶部的距离
             aerialWidth: 0, //鸟瞰图显示区域
             aerialHeight: 0, //鸟瞰图显示区域
-            aerialViewShow: true // 显示鸟瞰图  注：（暂由图片超宽超高控制）
+            aerialViewShow: true, // 显示鸟瞰图  注：（暂由图片超宽超高控制显示不显示）
+            ...state
         }
         // 初始化一些需要用的参数；
         this.resizeBind = this.resize.bind(this); //绑定窗口改变事件
@@ -70,7 +71,7 @@ export default class extends React.Component {
         this.AerialViewWidth = typeof AerialView === 'number' ? AerialView : AerialView.width || 200; //鸟瞰图容器宽度
         this.AerialViewHeight = typeof AerialView === 'number' ? AerialView : AerialView.height || 200; //鸟瞰图容器高度
     }
-    scales = [1, 2, 1, 3]; //缩放比例
+    scales = [1, 2, 3, 4]; //缩放比例
     currentScale = 1; //当前比例
     currentScaleIndex = 0; //当前比例下标
     touch = false; //是否触摸
@@ -84,13 +85,20 @@ export default class extends React.Component {
         this.setState({
             width: imgWidth,
             height: imgHeight
-        });
+        }, this.initPicture);
     }
 
     componentDidMount() {
         this.screenChange();// 监听屏幕改变
-        this.initPicture();
+        // this.initPicture();
 
+    }
+    reset() {
+        let { imgWidth, imgHeight } = this.getPictrueWidthAndHeight();
+        this.setState({
+            width: imgWidth,
+            height: imgHeight
+        }, this.initPicture);
     }
 
     // 初始化图片宽高及显示位置
@@ -233,7 +241,7 @@ export default class extends React.Component {
         const { left: aerialLeft, top: aerialTop } = position;
 
         const { offsetWidth: aerialImgWidth, offsetHeight: aerialImgHeight } = this.refs.aerialImg; // 鸟瞰图宽高
-        console.log(aerialImgWidth, aerialImgHeight)
+        // console.log(aerialImgWidth, aerialImgHeight)
         const { showWidth, showHeight } = this.getShowWidthAndHeight();// 图片高度
 
         const states = this.ViewBounding({
@@ -267,6 +275,8 @@ export default class extends React.Component {
     // 点击、触摸事件
     touchStrat(e) {
         // 模拟双击事件
+        e.preventDefault();
+
         if (e.type === 'touchstart') {
             if (Date.now() - this.touchTime < 300) {
                 this.doubleClick(e);

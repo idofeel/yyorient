@@ -28,5 +28,7 @@ export default class PhotoGallery extends Component {
         this.setState({
             visible: true
         });
+
     }
+
 }

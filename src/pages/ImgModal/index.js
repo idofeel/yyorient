@@ -29,17 +29,36 @@ class ModalPic extends React.Component {
             style={this.props.style}
             bodyStyle={{ height: '100%', padding: 0 }}
             cancelButtonProps={<Icon type="left" />}
+            destroyOnClose={this.state.visible}
         >
-            {this.state.visible && <PicView
+            <PicView
                 uri={this.props.uri}
                 options={this.props.options}
-            />}
+            />
         </Modal>
     }
-
+    stopScroll(e) {
+        e.preventDefault();
+    }
+    showPop() {
+        document.body.addEventListener("touchmove", this.stopScroll, { passive: false });
+    }
+    rmShowPop() {
+        document.body.removeEventListener("touchmove", this.stopScroll, { passive: true });
+    }
+    shouldComponentUpdate(nextProps, nextState) {
+        if (nextState.visible) {
+            this.showPop();
+        } else {
+            this.rmShowPop();
+        }
+        // console.log(...arguments)
+        return true;
+    }
     UNSAFE_componentWillReceiveProps(nextProps) {
         this.state.visible !== nextProps.visible && this.setState(nextProps);
     }
+
 
     hideModal(e) {
         this.setState({

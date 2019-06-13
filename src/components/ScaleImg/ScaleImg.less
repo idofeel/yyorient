@@ -52,8 +52,10 @@
             align-items: center;
             justify-content: center;
             background: rgba(0, 0, 0, .3);
-            transition: right，bottom .3s, .3s ease, ease;
 
+            :local {
+                animation: mymove .2s;
+            }
 
             .aerialImgBox {
                 max-width: 100%;
@@ -95,11 +97,14 @@
     }
 
 
+}
 
+@keyframes mymove {
+    from {
+        right: -100%;
+    }
 
-
-
-
-
-
+    to {
+        right: 0;
+    }
 }
