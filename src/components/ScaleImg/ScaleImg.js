@@ -71,13 +71,14 @@ export default class extends React.Component {
         this.AerialViewWidth = typeof AerialView === 'number' ? AerialView : AerialView.width || 200; //鸟瞰图容器宽度
         this.AerialViewHeight = typeof AerialView === 'number' ? AerialView : AerialView.height || 200; //鸟瞰图容器高度
     }
-    scales = [1, 2, 3, 4]; //缩放比例
+    scales = [1, 2, 3]; //缩放比例
     currentScale = 1; //当前比例
+    minScale = 1; //最小缩放距离
+    maxScale = 1;
+    scaleLoop = true; // 缩放是否循环
     currentScaleIndex = 0; //当前比例下标
     touch = false; //是否触摸
     touchTime = 0; //记录touch端是否双击 
-    initWidth = 0;
-    initHeight = 0;
     bounceTimer = null;
 
     UNSAFE_componentWillMount() {
@@ -85,26 +86,29 @@ export default class extends React.Component {
         this.setState({
             width: imgWidth,
             height: imgHeight
-        }, this.initPicture);
+        });
     }
 
     componentDidMount() {
         this.screenChange();// 监听屏幕改变
-        // this.initPicture();
+        this.reset(); // 重置
+    }
 
-    }
     reset() {
-        let { imgWidth, imgHeight } = this.getPictrueWidthAndHeight();
-        this.setState({
-            width: imgWidth,
-            height: imgHeight
-        }, this.initPicture);
+        const state = this.initPicture();
+        this.setState(state);
     }
+
+    initBefore() { }
 
     // 初始化图片宽高及显示位置
     initPicture(up) {
-        let { visivbleWidth, visivbleHeight } = this.getVisivbleWidthAndHeight();
-        let { imgWidth, imgHeight } = this.getPictrueWidthAndHeight();
+        // 初始化参数
+        this.currentScaleIndex = 0;
+        this.currentScale = 1;
+        // 获取宽高
+        const { visivbleWidth, visivbleHeight } = this.getVisivbleWidthAndHeight();
+        const { imgWidth, imgHeight } = this.getPictrueWidthAndHeight();
         // 图片放大后
         // visivbleWidth = visivbleWidth % 2 != 0 ? visivbleWidth - 1 : visivbleWidth;
         // visivbleHeight = visivbleHeight % 2 != 0 ? visivbleHeight - 1 : visivbleHeight;
@@ -113,7 +117,9 @@ export default class extends React.Component {
         let WScale = visivbleWidth / imgWidth,
             HScale = visivbleHeight / imgHeight,
             minScale = WScale < HScale ? WScale : HScale,
-            { width, height, } = this.state,
+            width = imgWidth,
+            height = imgHeight,
+            // { width, height, } = this.state,
             top = (visivbleHeight - imgHeight) / 2,
             left = (visivbleWidth - imgWidth) / 2;
         // 图片超宽超高 或 宽高某项小于2倍
@@ -126,27 +132,38 @@ export default class extends React.Component {
             top = (visivbleHeight - height) / 2;
             left = (visivbleWidth - width) / 2;
             this.currentScale = minScale;
+            this.minScale = minScale;
         } else {
-            if (up === false) return;
+            // if (up === false) return;
         }
-        // 初始宽高
-        this.initWidth = width;
-        this.initHeight = height;
         // 可视区域
         // this.visivbleWidth = visivbleWidth;
         // this.visivbleHeight = visivbleHeight;
         const aerialState = this.AerialVisible({ left, top });
 
+        this.maxScale = this.scales[this.scales.length - 1] || 1;
         // 初始化图片宽高，居中显示
-        this.setState({
+        const nextState = {
             width,
             height,
             ...aerialState,
             // originX: this.currentScale * imgWidth / 2,
             // originY: this.currentScale * imgHeight / 2,
             rows: this.visivbleMatrix(1, { width, height }),
-        });
+        }
 
+        const state = this.initBefore(nextState) || nextState;
+
+        return state;
+
+    }
+
+    recalculate() {
+        // 重新计算当前left top
+        const { left, top } = this.state;
+        this.setState({
+            ...this.ViewBounding({ left, top })
+        });
     }
 
     render() {
@@ -183,8 +200,8 @@ export default class extends React.Component {
 
                     {this.renderPictureBlock()}
                 </div>
-                {this.renderTools()}
                 {this.renderAerialView()}
+                {this.renderTools()}
             </div>);
 
     }
@@ -198,7 +215,6 @@ export default class extends React.Component {
         if (this.state.aerialViewShow !== true) return null;
 
         const src = logo;
-        // const left = 
         const pos = {
             left: this.state.aerialLeft,
             top: this.state.aerialTop,
@@ -206,8 +222,6 @@ export default class extends React.Component {
             height: this.state.aerialHeight
         }
 
-        // width = 200 * (width / height);
-        // height = 200;
         return (
             <div ref="aerialView" className="aerialView" style={{ width: this.AerialViewWidth, height: this.AerialViewHeight }}>
                 <div className="aerialImgBox">
@@ -332,41 +346,73 @@ export default class extends React.Component {
 
     // 双击事件
     doubleClick(e) {
-        const scale = this.scales[this.currentScaleIndex];
-        // 
-        if (++this.currentScaleIndex === this.scales.length) this.currentScaleIndex = 0;
-        const nextScale = this.scales[this.currentScaleIndex];
+        const nextScale = this.scales.filter(i => i > this.currentScale)[0] || this.minScale;
+        // if (!nextScale) return this.initPicture();
+        const nextScaleState = this.scale(nextScale, this.getClientPos(e));
 
-        this.scale(nextScale, scale, this.getClientPos(e));
-
+        this.setState(nextScaleState);
     }
 
     BindTouchMove() { };
 
-    // 缩放(放大的倍数，当前倍数，放大起点)
-    scale(nextScale, scale, origin) {
+    scaleBefore() { };
+
+    // 缩放(放大的倍数，放大起点)
+    scale(nextScale, origin) {
+        const scale = this.currentScale,
+            { isMaxScale, nextScale: NextScale } = this.scaleBounding(nextScale),
+            scaleDiff = NextScale - scale;
+        // 没有变化时
+        if (scaleDiff === 0) return;
+        //需要循环 且 已达到最大值；
+        if (isMaxScale === true) return this.initPicture();
+        //需要循环 且 已达到最小值；
+        // if (isMaxScale === false) ;
 
         const imgBounding = this.refs.imgContainer.getBoundingClientRect(),
+            { visivbleWidth, visivbleHeight } = this.getVisivbleWidthAndHeight(),
+            { imgWidth, imgHeight } = this.getPictrueWidthAndHeight(),
             { x, y } = origin || {
-                x: this.initWidth * scale / 2 + imgBounding.left,
-                y: this.initHeight * scale / 2 + imgBounding.top,
+                x: visivbleWidth / 2,
+                y: visivbleHeight / 2,
             },
-            scaleDiff = nextScale - scale,
             imgLeft = (x - imgBounding.left) / scale,
             imgTop = (y - imgBounding.top) / scale,
             left = imgBounding.left - scaleDiff * imgLeft,
             top = imgBounding.top - scaleDiff * imgTop;
-        this.setState({
+
+        this.currentScale = NextScale;
+
+        const scaleState = {
             ...this.ViewBounding({ left, top }),
-            width: this.initWidth * nextScale,
-            height: this.initHeight * nextScale,
+            width: imgWidth * NextScale,
+            height: imgHeight * NextScale,
             rows: this.visivbleMatrix(nextScale),
-        }, function () {
-            if (this.currentScaleIndex === 0) this.initPicture();
-        });
+        },
+            state = this.scaleBefore(scaleState) || scaleState;
+        return state;
+    }
 
+    scaleBounding(scale = this.currentScale) {
+        // 当前缩放 =  小于按最小值处理 大于按最大值处理 都不符合按当前值 
+        let isMaxScale = null, nextScale = scale;
+        const isMax = scale > this.maxScale,
+            isMin = scale < this.minScale;
 
+        if (this.scaleLoop === true) {
+            // 循环
+            nextScale = isMin ? this.maxScale : isMax ? this.minScale : scale;
+            isMaxScale = isMax ? isMax : isMin ? false : null;
+        } else {
+            // 不循环，到最小按最小显示；
+            nextScale = isMin ? this.minScale : isMax ? this.maxScale : scale;
+            isMaxScale = null;
+        }
 
+        // isMaxScale  true 需要循环且最大
+        //             false 需要循环且最小
+        //             null 不循环 或 不是最大页不是最小
+        return { isMaxScale, nextScale };
     }
 
     // 鸟瞰图大小
@@ -382,13 +428,6 @@ export default class extends React.Component {
 
         return { width, height };
     }
-
-    // 拖动放大进度条时的放大缩小
-    dragScale() {
-
-    }
-
-
 
     // 设置图片显示的位置
     setPicturePos(e) {
@@ -449,7 +488,6 @@ export default class extends React.Component {
             aerialLeft: - (width / (showWidth / left)),
             aerialTop: - (height / (showHeight / top))
         }
-
         return {
             aerialViewShow: showWidth > visivbleWidth || showHeight > visivbleHeight, //当屏幕显示不全图片时展示 鸟瞰图
             ...aerialState,
@@ -480,15 +518,11 @@ export default class extends React.Component {
         }
     }
 
-    genCenterPoint() {
-        const { visivbleWidth, visivbleHeight } = this.getVisivbleWidthAndHeight();
-
-    }
-
     getShowWidthAndHeight() {
+        const { imgWidth, imgHeight } = this.getPictrueWidthAndHeight();
         return {
-            showWidth: (this.scales[this.currentScaleIndex] * this.initWidth).toFixed(2) * 1,
-            showHeight: (this.scales[this.currentScaleIndex] * this.initHeight).toFixed(2) * 1
+            showWidth: (this.currentScale * imgWidth).toFixed(2) * 1,
+            showHeight: (this.currentScale * imgHeight).toFixed(2) * 1
         }
     }
 
@@ -496,7 +530,6 @@ export default class extends React.Component {
     getPictrueWidthAndHeight() {
         let imgWidth = 1300,
             imgHeight = 100;
-        // console.log(`图片尺寸：${imgWidth} * ${imgHeight}`)
         return {
             imgWidth,
             imgHeight
@@ -524,9 +557,12 @@ export default class extends React.Component {
 
 
     }
+    onResize() { }
     // 窗口发生改变执行的回调
     resize() {
-        this.initPicture(false)
+        // 重新计算
+        this.currentScale === this.minScale ? this.reset() : this.recalculate();
+        this.onResize();
     }
     // 监听窗口发生改变
     screenChange() {
@@ -536,5 +572,9 @@ export default class extends React.Component {
         // 销毁监听事件
         window.removeEventListener('resize', this.resizeBind);
         clearTimeout(this.bounceTimer)
+    }
+    onUpdate() { }
+    componentDidUpdate(prevProps, prevState) {
+        this.onUpdate(prevProps, prevState);
     }
 }

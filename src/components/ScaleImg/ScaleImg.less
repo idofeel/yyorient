@@ -52,6 +52,7 @@
             align-items: center;
             justify-content: center;
             background: rgba(0, 0, 0, .3);
+            transition: right .2s ease;
 
             :local {
                 animation: mymove .2s;
@@ -96,7 +97,12 @@
 
     }
 
-
+    @media (max-width: 576px) {
+        .aerialView {
+            display: none !important;
+            right: -100% !important;
+        }
+    }
 }
 
 @keyframes mymove {
