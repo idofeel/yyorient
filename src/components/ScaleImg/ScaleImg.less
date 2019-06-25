@@ -10,6 +10,7 @@
         .pictureArea {
             position: absolute;
             overflow: hidden;
+            z-index: 1001;
 
             img {
                 width: 100%;
@@ -53,6 +54,7 @@
             justify-content: center;
             background: rgba(0, 0, 0, .3);
             transition: right .2s ease;
+            z-index: 1100;
 
             :local {
                 animation: mymove .2s;

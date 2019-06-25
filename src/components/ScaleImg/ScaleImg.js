@@ -11,9 +11,11 @@
  * --------------------------------------------------------------------------------
  * uri         |    String      |     ''        |     * 必填 图片的地址
  * options     |    Object      |     {}        |     可选参数 (见下方说明)
+ * AerialShow  |    Boolean     |     true      |     是否显示鸟瞰图
  * AerialView  |    Number      |     200       |     可选参数
  * 
  * --------------------------------------------------------------------------------
+ * 
  * options 参数  Object
  * 
  *  bounding   默认值：false   设置边界
@@ -43,7 +45,7 @@ import './ScaleImg.less'
 export default class extends React.Component {
     constructor(props, state) {
         super(props);
-        const { options = { bounding: false }, onDrag = () => { }, AerialView = 200 } = props; //接收参数,设置默认值；
+        const { options = { bounding: false }, onDrag = () => { }, AerialView = 200, AerialShow = true } = props; //接收参数,设置默认值；
         this.state = {
             top: 0,//图片离顶部的距离
             left: 0,//图片左边界的距离
@@ -61,6 +63,8 @@ export default class extends React.Component {
             aerialWidth: 0, //鸟瞰图显示区域
             aerialHeight: 0, //鸟瞰图显示区域
             aerialViewShow: true, // 显示鸟瞰图  注：（暂由图片超宽超高控制显示不显示）
+            aerialShow: AerialShow, //强制是否显示鸟瞰图。
+            fullScreen: false,  //是否全屏
             ...state
         }
         // 初始化一些需要用的参数；
@@ -71,17 +75,19 @@ export default class extends React.Component {
         this.AerialViewWidth = typeof AerialView === 'number' ? AerialView : AerialView.width || 200; //鸟瞰图容器宽度
         this.AerialViewHeight = typeof AerialView === 'number' ? AerialView : AerialView.height || 200; //鸟瞰图容器高度
     }
-    scales = [1, 2, 3]; //缩放比例
+    scales = [1, 2, 3, 6]; //缩放比例
     currentScale = 1; //当前比例
     minScale = 1; //最小缩放距离
     maxScale = 1;
-    scaleLoop = true; // 缩放是否循环
+    scaleLoop = false; // 缩放是否循环
     currentScaleIndex = 0; //当前比例下标
     touch = false; //是否触摸
     touchTime = 0; //记录touch端是否双击 
     bounceTimer = null;
-
+    onReay() { }
+    onLoad() { }
     UNSAFE_componentWillMount() {
+        this.onLoad();
         let { imgWidth, imgHeight } = this.getPictrueWidthAndHeight();
         this.setState({
             width: imgWidth,
@@ -90,6 +96,7 @@ export default class extends React.Component {
     }
 
     componentDidMount() {
+        this.onReay();
         this.screenChange();// 监听屏幕改变
         this.reset(); // 重置
     }
@@ -183,7 +190,6 @@ export default class extends React.Component {
                 onTouchEnd={this.touchEnd.bind(this)}
                 onMouseUp={this.touchEnd.bind(this)}
                 onTouchMove={this.touchMove.bind(this)}>
-
                 <div ref="imgContainer"
                     className="pictureArea"
                     onMouseDown={this.touchStrat.bind(this)}
@@ -212,7 +218,7 @@ export default class extends React.Component {
 
     renderAerialView() {
 
-        if (this.state.aerialViewShow !== true) return null;
+        if (this.state.aerialViewShow !== true || !this.state.aerialShow) return null;
 
         const src = logo;
         const pos = {
@@ -250,6 +256,7 @@ export default class extends React.Component {
     }
 
     AerialTouchMove(e) {
+
         const position = this.handleMove(e);
         if (!position) return;
         const { left: aerialLeft, top: aerialTop } = position;
@@ -264,6 +271,7 @@ export default class extends React.Component {
         });
         // 
         this.setState(states);
+
     }
 
     renderPictureBlock() {
@@ -289,19 +297,100 @@ export default class extends React.Component {
     // 点击、触摸事件
     touchStrat(e) {
         // 模拟双击事件
-        e.preventDefault();
-
-        if (e.type === 'touchstart') {
-            if (Date.now() - this.touchTime < 300) {
-                this.doubleClick(e);
-            }
-            this.touchTime = Date.now();
+        // 单指/单鼠标
+        const SingleFinger = e => {
+            this.touch = true;
+            this.handleClick({ x: this.state.left, y: this.state.top }, e);
+            // 绑定一个其它移动事件
+            this.BindTouchMove = this.ViewerTouchMove;
         }
-        this.touch = true;
-        this.handleClick({ x: this.state.left, y: this.state.top }, e);
-        // 绑定一个其它移动事件
-        this.BindTouchMove = this.ViewerTouchMove;
+        e.preventDefault();
+        if (e.type === 'touchstart') {
+            if (e.touches.length > 1) {
+                this.isDobleTouch = true;
+                this.touchTime = 0;
+                this.getTouchPos(e);
+                this.BindTouchMove = this.twoFingers;
+            } else {
+                if (Date.now() - this.touchTime < 300) {
+                    this.touchTime = 0;
+                    this.doubleClick(e);
+                }
+                this.touchTime = Date.now();
+                SingleFinger(e);
+            }
+        } else {
+            SingleFinger(e);
+        }
+
     }
+
+
+    /**
+    *两点的距离
+    *
+    */
+    getSqrt(e) {
+        const { pageX: x, pageY: y } = this.getTouchesPage(e, 0),
+            { pageX: x1, pageY: y1 } = this.getTouchesPage(e, 1),
+            dfx = x1 - x,
+            dfy = y1 - y;
+
+        return Math.sqrt(dfx * dfx + dfy * dfy).toFixed(2);
+    }
+    /**
+     * 两点的夹角
+     */
+    getAngle(e) {
+        const p1 = this.getTouchesPage(e, 0),
+            p2 = this.getTouchesPage(e, 1),
+            x = p1.pageX - p2.pageX,
+            y = p1.pageY - p2.pageY;
+        return Math.atan2(y, x) * 180 / Math.PI;
+    }
+
+    /*
+    * 获取中❤️点 
+    */
+    getMidpoint(e) {
+        const p1 = this.getTouchesPage(e, 0),
+            p2 = this.getTouchesPage(e, 1),
+            // x = (p1.pageX + p2.pageX) / 2,
+            // y = (p1.pageY + p2.pageY) / 2;
+            x = (p1.pageX + p2.pageX) / 2 - e.target.offsetLeft,
+            y = (p1.pageY + p2.pageY) / 2 - e.target.offsetTop;
+        return { x, y };
+    }
+
+    DobTouchStart = 0; // 双指触摸
+    tempScale = 1; //临时存储缩放比例
+    midPoint = null;
+    getTouchPos(e) {
+        this.DobTouchStart = this.getSqrt(e);
+        this.tempScale = this.currentScale;
+        this.midPoint = this.getMidpoint(e);
+    }
+
+    twoFingers(e) {
+        if (e.touches.length > 1 && this.isDobleTouch) {
+            // 获取缩放比例
+            const scale = this.tempScale + (this.getSqrt(e) / this.DobTouchStart - 1);
+            this.setState({
+                ...this.scale(scale, this.midPoint)
+            });
+        }
+    }
+
+    getTouchesPage(event, index) {
+        const touches = event.touches[index];
+        return {
+            pageX: touches.pageX,
+            pageY: touches.pageY,
+        }
+    }
+
+
+
     // 移动事件
     touchMove(e) {
         this.BindTouchMove(e);
@@ -313,6 +402,7 @@ export default class extends React.Component {
         if (!position) return;
         this.onDrag(true);
         this.setState(this.ViewBounding(position));
+
     }
 
     // 触摸结束，鼠标抬起事件
@@ -341,6 +431,7 @@ export default class extends React.Component {
     // 鼠标、触摸 结束事件处理
     handleEnd(event) {
         this.touch = false;
+        this.isDobleTouch = false;
         this.BindTouchMove = () => { };//
     }
 
@@ -368,18 +459,19 @@ export default class extends React.Component {
         if (isMaxScale === true) return this.initPicture();
         //需要循环 且 已达到最小值；
         // if (isMaxScale === false) ;
-
         const imgBounding = this.refs.imgContainer.getBoundingClientRect(),
-            { visivbleWidth, visivbleHeight } = this.getVisivbleWidthAndHeight(),
+            // { visivbleWidth, visivbleHeight } = this.getVisivbleWidthAndHeight(),
             { imgWidth, imgHeight } = this.getPictrueWidthAndHeight(),
+            { showWidth, showHeight } = this.getShowWidthAndHeight(),
             { x, y } = origin || {
-                x: visivbleWidth / 2,
-                y: visivbleHeight / 2,
+                x: this.state.left + showWidth / 2,
+                y: this.state.top + showHeight / 2,
             },
             imgLeft = (x - imgBounding.left) / scale,
             imgTop = (y - imgBounding.top) / scale,
             left = imgBounding.left - scaleDiff * imgLeft,
             top = imgBounding.top - scaleDiff * imgTop;
+        // console.log(this.state.top, x)
 
         this.currentScale = NextScale;
 
@@ -429,10 +521,10 @@ export default class extends React.Component {
         return { width, height };
     }
 
-    // 设置图片显示的位置
-    setPicturePos(e) {
-        return this.ViewBounding(this.handleMove(e));
-    }
+    // // 设置图片显示的位置
+    // setPicturePos(e) {
+    //     return this.ViewBounding(this.handleMove(e));
+    // }
 
     // 视图边界
     ViewBounding(pos) {
@@ -529,7 +621,7 @@ export default class extends React.Component {
     // 获取图片的宽高
     getPictrueWidthAndHeight() {
         let imgWidth = 1300,
-            imgHeight = 100;
+            imgHeight = 200;
         return {
             imgWidth,
             imgHeight
@@ -555,13 +647,48 @@ export default class extends React.Component {
         // console.log(matrix)
         return matrix
 
-
     }
+
+    // 全屏显示
+    fullScreen() {
+        const de = document.documentElement;
+        if (de.requestFullscreen) {
+            de.requestFullscreen();
+        } else if (de.mozRequestFullScreen) {
+            de.mozRequestFullScreen();
+        } else if (de.webkitRequestFullScreen) {
+            de.webkitRequestFullScreen();
+        }
+
+    };
+
+    // 退出全屏
+    exitFullscreen() {
+
+        const de = document;
+        if (de.exitFullscreen) {
+            de.exitFullscreen();
+        } else if (de.mozCancelFullScreen) {
+            de.mozCancelFullScreen();
+        } else if (de.webkitCancelFullScreen) {
+            de.webkitCancelFullScreen();
+        }
+    };
+
+    // 判断是否在全屏状态
+    isFullscreen() {
+        return document.fullscreenElement ||
+            document.msFullscreenElement ||
+            document.mozFullScreenElement ||
+            document.webkitFullscreenElement || false;
+    }
+
     onResize() { }
     // 窗口发生改变执行的回调
     resize() {
         // 重新计算
-        this.currentScale === this.minScale ? this.reset() : this.recalculate();
+        // this.currentScale === this.minScale ? this.reset() : this.recalculate();
+        this.reset()
         this.onResize();
     }
     // 监听窗口发生改变

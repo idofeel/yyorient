@@ -2,45 +2,119 @@
     color: #fff;
     width: 100%;
     height: 100%;
-
-
-}
-
-.toolsBox::selection {
-    background: none;
-}
-
-.sliderRange {
-    position: absolute;
-    width: 100%;
-    bottom: 0;
-    transition: padding .2s ease;
+    padding-bottom: 10px;
+    transition: transform .2s ease;
 }
 
 
 :global {
-    .slider-wrapper {
-        position: relative;
-        padding: 0px 20px;
-        height: auto;
-        margin: 20px;
+    // ---- 
+
+    // 工具栏
+    .toolsBox {
+        color: #fff;
+        width: 100%;
+        height: 100%;
+        padding-bottom: 10px;
+        transition: transform .2s ease;
+        text-align: center;
     }
 
-    .slider-wrapper .anticon {
+    // 
+    .sliderRange {
         position: absolute;
-        top: -3px;
-        width: 16px;
-        height: 16px;
-        line-height: 1;
-        font-size: 18px;
-        cursor: pointer;
+        width: 100%;
+        bottom: 0;
+        z-index: 1001;
+        transition: padding .2s ease;
+
+        .anticon {
+            width: 16px;
+            height: 16px;
+            line-height: 1;
+            font-size: 18px;
+            position: relative;
+            top: -3px;
+            // margin-left: 14px; // 30
+        }
+
+        // 缩放组
+        .tools-scale {
+
+            .anticon {
+                position: absolute;
+                top: -3px;
+                cursor: pointer;
+            }
+
+            >:first-child {
+                left: 0px;
+            }
+
+            .slide_scale {
+                margin: 0 30px;
+            }
+
+            >:last-child {
+                right: 0;
+            }
+        }
     }
 
-    .slider-wrapper .anticon:first-child {
-        left: 0;
+
+
+    .imgDetails {
+        .ant-drawer-content-wrapper {
+            height: auto;
+        }
+
     }
 
-    .slider-wrapper .anticon:last-child {
-        right: 0;
+    // 隐藏工具栏
+
+    .hideTools {
+        .toolsBox {
+            transform: translate(0, 110%);
+        }
+
+        .showTools {
+            position: fixed;
+            top: -110%;
+            right: 20px;
+            transition: all .5s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        }
     }
+
+
+    .imgDesc {
+        .ant-descriptions-title {
+            margin-bottom: 5px;
+        }
+
+
+
+        td {
+            border-bottom: 1px solid #646464;
+            padding: 10px 0;
+        }
+    }
+
+    .btn-group {
+        display: flex;
+        margin: 20px 0;
+        justify-content: space-between;
+
+        .ant-btn {
+            .anticon {
+                color: inherit;
+            }
+        }
+    }
+
+    .listbox {
+        overflow: auto;
+        // height: 300px;
+    }
+
+    // ----
 }

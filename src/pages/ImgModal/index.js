@@ -34,9 +34,15 @@ class ModalPic extends React.Component {
             <PicView
                 uri={this.props.uri}
                 options={this.props.options}
+                drawerChange={(isShow) => {
+                    isShow ? this.rmShowPop() : this.showPop();
+                }}
             />
         </Modal>
     }
+
+
+
     stopScroll(e) {
         e.preventDefault();
     }
