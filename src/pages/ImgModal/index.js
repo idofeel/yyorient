@@ -10,15 +10,69 @@ import './index.less';
 class ModalPic extends React.Component {
     constructor(props) {
         super(props)
+        const { visible = false } = props;
         this.state = {
-            visible: props.visible || false
+            visible: visible
         }
+    }
+    dataSource = [];
+
+    UNSAFE_componentWillMount() {
+        // 请求数据
+        let dataSource = [
+            {
+                sizeid: '01x',
+                imgw: 250,
+                imgh: 82,
+                rows: 1,
+                cols: 1,
+                wmax: 250,
+                hmax: 82,
+                baseurl: './',
+                imgid: 'abcdef'
+            },
+            {
+                sizeid: '05x',
+                imgw: 1445,
+                imgh: 480,
+                rows: 1,
+                cols: 1,
+                wmax: 1445,
+                hmax: 480,
+                baseurl: './',
+                imgid: 'abcdef'
+            },
+            {
+                sizeid: '1x',
+                imgw: 4337,
+                imgh: 1440,
+                rows: 1,
+                cols: 1,
+                wmax: 4337,
+                hmax: 1440,
+                baseurl: './',
+                imgid: 'abcdef'
+            },
+            {
+                sizeid: '2x',
+                imgw: 6299,
+                imgh: 2091,
+                rows: 9,
+                cols: 25,
+                wmax: 255,
+                hmax: 255,
+                baseurl: './',
+                imgid: 'abcdef'
+            }
+        ];
+        dataSource.splice(0, 1);
+        this.dataSource = dataSource;
     }
 
     render() {
         return <Modal
             footer={null}
-            visible={this.state.visible || false}
+            visible={this.state.visible}
             onOk={this.hideModal.bind(this)}
             onCancel={this.hideModal.bind(this)}
             okButtonProps={null}
@@ -37,6 +91,8 @@ class ModalPic extends React.Component {
                 drawerChange={(isShow) => {
                     isShow ? this.rmShowPop() : this.showPop();
                 }}
+                visible={this.state.visible}
+                dataSource={this.dataSource}
             />
         </Modal>
     }

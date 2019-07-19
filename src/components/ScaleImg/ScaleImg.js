@@ -36,16 +36,14 @@
  */
 
 import React from 'react';
-import logo from 'images/logo.png';
-
+// import logo from 'Assets/abcdef/abcdef-1x_0_0.jpg';
 import './ScaleImg.less'
-
 
 // const imgs = require('../../assets/images/3.jpg')
 export default class extends React.Component {
     constructor(props, state) {
         super(props);
-        const { options = { bounding: false }, onDrag = () => { }, AerialView = 200, AerialShow = true } = props; //接收参数,设置默认值；
+        const { dataSource = [], options = { bounding: false }, onDrag = () => { }, AerialView = 200, AerialShow = true } = props; //接收参数,设置默认值；
         this.state = {
             top: 0,//图片离顶部的距离
             left: 0,//图片左边界的距离
@@ -74,8 +72,17 @@ export default class extends React.Component {
         this.onDrag = onDrag; // 拖动图片时的事件 
         this.AerialViewWidth = typeof AerialView === 'number' ? AerialView : AerialView.width || 200; //鸟瞰图容器宽度
         this.AerialViewHeight = typeof AerialView === 'number' ? AerialView : AerialView.height || 200; //鸟瞰图容器高度
+        this.initLoadData = dataSource.splice(0, 1)[0]; // 将第一条数据作为初始显示倍数。
+        this.dataSource = dataSource;
+        this.baseurl = '/src/assets';
+        this.imgUrl = this.url({
+            ...this.initLoadData,
+            baseurl: '/src/assets',
+            row: 0,
+            col: 0
+        })
     }
-    scales = [1, 2, 3, 6]; //缩放比例
+    scales = [1]; //缩放比例
     currentScale = 1; //当前比例
     minScale = 1; //最小缩放距离
     maxScale = 1;
@@ -84,15 +91,24 @@ export default class extends React.Component {
     touch = false; //是否触摸
     touchTime = 0; //记录touch端是否双击 
     bounceTimer = null;
+    doc = document;
+    docFrag = document.createDocumentFragment();
+    imageSource = {};
+    imageData = [];
+    url = data => `${data.baseurl}/${data.imgid}/${data.imgid}-${data.sizeid}_${data.row}_${data.col}.${data.ex || 'jpg'}`;
     onReay() { }
     onLoad() { }
     UNSAFE_componentWillMount() {
+        // 文档碎片
         this.onLoad();
-        let { imgWidth, imgHeight } = this.getPictrueWidthAndHeight();
-        this.setState({
-            width: imgWidth,
-            height: imgHeight
-        });
+        // let { imgWidth, imgHeight } = this.getPictrueWidthAndHeight();
+
+        this.scales = this.dataSource.map(item => (item.imgw / this.initLoadData.imgw).toFixed(1) * 1);
+
+        // this.setState({
+        //     width: imgWidth,
+        //     height: imgHeight
+        // });
     }
 
     componentDidMount() {
@@ -143,12 +159,15 @@ export default class extends React.Component {
         } else {
             // if (up === false) return;
         }
+
         // 可视区域
         // this.visivbleWidth = visivbleWidth;
         // this.visivbleHeight = visivbleHeight;
         const aerialState = this.AerialVisible({ left, top });
 
         this.maxScale = this.scales[this.scales.length - 1] || 1;
+
+        this.renderMeta({ width, height, ...aerialState });
         // 初始化图片宽高，居中显示
         const nextState = {
             width,
@@ -156,13 +175,99 @@ export default class extends React.Component {
             ...aerialState,
             // originX: this.currentScale * imgWidth / 2,
             // originY: this.currentScale * imgHeight / 2,
-            rows: this.visivbleMatrix(1, { width, height }),
+            // windowMeta: this.visivbleMatrix({ width, height, ...aerialState }),
         }
 
         const state = this.initBefore(nextState) || nextState;
 
         return state;
 
+    }
+
+    renderMeta(picWh) {
+        const nextScale = this.scales.indexOf(this.scales.filter(i => i >= this.currentScale)[0]);
+        const scaleMeta = { ...picWh, nextScale };
+        this.imageData[nextScale] ? this.setScaleMeta(scaleMeta) : this.getScaleMeta(scaleMeta);
+    }
+    getRowsAndCols(data) {
+        let { left, top } = data || this.state;
+        const { visivbleWidth, visivbleHeight } = this.getVisivbleWidthAndHeight();
+        let meta = this.dataSource[data.nextScale];
+        left = Math.abs(left);
+        top = Math.abs(top);
+        let minCol = Math.floor(left / meta.wmax), //从第几列开始显示
+            maxCol = minCol + Math.ceil(visivbleWidth / meta.wmax),
+            minRow = Math.floor(top / meta.hmax), //从第几行开始显示
+            maxRow = minRow + Math.ceil(visivbleHeight / meta.hmax);
+
+        maxCol = maxCol > 1 ? maxCol : maxCol > meta.cols ? meta.cols : maxCol;
+        maxRow = maxRow > 1 ? maxRow : maxRow > meta.rows ? meta.rows : maxRow;
+
+        return { minCol, maxCol, minRow, maxRow, meta };
+    }
+    setScaleMeta(data) {
+        let { minCol, maxCol, minRow, maxRow } = this.getRowsAndCols(data);
+
+        this.imageData[data.nextScale].map(item => {
+            if (item.col >= minCol && item.col <= maxCol && item.row >= minRow && item.row <= maxRow) item.visible = true;
+            return item;
+        });
+
+        // for (let i = minRow; i <= maxRow; i++) {
+        //     for (let j = minCol; j < maxCol; j++) {
+        //         const index = i * meta.cols + j;
+        //         try {
+        //             this.imageData[data.nextScale][index].visible = true;
+        //         } catch (err) {
+        //             console.log('errrrrr', index, this.imageData[data.nextScale])
+        //             console.log(minCol, maxCol, minRow, maxRow)
+        //         }
+        //     }
+        // }
+    }
+    getScaleMeta(data) {
+        const { minCol, maxCol, minRow, maxRow, meta } = this.getRowsAndCols(data);
+        let lastRow = meta.imgw % meta.wmax || meta.wmax,
+            lastCol = meta.imgh % meta.hmax || meta.hmax,
+            metaLen = meta.rows * meta.cols,
+            meteData = [];
+        meta.baseurl = '/src/assets';
+
+        // datas[meta.sizeid] = this.imageSource[meta.sizeid] || [];
+        let row = 1, col = 0;
+
+        for (let i = 1; i <= metaLen; i++) {
+
+            const tempi = i - 1;
+            let isShow = {
+                col: false,
+                row: false,
+            };
+            // 
+            if (col >= minCol && col <= maxCol) isShow.col = true;
+            if (row - 1 >= minRow && row - 1 <= maxRow) isShow.row = true;
+
+            meteData[tempi] = { w: meta.wmax, h: meta.hmax, col, row: row - 1 }
+
+            // 最后一行
+            col = i % meta.cols;
+            if (row % meta.rows === 0) {
+                meteData[tempi].h = lastCol;
+            }
+            // 最后一列
+            if (col === 0) {
+                meteData[tempi].w = lastRow;
+                row++;
+            }
+            meteData[tempi].visible = isShow.col && isShow.row;
+            meteData[tempi].img = this.url({ ...meta, ...meteData[tempi] });
+            meteData[tempi].imgw = meta.imgw;
+            meteData[tempi].imgh = meta.imgh;
+
+        }
+
+        this.imageData[data.nextScale] = meteData;
+        return meteData;
     }
 
     recalculate() {
@@ -175,7 +280,7 @@ export default class extends React.Component {
 
     render() {
         const { width, height, top, left, translateX, translateY, originX, originY, scaleX, scaleY } = this.state;
-        const { uri } = this.props;
+        // const { uri } = this.props;
         const pictrueStyle = {
             width,
             height,
@@ -197,8 +302,7 @@ export default class extends React.Component {
                     onDoubleClick={this.doubleClick.bind(this)}
                     style={pictrueStyle}>
                     {/* 缩略图 */}
-                    <img src={uri || logo} alt="" draggable={false} />
-
+                    <img src={this.imgUrl} alt="" draggable={false} />
                     {/* 真实图片按比例加载区域图片*/}
                     {/* <div style={{ position: 'absolute', width: '100%', height: '100%', top: 0, left: 0 }}>
                         <div style={{ ...imgStyle, background: `url(${imgs}) ` }} ></div>
@@ -220,7 +324,6 @@ export default class extends React.Component {
 
         if (this.state.aerialViewShow !== true || !this.state.aerialShow) return null;
 
-        const src = logo;
         const pos = {
             left: this.state.aerialLeft,
             top: this.state.aerialTop,
@@ -232,7 +335,7 @@ export default class extends React.Component {
             <div ref="aerialView" className="aerialView" style={{ width: this.AerialViewWidth, height: this.AerialViewHeight }}>
                 <div className="aerialImgBox">
                     <div ref="aerialImg" className="aerialImg" style={this.aerialImgSize()}>
-                        <img src={src} draggable={false} className="notSelect" />
+                        <img src={this.imgUrl} draggable={false} className="notSelect" alt="" />
                     </div>
                     <div
                         ref="aerial"
@@ -262,7 +365,6 @@ export default class extends React.Component {
         const { left: aerialLeft, top: aerialTop } = position;
 
         const { offsetWidth: aerialImgWidth, offsetHeight: aerialImgHeight } = this.refs.aerialImg; // 鸟瞰图宽高
-        // console.log(aerialImgWidth, aerialImgHeight)
         const { showWidth, showHeight } = this.getShowWidthAndHeight();// 图片高度
 
         const states = this.ViewBounding({
@@ -274,23 +376,164 @@ export default class extends React.Component {
 
     }
 
-    renderPictureBlock() {
-        const distance = index => this.state.rows[0].w / this.state.scaleX * index;
-        return this.scales.map((item, index) =>
-            <div className={`scalebox${item}${index} scaleBox`}
-                key={index}
-                hidden={item !== this.state.scaleX}>
-                {this.state.rows.map((v, i) =>
-                    <div className="imgStyle"
-                        key={i}
-                        style={{ left: distance(i), top: 0, width: v.w / this.state.scaleX, height: v.h / this.state.scaleY }}>
-                        <img src={logo} alt=""
-                            style={{ position: 'relative', left: -distance(i) + 'px', width: this.state.width, height: this.state.height }}
+    // 可显示区域的矩阵
+    // 根据当前比例和，图片的
+    visivbleMatrix(picWh) {
+        // this.imageData = [];
+
+        let { left, top } = picWh || this.state;
+        const { visivbleWidth, visivbleHeight } = this.getVisivbleWidthAndHeight();
+        const nextScale = this.scales.indexOf(this.scales.filter(i => i >= this.currentScale)[0]);
+
+        let meta = this.dataSource[nextScale],
+            lastRow = meta.imgw % meta.wmax || meta.wmax,
+            lastCol = meta.imgh % meta.hmax || meta.hmax,
+            metaLen = meta.rows * meta.cols,
+            meteData = [];
+        left = left < 0 ? left *= -1 : left;
+        top = top < 0 ? top * -1 : top;
+        let minCol = Math.floor(left / meta.wmax + 1 - 1), //从第几列开始显示
+            maxCol = minCol + Math.ceil(visivbleWidth / meta.wmax),
+            minRow = Math.floor(top / meta.hmax + 1 - 1), //从第几行开始显示
+            maxRow = minRow + Math.ceil(visivbleHeight / meta.hmax);
+        meta.baseurl = '/src/assets';
+
+        this.imageSource[meta.sizeid] = this.imageSource[meta.sizeid] || [];
+        // this.imageData[this.imageData.length]
+        // const url = data => `${data.baseurl}/${data.imgid}/${data.imgid}-${data.sizeid}_${data.row}_${data.col}.${data.ex || 'jpg'}`;
+        let row = 1, col = 0;
+
+        for (let i = 1; i <= metaLen; i++) {
+
+            const tempi = i - 1;
+            let pv = {}
+            // 
+            if (col >= minCol && col <= maxCol) pv.col = col
+            if (row - 1 >= minRow && row - 1 <= maxRow) pv.row = row - 1
+
+            meteData[tempi] = { w: meta.wmax, h: meta.hmax, ...pv }
+
+            // 最后一行
+            col = i % meta.cols;
+            if (row % meta.rows === 0) {
+                meteData[tempi].h = lastCol;
+            }
+            // 最后一列
+            if (col === 0) {
+                meteData[tempi].w = lastRow;
+                row++;
+            }
+
+            const img = pv.row !== undefined && pv.col !== undefined ? this.url({ ...meta, ...meteData[tempi] }) : '';
+
+            // let image = {};
+            // let images= {};
+            // let imgsrc = this.imageSource[meta.sizeid];
+            // if(img && !imgsrc.row){
+            //     // image = document.createElement('img',{src:img});
+            //     // // images = document.createElement('img');
+            //     // images.src = img;
+            //     // // // image.id = `src${pv.row}${pv.col}`;
+            //     // this.docFrag.appendChild(image);
+            //     this.imageSource[meta.sizeid] 
+            //     // this.imageSource[`${pv.row}_${pv.col}`] = images;
+            // } 
+
+
+            meteData[tempi].img = img;
+
+            const currentMeta = this.imageSource[meta.sizeid][tempi];
+            this.imageSource[meta.sizeid][tempi] = currentMeta && currentMeta.img ? currentMeta : meteData[tempi];
+
+            // meteData[tempi].reactDom = image.type ? image : '';
+
+        }
+        // document.body.appendChild(this.docFrag);
+        // document.body.appendChild(this.docFrag);
+
+
+        return (
+            this.imageSource[meta.sizeid].map((item, index) => {
+                return (
+                    // <div className="imgStyle" style={{ width: item.w / meta.imgw * 100 + '%', height: item.h / meta.imgh * 100 + '%' }}
+                    <div className="imgStyle" style={{ width: item.w / meta.imgw * 100 + '%', height: item.h / meta.imgh * 100 + '%' }}
+                        key={index} >
+                        {<img src={item.img} lazy={item.img} alt="" />}
+                    </div >
+                )
+            })
+        )
+
+    }
+
+    renderBlock(index) {
+        let meta = this.dataSource[index];
+        meta.baseurl = '/src/assets';
+        const lastRow = meta.imgw % meta.wmax || meta.wmax,
+            lastCol = meta.imgh % meta.hmax || meta.hmax,
+            metaLen = meta.rows * meta.cols,
+            meteData = [];
+        // let x = Math.ceil(meta.imgw / meta.wmax)
+        // let y = Math.ceil(meta.imgh / meta.hmax)
+        let row = 1, col = 0;
+        // const url = data => `${data.baseurl}/${data.imgid}/${data.imgid}-${data.sizeid}_${data.row}_${data.col}.${data.ex || 'jpg'}`;
+
+        for (let i = 1; i <= metaLen; i++) {
+            meteData[i - 1] = { w: meta.wmax, h: meta.hmax, row: row - 1, col: col }
+            // 最后一行
+            col = i % meta.cols;
+            if (row % meta.rows === 0) {
+                meteData[i - 1].h = lastCol;
+            }
+            // 最后一列
+            if (col === 0) {
+                meteData[i - 1].w = lastRow;
+                row++;
+            }
+            meteData[i - 1].img = this.url({ ...meta, ...meteData[i - 1] })
+        }
+
+        return (
+            meteData.map((item, index) => {
+                return (
+                    // <div className="imgStyle" style={{ width: item.w / meta.imgw * 100 + '%', height: item.h / meta.imgh * 100 + '%' }}
+                    <div className="imgStyle" style={{ width: item.w / meta.imgw * 100 + '%', height: item.h / meta.imgh * 100 + '%' }}
+                        key={index} >
+                        <img src={item.img} lazy={item.img} alt=""
                             draggable={false} />
-                    </div>
-                )}
-            </div>
-        );
+                    </div >)
+
+            }
+
+            )
+        )
+
+
+    }
+
+    renderPictureBlock() {
+        // 根据当前比例 获取对应的比例盒子
+        let hideScale = this.scales.indexOf(this.scales.filter(i => i >= this.currentScale)[0]);
+        return (
+            this.imageData.map((items, index) => {
+                // if (index !== nextScale) return null
+                return <div className={`scalebox${index} scaleBox`}
+                    key={index}
+                    hidden={index > hideScale}
+                >
+                    {
+                        items.map((item, index) => {
+                            return (
+                                <div className="imgStyle" style={{ width: item.w / item.imgw * 100 + '%', height: item.h / item.imgh * 100 + '%', background: '#fff' }}
+                                    key={index} >
+                                    {item.visible && <img src={item.img} alt="" />}
+                                </div >
+                            )
+                        })
+                    }
+                </div>
+            })
+        )
 
     }
 
@@ -437,6 +680,7 @@ export default class extends React.Component {
 
     // 双击事件
     doubleClick(e) {
+
         const nextScale = this.scales.filter(i => i > this.currentScale)[0] || this.minScale;
         // if (!nextScale) return this.initPicture();
         const nextScaleState = this.scale(nextScale, this.getClientPos(e));
@@ -463,23 +707,24 @@ export default class extends React.Component {
             // { visivbleWidth, visivbleHeight } = this.getVisivbleWidthAndHeight(),
             { imgWidth, imgHeight } = this.getPictrueWidthAndHeight(),
             { showWidth, showHeight } = this.getShowWidthAndHeight(),
-            { x, y } = origin || {
-                x: this.state.left + showWidth / 2,
-                y: this.state.top + showHeight / 2,
-            },
+            {
+                x, y } = origin || {
+                    x: this.state.left + showWidth / 2,
+                    y: this.state.top + showHeight / 2,
+                },
             imgLeft = (x - imgBounding.left) / scale,
             imgTop = (y - imgBounding.top) / scale,
             left = imgBounding.left - scaleDiff * imgLeft,
             top = imgBounding.top - scaleDiff * imgTop;
-        // console.log(this.state.top, x)
+        const NextSize = { width: imgWidth * NextScale, height: imgHeight * NextScale };
 
         this.currentScale = NextScale;
 
+        this.renderMeta({ ...NextSize, left, top });
         const scaleState = {
             ...this.ViewBounding({ left, top }),
-            width: imgWidth * NextScale,
-            height: imgHeight * NextScale,
-            rows: this.visivbleMatrix(nextScale),
+            ...NextSize,
+            // windowMeta: this.visivbleMatrix({ ...NextSize, left, top }),
         },
             state = this.scaleBefore(scaleState) || scaleState;
         return state;
@@ -562,8 +807,14 @@ export default class extends React.Component {
             top = top < MaxTop ? MaxTop : top > MaxBottom ? MaxBottom : top;
         }
         // this.AerialVisible({left,top});
+        const aerialState = this.AerialVisible({ left, top });
+        this.renderMeta({ left, top, widht: showWidth, height: showHeight });
+        // const windowMeta = this.visivbleMatrix({ left, top, widht: showWidth, height: showHeight })
 
-        return this.AerialVisible({ left, top });
+        return {
+            ...aerialState,
+            // windowMeta,
+        };
     }
 
     // 鸟瞰图显示
@@ -602,11 +853,10 @@ export default class extends React.Component {
 
     // 获取可显示区域的宽高
     getVisivbleWidthAndHeight() {
-        let { visivbleArea } = this.refs;
-        // console.log(`可视区域：${visivbleArea.clientWidth} * ${visivbleArea.clientHeight}`)
+        let { visivbleArea = {} } = this.refs;
         return {
-            visivbleWidth: visivbleArea.clientWidth,
-            visivbleHeight: visivbleArea.clientHeight
+            visivbleWidth: visivbleArea.clientWidth || 0,
+            visivbleHeight: visivbleArea.clientHeight || 0
         }
     }
 
@@ -620,33 +870,12 @@ export default class extends React.Component {
 
     // 获取图片的宽高
     getPictrueWidthAndHeight() {
-        let imgWidth = 1300,
-            imgHeight = 200;
+        let imgWidth = this.initLoadData.imgw,
+            imgHeight = this.initLoadData.imgh;
         return {
             imgWidth,
             imgHeight
         }
-    }
-
-    // 可显示区域的矩阵
-    visivbleMatrix(scale, picWh) {
-        let { width, height } = picWh || this.state;
-        width *= scale;
-        height *= scale;
-        // let matrix = [];
-
-        let row = Math.floor(width / 100),
-            lastRow = width % 100,
-            cols = height * scale / 100;
-        let matrix = [];
-        for (let i = 0; i < row; i++) {
-            matrix[i] = { w: 100, h: 100 };
-        }
-        matrix[matrix.length] = { w: lastRow, h: 100 };
-
-        // console.log(matrix)
-        return matrix
-
     }
 
     // 全屏显示
@@ -687,8 +916,8 @@ export default class extends React.Component {
     // 窗口发生改变执行的回调
     resize() {
         // 重新计算
-        // this.currentScale === this.minScale ? this.reset() : this.recalculate();
-        this.reset()
+        this.currentScale === this.minScale ? this.reset() : this.recalculate();
+        // this.reset()
         this.onResize();
     }
     // 监听窗口发生改变

@@ -1,25 +1,26 @@
 // import React, { Component } from 'react'
 import ScaleImg from '../ScaleImg';
 import Styles from './index.less'
-import { Slider, Icon, Row, Col, Drawer, Descriptions, Button, List,Divider } from 'antd';
+import { Slider, Icon, Row, Col, Drawer, Descriptions, Button, List, Divider } from 'antd';
 // import InfiniteScroll from 'react-infinite-scroller';
 /**
  * 基于图片缩放 使用ant design 给图片查看器提供一个工具组件。
  * 
  * 
  */
+
 export default class PictureTool extends ScaleImg {
     constructor(props) {
-        const {drawerChange = ()=>{}} = props; 
+        const { drawerChange = () => { }, visible = false } = props;
         super(props, {
             ScaleValue: 0, //进度条的值
             hideTools: false, //是否隐藏工具条
             paddingRight: 0, // 进度条右边的填充 （当出现鸟瞰图时设置，留出鸟瞰图显示的距离）
-            drawerShow: false,
-            drawerHeight:200
+            drawerShow: true,
+            visible: visible
         });
         this.drawerChange = drawerChange;
-    } 
+    }
 
 
     // data= {
@@ -65,7 +66,7 @@ export default class PictureTool extends ScaleImg {
                     <Col md={1} sm={2} xs={3}>
                         <Icon type="info-circle"
                             onClick={() => {
-                               this.toggleDrawer();
+                                this.toggleDrawer();
                             }}
                             title="图片简介信息"
                         />
@@ -80,7 +81,9 @@ export default class PictureTool extends ScaleImg {
     }
 
     renderImgInfo(info) {
-        // if (!info) return null;
+        // console.log(this.props.visible)
+        const { visivbleHeight } = this.getVisivbleWidthAndHeight(); //用于动态设置抽屉的 
+
         const data = [
             {
                 title: '作者简介',
@@ -99,22 +102,22 @@ export default class PictureTool extends ScaleImg {
                     title={
                         <div>
                             作品介绍
-                            <Icon type="left" style={{float:'right'}} onClick={()=>{this.toggleDrawer()}}/>
+                            <Icon type="left" style={{ float: 'right' }} onClick={() => { this.toggleDrawer() }} />
                         </div>
                     }
-                    visible={this.state.drawerShow}
+                    visible={(this.state.drawerShow && this.props.visible)} //
                     mask={false}
-                    maskStyle={{opacity:0,background:'none'}}
+                    maskStyle={{ opacity: 0, background: 'none' }}
                     closable={false}
                     placement="left"
                     className="imgDetails"
                     afterVisibleChange={this.drawerChange}
                     zIndex={1000}
-                    width={300}
+                    width={310}
                     bodyStyle={
                         {
-                         overflow:'auto',
-                         height:this.state.drawerHeight
+                            overflow: 'auto',
+                            height: visivbleHeight - 100
                         }
                     }
                     onClose={() => {
@@ -136,7 +139,7 @@ export default class PictureTool extends ScaleImg {
                         </Button>
                     </div>
                     <h3 className="imgDescTitle">更多详情</h3>
-                    <Divider style={{margin: '10px 0',}}/>
+                    <Divider style={{ margin: '10px 0', }} />
                     <div className="listbox">
                         <List
                             dataSource={data}
@@ -159,17 +162,10 @@ export default class PictureTool extends ScaleImg {
         );
     }
 
-    closeDrawer() {
-        this.toggleDrawer();
-    }
-
-
     // 切换显示工具栏
     toggleDrawer() {
-        const { visivbleHeight } = this.getVisivbleWidthAndHeight();
         this.setState({
             drawerShow: !this.state.drawerShow,
-            drawerHeight: visivbleHeight - 100
         });
     }
 

@@ -3,7 +3,7 @@
 # dependencies
 /node_modules
 /.idea
-
+/src/assets/abcdef
 # production
 /dist
 
