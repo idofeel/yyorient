@@ -18,7 +18,7 @@
  * 
  * options 参数  Object
  * 
- *  bounding   默认值：false   设置边界
+ *  bounding   默认值：false   设置拖动边界
  *             类型：Boolean     true 有边界，以可显示区域的边为边界；false 无边界，可任意拖拽
  *             类型：Obejct      { offsetLeft: Number, offsetTop: Number } 图片在屏幕中剩余的宽度/高度 (最大值为图片的宽度高度，超出按图片最大值)
  *   
@@ -524,7 +524,7 @@ export default class extends React.Component {
                     {
                         items.map((item, index) => {
                             return (
-                                <div className="imgStyle" style={{ width: item.w / item.imgw * 100 + '%', height: item.h / item.imgh * 100 + '%', background: '#fff' }}
+                                <div className="imgStyle" style={{ width: item.w / item.imgw * 100 + '%', height: item.h / item.imgh * 100 + '%' }}
                                     key={index} >
                                     {item.visible && <img src={item.img} alt="" />}
                                 </div >
@@ -681,7 +681,8 @@ export default class extends React.Component {
     // 双击事件
     doubleClick(e) {
 
-        const nextScale = this.scales.filter(i => i > this.currentScale)[0] || this.minScale;
+        // const nextScale = this.scales.filter(i => i > this.currentScale)[0] || this.minScale;
+        const nextScale = this.currentScale + (this.maxScale - this.minScale) / 10;
         // if (!nextScale) return this.initPicture();
         const nextScaleState = this.scale(nextScale, this.getClientPos(e));
 
@@ -853,10 +854,14 @@ export default class extends React.Component {
 
     // 获取可显示区域的宽高
     getVisivbleWidthAndHeight() {
-        let { visivbleArea = {} } = this.refs;
+        const getBoundingClientRect = () => { return { clientWidth: 0, clientHeight: 0, left: 0, top: 0 } },
+            { visivbleArea = { getBoundingClientRect } } = this.refs,
+            container = visivbleArea.getBoundingClientRect(),
+            visivbleWidth = container.width - container.left,
+            visivbleHeight = container.height - container.top
         return {
-            visivbleWidth: visivbleArea.clientWidth || 0,
-            visivbleHeight: visivbleArea.clientHeight || 0
+            visivbleWidth,
+            visivbleHeight
         }
     }
 

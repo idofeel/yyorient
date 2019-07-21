@@ -40,7 +40,7 @@ export default class PictureTool extends ScaleImg {
                         />
                     </Col>
                     <Col md={20} sm={16} xs={12} className="tools-scale">
-                        <Icon type="minus-circle" onClick={() => { this.ScalePlus(-0.1) }} />
+                        <Icon type="minus-circle" onClick={() => { this.ScalePlus(-1) }} />
                         <Slider
                             disabled={false}
                             value={this.state.ScaleValue}
@@ -48,7 +48,7 @@ export default class PictureTool extends ScaleImg {
                             onChange={this.dragScale.bind(this)}
                             className="slide_scale"
                         />
-                        <Icon type="plus-circle" onClick={() => { this.ScalePlus(0.1) }} />
+                        <Icon type="plus-circle" onClick={() => { this.ScalePlus() }} />
                     </Col>
                     <Col md={1} sm={2} xs={3}>
                         <Icon type={this.state.fullScreen ? 'fullscreen-exit' : 'fullscreen'}
@@ -102,7 +102,7 @@ export default class PictureTool extends ScaleImg {
                     title={
                         <div>
                             作品介绍
-                            <Icon type="left" style={{ float: 'right' }} onClick={() => { this.toggleDrawer() }} />
+                            <Icon type="left" style={{ float: 'right', color: '#fff' }} onClick={() => { this.toggleDrawer() }} />
                         </div>
                     }
                     visible={(this.state.drawerShow && this.props.visible)} //
@@ -117,7 +117,7 @@ export default class PictureTool extends ScaleImg {
                     bodyStyle={
                         {
                             overflow: 'auto',
-                            height: visivbleHeight - 100
+                            height: visivbleHeight - 100,
                         }
                     }
                     onClose={() => {
@@ -131,15 +131,15 @@ export default class PictureTool extends ScaleImg {
                     </Descriptions>
 
                     <div className="btn-group">
-                        <Button type="primary">
+                        <Button>
                             <Icon type="menu" /> 返回列表
                         </Button>
-                        <Button type="primary">
+                        <Button>
                             <Icon type="heart" /> 添加收藏
                         </Button>
                     </div>
                     <h3 className="imgDescTitle">更多详情</h3>
-                    <Divider style={{ margin: '10px 0', }} />
+                    <Divider />
                     <div className="listbox">
                         <List
                             dataSource={data}
@@ -205,8 +205,8 @@ export default class PictureTool extends ScaleImg {
     }
 
     // 扩大/缩小 
-    ScalePlus(scale = 0) {
-        const nextScale = this.currentScale + scale;
+    ScalePlus(scale = 1) {
+        const nextScale = this.currentScale + (this.maxScale - this.minScale) / 10 * scale;
         const nextScaleState = this.scale(nextScale);
         this.setState(nextScaleState);
     }

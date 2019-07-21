@@ -9,6 +9,10 @@
 
 :global {
     // ---- 
+    @img-details-bg: #787878;
+    @img-details-light: #fff;
+    @img-details-primary: #ccc;
+
 
     // 工具栏
     .toolsBox {
@@ -61,11 +65,58 @@
         }
     }
 
-
-
+    // 图片详细信息
     .imgDetails {
+        .ant-descriptions-title {
+            color: @img-details-light;
+        }
+
+        .ant-drawer-content {
+            background: @img-details-bg;
+        }
+
+        .ant-drawer-header {
+            background: none;
+
+            .ant-drawer-title {
+                color: @img-details-light;
+            }
+        }
+
         .ant-drawer-content-wrapper {
             height: auto;
+        }
+
+        .imgDescTitle {
+            color: @img-details-light;
+        }
+
+        .ant-descriptions-row {
+            span {
+                color: @img-details-primary;
+            }
+        }
+
+        .ant-divider {
+            background: #000;
+            margin: 10px 0;
+        }
+
+        .listbox {
+            overflow: auto;
+
+            // height: 300px;
+            .ant-list-item-meta-title {
+                color: @img-details-light;
+            }
+
+            .ant-list-item-meta-description {
+                color: @img-details-primary;
+            }
+
+            .ant-list-item {
+                border: none;
+            }
         }
     }
 
@@ -84,36 +135,23 @@
         }
     }
 
-
-    .imgDesc {
-        .ant-descriptions-title {
-            margin-bottom: 5px;
-        }
-
-
-
-        td {
-            border-bottom: 1px solid #646464;
-            padding: 10px 0;
-        }
-    }
-
     .btn-group {
         display: flex;
         margin: 20px 0;
         justify-content: space-between;
 
         .ant-btn {
+            background: #999;
+            color: #fff;
+
             .anticon {
                 color: inherit;
             }
         }
+
     }
 
-    .listbox {
-        overflow: auto;
-        // height: 300px;
-    }
+
 
     // ----
 }
