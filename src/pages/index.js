@@ -8,6 +8,7 @@ import SubRoutes, { RedirectRoute, NoMatchRoute } from '../utils/SubRoute';
 import './global.less'; //全局样式覆盖
 function IndexPage(props) {
   const { routes } = props;
+  console.log(props)
   return (
     <Row >
       <Header {...props} />

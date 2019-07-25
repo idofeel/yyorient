@@ -73,8 +73,9 @@ class ModalPic extends React.Component {
         return <Modal
             footer={null}
             visible={this.state.visible}
-            onOk={this.hideModal.bind(this)}
-            onCancel={this.hideModal.bind(this)}
+            // onOk={this.hideModal.bind(this)}
+            // onCancel={this.hideModal.bind(this)}
+            onCancel={this.props.hideModal}
             okButtonProps={null}
             maskClosable={false}
             width={this.props.width || "100%"}
@@ -109,12 +110,8 @@ class ModalPic extends React.Component {
         document.body.removeEventListener("touchmove", this.stopScroll, { passive: true });
     }
     shouldComponentUpdate(nextProps, nextState) {
-        if (nextState.visible) {
-            this.showPop();
-        } else {
-            this.rmShowPop();
-        }
-        // console.log(...arguments)
+        nextState.visible ?  this.showPop() : this.rmShowPop();
+        if(this.state.visible === nextState.visible) return false
         return true;
     }
     UNSAFE_componentWillReceiveProps(nextProps) {

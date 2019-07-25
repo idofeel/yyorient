@@ -5,8 +5,8 @@ import styles from './index.less';
 
 const menus = [
     {
-        key: 'home',
-        path: '/home',
+        key: 'photo',
+        path: '/photo',
         name: '图库',
     },
     {

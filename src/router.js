@@ -4,7 +4,8 @@ import SubRoutes from './utils/SubRoute';
 
 import index from './pages';
 
-import Home from './pages/PhotoGallery/PhotoGallery';
+import Home from './pages/Home/Home';
+import PhotoGallery from './pages/PhotoGallery/PhotoGallery';
 import Zone from './pages/YZone/YZone';
 import YVideo from './pages/YVideo/YVideo';
 import YCity from './pages/YCity/YCity';
@@ -24,8 +25,13 @@ const RoutersConfig = [
 				redirect: true
 			},
 			{
+				path: '/photo',
+				component: PhotoGallery
+			},
+			{
 				path: '/zone',
-				component: Zone
+				component: Zone,
+				header: false
 			},
 			{
 				path: '/city',

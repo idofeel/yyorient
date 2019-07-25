@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React from 'react'
 import { Row, Col, Input, Icon } from 'antd';
 import NavBar from '../NavBar/index';
 import logo from 'images/logo.png'
@@ -11,7 +11,9 @@ export default (props) => {
         <header className={style.header}>
             <Row type="flex" justify="space-around" align="middle">
                 <Col xs={8} sm={6} md={5} lg={4} xl={3} className={style.logo}>
-                    <img src={logo} title="雅韵东方官网" />
+                    <Link to="/">
+                        <img src={logo} title="雅韵东方官网" alt="雅韵东方官网" />
+                    </Link>
                 </Col>
                 <Col xs={10} sm={13} md={15} lg={16} xl={17}>
                     <NavBar {...props} />
