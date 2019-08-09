@@ -1,7 +1,11 @@
 import React, { Component } from 'react'
+import ReactDOM from 'react-dom';
 import ImgModal from '../ImgModal'
 import { Tabs, Anchor, Tag } from 'antd';
 import './photoGallery.less';
+import Autoresponsive from 'autoresponsive-react';
+import SecondayClassfiy from '../../components/SecondayClassfiy/SecondayClassfiy';
+
 const { TabPane } = Tabs;
 const { CheckableTag } = Tag;
 
@@ -52,40 +56,84 @@ export default class PhotoGallery extends Component {
             { name: '型制', data: [{ id: 4, name: '全部' }] },
         ],
         selectedTags: [1],
-        activeKey: "0"
+        activeKey: "0",
+        nextActiveKey: '',
     }
+    arrayList = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+
+    UNSAFE_componentWillMount() {
+        this.arrayList = this.arrayList.map(i => this.getItemStyle());
+        this.resize = this.resize.bind(this);
+
+    }
+
+    componentDidMount() {
+        this.setState({
+            containerWidth: ReactDOM.findDOMNode(this.refs.container).clientWidth
+        });
+        window.addEventListener('resize', this.resize, false);
+    }
+    getItemStyle() {
+        return {
+            width: 250,
+            height: parseInt(Math.random() * 20 + 12, 10) * 10,
+            // height: '200px',
+            color: '#fff',
+            cursor: 'pointer',
+            borderRadius: 5,
+            boxShadow: '0 1px 0 rgb(246, 170, 0, 0.5) inset',
+            backgroundColor: '#F6AA00',
+            borderColor: '#F6AA00',
+            fontSize: '80px',
+            lineHeight: '100px',
+            textAlign: 'center',
+            fontWeight: 'bold',
+            textShadow: '1px 1px 0px rgb(246, 170, 0)',
+            userSelect: 'none',
+            // padding: '10px',
+            margin: '10px',
+        };
+    }
+
+    getAutoResponsiveProps() {
+        const containerWidth = (this.state.containerWidth || this.props.containerWidth || document.body.clientWidth);
+
+        const cols = Math.floor((containerWidth - 261) / 270);
+
+        // containerMargin = containerMargin < 20 ? 20 : containerMargin;
+        return {
+            itemMargin: 20,
+            containerWidth: (cols + 1) * 270,
+            itemClassName: 'item',
+            transitionDuration: '.2',
+            // closeAnimation:true,
+            // gridWidth: containerMargin,
+            transitionTimingFunction: 'easeIn'
+        };
+    }
+
     render() {
-        const { menuTabs, activeKey } = this.state;
+        const { menuTabs, activeKey, hideCate } = this.state;
+        const AutoResponsiveProps = this.getAutoResponsiveProps();
         return (
             <>
-                <Anchor className="tabs-wrapper">
-                    <Tabs
-                        tabBarGutter={0}
-                        animated={false}
-                        activeKey={activeKey}
-                        onChange={(index) => {
-                            this.tabChange(index);
-                        }}
-                        className="menuTabs" >
-                        {menuTabs.map((item, index) => (
-                            <TabPane
-                                tab={
-                                    <div className="yy-tabs-tab" onMouseEnter={() => {
-                                        this.tabChange(index);
-                                    }}>
-                                        {item.name}
-                                    </div>
-                                }
-                                key={index}
-                            >
-
-                                {this.renderCategories(item)}
-                            </TabPane>
-                        ))}
-                    </Tabs>
-                    123
-                </Anchor>
-
+                <SecondayClassfiy
+                    tabs={menuTabs}
+                    onChange={(index) => { this.onChange(index) }}
+                    selectOptions={(item) => { this.selectOptions(item) }}
+                />
+                <div className="AutoresponsiveContainer" ref="container">
+                    <p>全部：</p>
+                    <div style={{ width: AutoResponsiveProps.containerWidth, margin: '0 auto' }}>
+                        <Autoresponsive  {...AutoResponsiveProps} >
+                            {
+                                this.arrayList.map(function (i, index) {
+                                    return <div key={index} onClick={() => { this.clickItemHandle() }} style={i} className="item">{index}</div>;
+                                }, this)
+                            }
+                        </Autoresponsive>
+                    </div>
+                </div>
                 <ImgModal
                     visible={this.state.visible}
                     options={this.state.scaleImgOptions}
@@ -96,40 +144,22 @@ export default class PhotoGallery extends Component {
             </>
         )
     }
-    hide = false;
-    renderCategories(item) {
-        const { categories, selectedTags, hideCate } = this.state
-        return (
-            <div className="categoriesBox" onMouseLeave={() => {
-                this.setState({
-                    hideCate: true
-                })
-            }} hidden={hideCate}>
-                {categories.map((item, index) => (
-                    <div className="categories" key={index}>
-                        <h4 style={{ marginRight: 8, display: 'inline' }}>{item.name}:</h4>
-                        {item.data.map(tag => (
-                            <CheckableTag
-                                key={tag.id}
-                                checked={selectedTags.indexOf(tag.id) > -1}
-                                onChange={checked => this.handleChange(tag.id, checked)}
-                            >
-                                {tag.name}
-                            </CheckableTag>
-                        ))}
-                    </div>
-                ))}
-            </div>
 
-        );
+    onChange(index) {
+        let { menuTabs, categories } = this.state;
+        menuTabs[index].categories = categories
+        this.setState({
+            menuTabs
+        })
+    }
+
+    selectOptions(item) {
+        console.log(item)
 
     }
 
-    handleChange(tag, checked) {
-        const { selectedTags } = this.state;
-        const nextSelectedTags = checked ? [...selectedTags, tag] : selectedTags.filter(t => t !== tag);
-        // console.log('You are interested in: ', nextSelectedTags);
-        this.setState({ selectedTags: nextSelectedTags });
+    clickItemHandle() {
+        this.handleImg(true)
     }
 
     handleImg(e = false) {
@@ -139,12 +169,14 @@ export default class PhotoGallery extends Component {
 
     }
 
-    tabChange(key) {
-        // this.hide = false;
+    resize() {
         this.setState({
-            activeKey: key + '',
-            hideCate: false
+            containerWidth: ReactDOM.findDOMNode(this.refs.container).clientWidth
         });
+    }
+    componentWillUnmount() {
+        // 销毁监听事件
+        window.removeEventListener('resize', this.resize);
     }
 
 }

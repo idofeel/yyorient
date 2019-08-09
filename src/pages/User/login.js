@@ -1,7 +1,10 @@
 import React, { Component } from 'react'
-import { Form, Input, Button, Checkbox, Icon } from 'antd';
+import { connect } from 'dva'
+import { Form, Input, Button, Checkbox, Icon, Message } from 'antd';
 import { email_reg } from '../../utils/Regexp';
 import styles from './login.less'
+
+@connect()
 class Login extends Component {
 
     render() {
@@ -41,13 +44,44 @@ class Login extends Component {
                     <a className="login-form-forgot" href="">
                         忘记密码
                     </a>
-                    <Button type="primary" htmlType="submit" className="login-form-button">
+                    <Button type="primary" htmlType="submit" onClick={(e) => { this.onSubmit(e) }} className="login-form-button">
                         登录
                     </Button>
                     <a href="">现在注册！</a>
                 </Form.Item>
             </Form>
         )
+    }
+
+
+
+    // login
+    onSubmit() {
+        // console.log(this)
+        this.props.form.validateFields((err, values) => {
+            if (err) return;
+            const { username, password } = values;
+            const res = { username: '375163888@qq.com', password: '123456' };
+            let login = [res];
+            if (res) {
+                // 匹配账号密码
+                login = login.filter(user => user.password === password && user.username === username);
+            }
+
+            if (login && login.length > 0) {
+                // 存储登录信息
+                this.props.dispatch({
+                    type: 'global/setUserInfo',
+                    payload: login[0]
+                }).then(() => {
+                    this.props.history.push('/');
+                })
+            } else {
+                Message.error('账号或密码错误');
+            }
+            console.log(login)
+
+        });
     }
 }
 

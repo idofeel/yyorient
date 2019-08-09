@@ -2,56 +2,54 @@ import React from 'react';
 import { Router, Switch } from 'dva/router';
 import SubRoutes from './utils/SubRoute';
 
-import index from './pages';
-
-import Home from './pages/Home/Home';
-import PhotoGallery from './pages/PhotoGallery/PhotoGallery';
-import Zone from './pages/YZone/YZone';
-import YVideo from './pages/YVideo/YVideo';
-import YCity from './pages/YCity/YCity';
-import Famous from './pages/Famous/Famous';
-import Login from './pages/User/login';
-import Register from './pages/User/register';
-
 // 顶级路由
 const RoutersConfig = [
 	{
 		path: '/',
-		component: index,
+		component: () => import('./pages'),
+		model: [],
 		routes: [
 			{
 				path: '/home',
-				component: Home,
-				redirect: true
+				component: () => import('./pages/Home/Home'),
+				redirect: true,
+				model: []
 			},
 			{
 				path: '/photo',
-				component: PhotoGallery
+				component: () => import('./pages/PhotoGallery/PhotoGallery'),
+				model: []
 			},
 			{
 				path: '/zone',
-				component: Zone,
-				header: false
+				component: () => import('./pages/YZone/YZone'),
+				header: false,
+				model: []
 			},
 			{
 				path: '/city',
-				component: YCity
+				component: () => import('./pages/YCity/YCity'),
+				model: []
 			},
 			{
 				path: '/video',
-				component: YVideo,
+				component: () => import('./pages/YVideo/YVideo'),
+				model: []
 			},
 			{
 				path: '/famous',
-				component: Famous,
+				component: () => import('./pages/Famous/Famous'),
+				model: []
 			},
 			{
 				path: '/login',
-				component: Login,
+				component: () => import('./pages/User/login'),
+				model: []
 			},
 			{
 				path: '/register',
-				component: Register,
+				component: () => import('./pages/User/register'),
+				model: []
 			}
 
 		]
@@ -60,11 +58,11 @@ const RoutersConfig = [
 ];
 
 
-function RouterConfig({ history }) {
+function RouterConfig({ history, app }) {
 	return (
 		<Router history={history}>
 			<Switch>
-				{RoutersConfig.map((route, i) => <SubRoutes key={i} {...route} />)}
+				{RoutersConfig.map((route, i) => <SubRoutes key={i} {...route} app={app} />)}
 			</Switch>
 		</Router>
 	);
