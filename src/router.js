@@ -2,6 +2,7 @@ import React from 'react';
 import { Router, Switch } from 'dva/router';
 import SubRoutes from './utils/SubRoute';
 
+const authorty = false;
 // 顶级路由
 const RoutersConfig = [
 	{
@@ -13,56 +14,70 @@ const RoutersConfig = [
 				path: '/home',
 				component: () => import('./pages/Home/Home'),
 				redirect: true,
-				model: []
+				model: [import('./models/global')],
 			},
 			{
 				path: '/photo',
 				component: () => import('./pages/PhotoGallery/PhotoGallery'),
-				model: []
+				model: [],
 			},
 			{
 				path: '/zone',
 				component: () => import('./pages/YZone/YZone'),
-				header: false,
-				model: []
+				authorty,
+				model: [],
 			},
 			{
 				path: '/city',
 				component: () => import('./pages/YCity/YCity'),
-				model: []
+				authorty,
+				model: [],
 			},
 			{
 				path: '/video',
 				component: () => import('./pages/YVideo/YVideo'),
-				model: []
+				authorty,
+				model: [],
 			},
 			{
 				path: '/famous',
 				component: () => import('./pages/Famous/Famous'),
-				model: []
+				authorty,
+				model: [],
+				routes: [
+					{
+						path: '/famous/list',
+						model: [],
+						component: () => import('./pages/Famous/FamousList'),
+					},
+					{
+						path: '/famous/detail',
+						model: [],
+						component: () => import('./pages/Famous/FamousDetails'),
+					},
+				],
 			},
 			{
 				path: '/login',
 				component: () => import('./pages/User/login'),
-				model: []
+				model: [],
 			},
 			{
 				path: '/register',
 				component: () => import('./pages/User/register'),
-				model: []
-			}
-
-		]
-
-	}
+				model: [],
+			},
+		],
+	},
 ];
-
 
 function RouterConfig({ history, app }) {
 	return (
 		<Router history={history}>
 			<Switch>
-				{RoutersConfig.map((route, i) => <SubRoutes key={i} {...route} app={app} />)}
+				{RoutersConfig.map((route, i) => (
+					<SubRoutes key={i} {...route} app={app} />
+				))}
 			</Switch>
 		</Router>
 	);
