@@ -4,55 +4,27 @@ import ImgModal from '../ImgModal';
 import './photoGallery.less';
 import Autoresponsive from 'autoresponsive-react';
 import SecondayClassfiy from '../../components/SecondayClassfiy/SecondayClassfiy';
-export default class PhotoGallery extends Component {
-	state = {
-		visible: false,
-		scaleImgOptions: {
-			bounding: true,
-			offset: 80,
-		},
-		menuTabs: [
-			{ name: '全部', id: 123 },
-			{ name: '中国画' },
-			{ name: '中国书法' },
-			{ name: '油画' },
-			{ name: '版画' },
-			{ name: '水彩水粉' },
-			{ name: '素描速写' },
-			{ name: '漆画' },
-			{ name: '紫砂' },
-			{ name: '素描速写' },
-			{ name: '漆画' },
-			{ name: '素描速写' },
-			{ name: '漆画' },
-			{ name: '民间艺术' },
-			{ name: '建筑' },
-			{ name: '雕塑' },
-		],
-		categories: [
-			{
-				name: '年代',
-				data: [
-					{ id: 1, name: '全部' },
-					{ id: 2, name: '秦朝' },
-					{ id: 3, name: '魏晋南北朝' },
-					{ id: 4, name: '隋' },
-					{ id: 5, name: '唐' },
-					{ id: 6, name: '五代' },
-					{ id: 7, name: '宋' },
-					{ id: 8, name: '元' },
-					{ id: 9, name: '明' },
-					{ id: 10, name: '当代' },
-				],
+import { connect } from 'dva';
+import { get } from '../../utils/request';
+
+@connect()
+class PhotoGallery extends Component {
+	constructor(props) {
+		super(props);
+		const menuTabs = props.secondaryMenu['photo'] || [];
+		this.state = {
+			visible: false,
+			scaleImgOptions: {
+				bounding: true,
+				offset: 80,
 			},
-			{ name: '素材', data: [{ id: 2, name: '全部' }] },
-			{ name: '技法', data: [{ id: 3, name: '全部' }] },
-			{ name: '型制', data: [{ id: 4, name: '全部' }] },
-		],
-		selectedTags: [1],
-		activeKey: '0',
-		nextActiveKey: '',
-	};
+			menuTabs,
+			selectedTags: [1],
+			activeKey: '0',
+			nextActiveKey: '',
+		};
+	}
+
 	arrayList = [
 		0,
 		1,
@@ -138,6 +110,10 @@ export default class PhotoGallery extends Component {
 			<>
 				<SecondayClassfiy
 					tabs={menuTabs}
+					activeKey="0"
+					mouseEnterTab={(item, index) =>
+						this.mouseEnterTab(item, index)
+					}
 					onChange={(index) => {
 						this.onChange(index);
 					}}
@@ -180,16 +156,58 @@ export default class PhotoGallery extends Component {
 		);
 	}
 
+	componentWillMount() {
+		this.getCategory('2', 0); // 初始加载的数据
+	}
+
+	async getCategory(id = '2', index = 0) {
+		let { menuTabs } = this.state;
+
+		// tab 没有加载分类信息
+		if (menuTabs[index] && !menuTabs[index].categories) {
+			//  获取分类信息
+			let categories = [];
+			let selectTags = [];
+			const res = await get('/?y=common&d=category', { id });
+			if (res.success && res.data) {
+				categories = res.data.map((item) => {
+					const { id, name, sub } = item;
+
+					if (sub && sub.length) {
+						sub.unshift({ name: '全部', id: item.id }); // 默认值全部
+						selectTags.push(sub[0].id);
+					}
+
+					return {
+						id,
+						name,
+						data: sub || [],
+					};
+				});
+			}
+
+			menuTabs[index].categories = categories;
+			menuTabs[index].selectTags = selectTags;
+
+			this.setState({
+				menuTabs,
+			});
+		}
+	}
+	mouseEnterTab(item, index) {
+		this.getCategory(item.id, index);
+	}
+
 	onChange(index) {
-		let { menuTabs, categories } = this.state;
-		menuTabs[index].categories = categories;
-		this.setState({
-			menuTabs,
-		});
+		// let { menuTabs, categories } = this.state;
+		// menuTabs[index].categories = categories;
+		// this.setState({
+		// 	menuTabs,
+		// });
 	}
 
 	selectOptions(item) {
-		// console.log(item)
+		console.log(item);
 	}
 
 	clickItemHandle() {
@@ -211,5 +229,24 @@ export default class PhotoGallery extends Component {
 	componentWillUnmount() {
 		// 销毁监听事件
 		window.removeEventListener('resize', this.resize);
+		this.setState = (state, callback) => {
+			return;
+		};
+	}
+
+	componentWillReceiveProps(nextProps) {
+		this.getMenutabsData(nextProps);
+	}
+
+	getMenutabsData(props) {
+		const { menuTabs } = this.state;
+		let tabs = props.secondaryMenu['photo'] || [];
+		if (menuTabs.toString() !== tabs.toString()) {
+			this.setState({
+				menuTabs: tabs,
+			});
+		}
 	}
 }
+
+export default connect(({ global }) => ({ ...global }))(PhotoGallery);

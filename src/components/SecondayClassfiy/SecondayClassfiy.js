@@ -15,7 +15,7 @@
  */
 
 import React, { Component } from 'react';
-import { Tabs, Anchor, Tag } from 'antd';
+import { Tabs, Anchor, Tag, Skeleton } from 'antd';
 import './SecomdayClassfiy.less';
 const { TabPane } = Tabs;
 const { CheckableTag } = Tag;
@@ -47,6 +47,7 @@ export default class SecondayClassfiy extends Component {
 
 	render() {
 		const { tabs, activeKey, nextActiveKey, hidePop } = this.state;
+		if (!tabs.length) return null;
 		return (
 			<>
 				<Anchor className="yy-tabs-wrapper">
@@ -67,33 +68,42 @@ export default class SecondayClassfiy extends Component {
 											this.mouseEnterTab(item, index);
 											this.nextCate(index);
 										}}
+										onMouseLeave={() => {
+											!item.categories && this.prevCate();
+										}}
 										onClick={() => {
 											this.setState({
 												activeKey: index + '',
 											});
-											this.selectOptions(
-												this.refs['Reclassify' + index]
-													.state.selectedTags,
-											);
+											item.categories &&
+												this.selectOptions(
+													this.refs[
+														'Reclassify' + index
+													].state.selectedTags,
+												);
 											this.onChange(index);
 										}}>
 										{item.name}
 									</div>
 								}
 								key={index}>
-								<Reclassify
-									ref={'Reclassify' + index}
-									categories={item.categories || []}
-									selectedTags={[]}
-									onSelect={(item) => this.onSelect(item)}
-									mouseLeave={(selecteds) =>
-										this.mouseLeave(selecteds)
-									}
-									getSelecteds={(selecteds) =>
-										this.selectOptions(selecteds)
-									}
-									hidden={hidePop}
-								/>
+								{item.categories ? (
+									<Reclassify
+										ref={'Reclassify' + index}
+										categories={item.categories || []}
+										selectedTags={item.selectTags || []}
+										onSelect={(item) => this.onSelect(item)}
+										mouseLeave={(selecteds) =>
+											this.mouseLeave(selecteds)
+										}
+										getSelecteds={(selecteds) =>
+											this.selectOptions(selecteds)
+										}
+										hidden={hidePop}
+									/>
+								) : (
+									<Skeleton active={true} loading={true} />
+								)}
 							</TabPane>
 						))}
 					</Tabs>
@@ -139,6 +149,16 @@ export default class SecondayClassfiy extends Component {
 			hidePop: true,
 		});
 		this.onChange(activeKey);
+	}
+
+	componentWillReceiveProps(nextProps) {
+		const { tabs } = this.state;
+		const propsTab = nextProps.tabs || [];
+		if (tabs.toString() !== propsTab.toString()) {
+			this.setState({
+				tabs: propsTab,
+			});
+		}
 	}
 }
 

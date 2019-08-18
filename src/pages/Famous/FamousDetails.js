@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'dva';
 import sessionData from '../../utils/sessionData';
 @connect()
-class FamouseDetails extends Component {
+class FamousDetails extends Component {
 	constructor(props) {
 		super(props);
 
@@ -29,4 +29,4 @@ class FamouseDetails extends Component {
 	}
 }
 
-export default connect(({ global }) => ({ ...global }))(FamouseDetails);
+export default connect(({ global }) => ({ ...global }))(FamousDetails);

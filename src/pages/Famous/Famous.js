@@ -86,4 +86,7 @@ export default class Famous extends PureComponent {
 		console.log(item);
 		// console.log(item)
 	}
+	componentWillUnmount(){
+		console.log('object')
+	}
 }

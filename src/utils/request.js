@@ -1,17 +1,17 @@
 import fetch from 'dva/fetch';
 
 function parseJSON(response) {
-  return response.json();
+	return response.json();
 }
 
 function checkStatus(response) {
-  if (response.status >= 200 && response.status < 300) {
-    return response;
-  }
+	if (response.status >= 200 && response.status < 300) {
+		return response;
+	}
 
-  const error = new Error(response.statusText);
-  error.response = response;
-  throw error;
+	const error = new Error(response.statusText);
+	error.response = response;
+	throw error;
 }
 
 /**
@@ -22,9 +22,48 @@ function checkStatus(response) {
  * @return {object}           An object containing either "data" or "err"
  */
 export default function request(url, options) {
-  return fetch(url, options)
-    .then(checkStatus)
-    .then(parseJSON)
-    .then(data => ({ data }))
-    .catch(err => ({ err }));
+	return fetch('http://47.104.79.113' + url, options)
+		.then(checkStatus)
+		.then(parseJSON)
+		.then((data) => data)
+		.catch((err) => ({ err }));
 }
+
+exports.get = (url, data) => {
+	const params = urlEncoded(data);
+	if (url.indexOf('?') < 0 && params) {
+		url += '?' + params;
+	} else {
+		url += '&' + params;
+	}
+	console.log(url);
+	return request(url, {
+		method: 'GET',
+		mode: 'cors',
+	});
+};
+/**
+ *
+ * @param {String} url
+ * @param {Object} data
+ */
+exports.post = (url, data) => {
+	return request(url, {
+		method: 'POST',
+		mode: 'cors',
+		body: JSON.stringify(data),
+	});
+};
+
+let urlEncoded = (data) => {
+	if (typeof data === 'string') return encodeURIComponent(data);
+	let params = [];
+	for (let k in data) {
+		if (!data.hasOwnProperty(k)) return;
+		let v = data[k];
+		if (typeof v === 'string') v = encodeURIComponent(v);
+		if (v == undefined) v = '';
+		params.push(`${encodeURIComponent(k)}=${v}`);
+	}
+	return params.join('&');
+};

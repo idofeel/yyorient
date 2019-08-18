@@ -28,7 +28,7 @@ class ModalPic extends React.Component {
 				cols: 1,
 				wmax: 250,
 				hmax: 82,
-				baseurl: './',
+				baseurl: '/dist',
 				imgid: 'abcdef',
 			},
 			{
@@ -39,7 +39,7 @@ class ModalPic extends React.Component {
 				cols: 1,
 				wmax: 1445,
 				hmax: 480,
-				baseurl: './',
+				baseurl: '/dist',
 				imgid: 'abcdef',
 			},
 			{
@@ -50,7 +50,7 @@ class ModalPic extends React.Component {
 				cols: 1,
 				wmax: 4337,
 				hmax: 1440,
-				baseurl: './',
+				baseurl: '/dist',
 				imgid: 'abcdef',
 			},
 			{
@@ -61,7 +61,7 @@ class ModalPic extends React.Component {
 				cols: 25,
 				wmax: 255,
 				hmax: 255,
-				baseurl: './',
+				baseurl: '/dist',
 				imgid: 'abcdef',
 			},
 		];
