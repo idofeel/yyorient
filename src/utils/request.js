@@ -36,7 +36,6 @@ exports.get = (url, data) => {
 	} else {
 		url += '&' + params;
 	}
-	console.log(url);
 	return request(url, {
 		method: 'GET',
 		mode: 'cors',
@@ -55,7 +54,7 @@ exports.post = (url, data) => {
 	});
 };
 
-let urlEncoded = (data) => {
+const urlEncoded = (data) => {
 	if (typeof data === 'string') return encodeURIComponent(data);
 	let params = [];
 	for (let k in data) {

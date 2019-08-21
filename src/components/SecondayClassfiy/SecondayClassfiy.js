@@ -27,7 +27,7 @@ export default class SecondayClassfiy extends Component {
 		const {
 			tabs = [], // tabs
 			onChange = () => {}, // 点击tab 发生改变时
-			nextActiveKey, //
+			nextActiveKey = '', //
 			activeKey = '0', // 初始选中的tabKey
 			mouseEnterTab = (e) => {}, // 鼠标移入tab事件
 			selectOptions = (e) => {}, // 选中子选项
@@ -43,10 +43,12 @@ export default class SecondayClassfiy extends Component {
 		this.onChange = onChange;
 		this.mouseEnterTab = mouseEnterTab;
 		this.selectOptions = selectOptions;
+		this.skeletonLoding = false;
 	}
 
 	render() {
 		const { tabs, activeKey, nextActiveKey, hidePop } = this.state;
+		const currentKey = nextActiveKey || activeKey;
 		if (!tabs.length) return null;
 		return (
 			<>
@@ -54,7 +56,7 @@ export default class SecondayClassfiy extends Component {
 					<Tabs
 						tabBarGutter={0}
 						// animated={false}
-						activeKey={nextActiveKey || activeKey}
+						activeKey={currentKey}
 						onChange={(index) => {
 							this.onChange(index);
 						}}
@@ -71,18 +73,9 @@ export default class SecondayClassfiy extends Component {
 										onMouseLeave={() => {
 											!item.categories && this.prevCate();
 										}}
-										onClick={() => {
-											this.setState({
-												activeKey: index + '',
-											});
-											item.categories &&
-												this.selectOptions(
-													this.refs[
-														'Reclassify' + index
-													].state.selectedTags,
-												);
-											this.onChange(index);
-										}}>
+										onClick={() =>
+											this.tabClick(item, index)
+										}>
 										{item.name}
 									</div>
 								}
@@ -102,7 +95,7 @@ export default class SecondayClassfiy extends Component {
 										hidden={hidePop}
 									/>
 								) : (
-									<Skeleton active={true} loading={true} />
+									this.renderSkeleton(item)
 								)}
 							</TabPane>
 						))}
@@ -116,6 +109,18 @@ export default class SecondayClassfiy extends Component {
 			</>
 		);
 	}
+	renderSkeleton(item) {
+		if (item.sub < 1) return null;
+		return (
+			<Skeleton
+				active={true}
+				loading={true}
+				paragraph={{
+					rows: item.sub * 1 - 1 || 0,
+				}}
+			/>
+		);
+	}
 
 	nextCate(key) {
 		this.setState({
@@ -125,6 +130,18 @@ export default class SecondayClassfiy extends Component {
 		this.onChange(key);
 	}
 
+	tabClick(item, index) {
+		this.setState({
+			activeKey: index + '',
+		});
+		let tagId = [item.id]; // 初始为父级id
+		// 当存在分类数据取分类的id
+		if (item.categories && item.categories.length) {
+			tagId = this.refs['Reclassify' + index].state.selectedTags;
+		}
+		this.selectOptions(tagId); // 选中的tagid
+		this.onChange(index);
+	}
 	mouseLeave(selecteds) {
 		this.prevCate();
 	}
@@ -151,7 +168,7 @@ export default class SecondayClassfiy extends Component {
 		this.onChange(activeKey);
 	}
 
-	componentWillReceiveProps(nextProps) {
+	UNSAFE_componentWillReceiveProps(nextProps) {
 		const { tabs } = this.state;
 		const propsTab = nextProps.tabs || [];
 		if (tabs.toString() !== propsTab.toString()) {
@@ -187,7 +204,7 @@ export class Reclassify extends Component {
 		this.getSelecteds = getSelecteds; // 获取选中的分类
 	}
 
-	componentWillReceiveProps(nextProps) {
+	UNSAFE_componentWillReceiveProps(nextProps) {
 		const { categories } = this.state;
 		const newdata = nextProps.categories.toString();
 		if (categories.toString() !== newdata) {
@@ -226,8 +243,10 @@ export class Reclassify extends Component {
 										}
 										onChange={(checked) => {
 											// this.onSelect(selectedTags)
+
 											this.handleChange(
-												tag.id,
+												item.data,
+												tag,
 												checked,
 												idx,
 											);
@@ -244,11 +263,21 @@ export class Reclassify extends Component {
 		return this.state.selectedTags;
 	}
 
-	handleChange(tag, checked, index) {
+	handleChange(itemData = [], tag, checked, index) {
 		const { selectedTags } = this.state;
-		const nextSelectedTags = checked
-			? [...selectedTags, tag]
-			: selectedTags.filter((t) => t !== tag);
+		if (selectedTags.indexOf(tag.id) > -1) return; // 已存在id
+
+		let nextSelectedTags = selectedTags;
+		// 同行单选，删除一行数据中已选中的id
+		itemData.forEach((i) => {
+			nextSelectedTags = nextSelectedTags.filter((t) => t !== i.id); // 删除单行数据中的所有tagid
+		});
+		// checked ? 保存新的id : 删除当前
+		nextSelectedTags = checked
+			? [...nextSelectedTags, tag.id]
+			: selectedTags.filter((t) => t !== tag.id);
+
+		// 刷新数据，重新渲染
 		this.setState(
 			{
 				selectedTags: nextSelectedTags,

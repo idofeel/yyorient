@@ -1,11 +1,15 @@
-import React, { Component } from 'react'
+import { connect } from 'dva';
+import Page from '../common/Page';
 
-export default class YCity extends Component {
-    render() {
-        return (
-            <div>
-                城市
-            </div>
-        )
-    }
+@connect()
+class YCity extends Page {
+	constructor(props) {
+		super(props);
+	}
+	pageName = 'city'; // 图库页对应名称
+
+	renderBody() {
+		return null;
+	}
 }
+export default connect(({ global }) => ({ ...global }))(YCity);

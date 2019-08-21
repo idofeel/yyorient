@@ -4,6 +4,7 @@ import { Link } from 'dva/router';
 import styles from './index.less';
 import { get } from '../../utils/request';
 import { connect } from 'dva';
+import api from '../../services/api';
 
 const routerKeys = {
 	'2': 'photo',
@@ -46,7 +47,7 @@ class NavBar extends Component {
 	async componentDidMount() {
 		let { menus = [] } = this.props;
 		if (!menus.length) {
-			const res = await get('/?y=common&d=menu');
+			const res = await get(api.menus);
 			if (res.success) {
 				let secondaryMenu = {}; // 二级菜单 keys 对应路由
 				// 初始加载 一级菜单、二级菜单数据
@@ -76,9 +77,14 @@ class NavBar extends Component {
 			name: item.name,
 		};
 	}
+	// 二级分类菜单数据
 	secondaryMenu(item) {
 		if (!item.sub && !item.sub.length) return [];
-		item.sub.unshift({ name: '全部', id: item.id, categories: [] });
+		item.sub.unshift({
+			name: '全部',
+			id: item.id,
+			categories: [],
+		});
 		return item.sub;
 	}
 

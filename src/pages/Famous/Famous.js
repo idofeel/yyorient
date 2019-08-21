@@ -1,92 +1,26 @@
-import React, { PureComponent } from 'react';
-import SecondayClassfiy from '../../components/SecondayClassfiy/SecondayClassfiy';
 import { Switch } from 'dva/router';
 import SubRoutes, { RedirectRoute } from '../../utils/SubRoute';
-export default class Famous extends PureComponent {
+import { connect } from 'dva';
+import Page from '../common/Page';
+
+@connect()
+class Famous extends Page {
 	constructor(props) {
 		super(props);
-		// console.log('Famous', props);
 	}
-	state = {
-		menuTabs: [
-			{
-				name: '全部',
-			},
-			{
-				name: '绘画',
-			},
-			{
-				name: '戏曲',
-			},
-			{
-				name: '工艺',
-			},
-			{
-				name: '其它',
-			},
-		],
-	};
+	pageName = '5'; // 图库页对应名称
+	pageName = 'famous'; // 图库页对应名称
 
-	render() {
-		const { menuTabs } = this.state;
+	renderBody() {
 		const { routes, app } = this.props;
-
 		return (
-			<>
-				<SecondayClassfiy
-					tabs={menuTabs}
-					activeKey="2"
-					onChange={(index) => {
-						this.onChange(index);
-					}}
-					// mouseEnterTab={this.onMouseEnter}
-					selectOptions={(item) => {
-						this.selectOptions(item);
-					}}
-				/>
-				<Switch>
-					{routes.map((route, i) => (
-						<SubRoutes key={i} {...route} app={app} />
-					))}
-					<RedirectRoute from={'/famous'} routes={routes} />
-				</Switch>
-			</>
+			<Switch>
+				{routes.map((route, i) => (
+					<SubRoutes key={i} {...route} app={app} />
+				))}
+				<RedirectRoute from={'/famous'} routes={routes} />
+			</Switch>
 		);
 	}
-
-	onChange(index) {
-		let { menuTabs } = this.state;
-		// 发生改变
-		if (!menuTabs[index].categories) {
-			menuTabs[index].categories = [
-				{
-					name: 'xxx',
-					id: 123,
-					data: [
-						{
-							name: menuTabs[index].name,
-							id: Math.random(),
-						},
-						{
-							name: menuTabs[index].name,
-							id: Math.random(),
-						},
-						{
-							name: menuTabs[index].name,
-							id: Math.random(),
-						},
-					],
-				},
-			];
-		}
-		this.setState({ menuTabs });
-	}
-
-	selectOptions(item) {
-		console.log(item);
-		// console.log(item)
-	}
-	componentWillUnmount(){
-		console.log('object')
-	}
 }
+export default connect(({ global }) => ({ ...global }))(Famous);

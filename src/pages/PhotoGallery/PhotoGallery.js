@@ -1,29 +1,31 @@
-import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import ImgModal from '../ImgModal';
-import './photoGallery.less';
-import Autoresponsive from 'autoresponsive-react';
-import SecondayClassfiy from '../../components/SecondayClassfiy/SecondayClassfiy';
 import { connect } from 'dva';
+import Autoresponsive from 'autoresponsive-react';
+import ImgModal from '../ImgModal';
 import { get } from '../../utils/request';
+import api from '../../services/api';
+import Page from '../common/Page';
+
+import './photoGallery.less';
 
 @connect()
-class PhotoGallery extends Component {
+class PhotoGallery extends Page {
 	constructor(props) {
-		super(props);
-		const menuTabs = props.secondaryMenu['photo'] || [];
-		this.state = {
+		super(props, {
 			visible: false,
 			scaleImgOptions: {
 				bounding: true,
 				offset: 80,
 			},
-			menuTabs,
 			selectedTags: [1],
 			activeKey: '0',
 			nextActiveKey: '',
-		};
+			picList: [],
+		});
 	}
+
+	pageId = '2'; // 图库页对应id
+	pageName = 'photo'; // 图库页对应名称
 
 	arrayList = [
 		0,
@@ -49,18 +51,6 @@ class PhotoGallery extends Component {
 		20,
 	];
 
-	UNSAFE_componentWillMount() {
-		this.arrayList = this.arrayList.map((i) => this.getItemStyle());
-		this.resize = this.resize.bind(this);
-	}
-
-	componentDidMount() {
-		this.setState({
-			containerWidth: ReactDOM.findDOMNode(this.refs.container)
-				.clientWidth,
-		});
-		window.addEventListener('resize', this.resize, false);
-	}
 	getItemStyle() {
 		return {
 			width: 250,
@@ -103,47 +93,11 @@ class PhotoGallery extends Component {
 		};
 	}
 
-	render() {
-		const { menuTabs } = this.state;
-		const AutoResponsiveProps = this.getAutoResponsiveProps();
+	renderBody() {
 		return (
 			<>
-				<SecondayClassfiy
-					tabs={menuTabs}
-					activeKey="0"
-					mouseEnterTab={(item, index) =>
-						this.mouseEnterTab(item, index)
-					}
-					onChange={(index) => {
-						this.onChange(index);
-					}}
-					selectOptions={(item) => {
-						this.selectOptions(item);
-					}}
-				/>
 				<div className="AutoresponsiveContainer" ref="container">
-					<p>全部：</p>
-					<div
-						style={{
-							width: AutoResponsiveProps.containerWidth,
-							margin: '0 auto',
-						}}>
-						<Autoresponsive {...AutoResponsiveProps}>
-							{this.arrayList.map(function(i, index) {
-								return (
-									<div
-										key={index}
-										onClick={() => {
-											this.clickItemHandle();
-										}}
-										style={i}
-										className="item">
-										{index}
-									</div>
-								);
-							}, this)}
-						</Autoresponsive>
-					</div>
+					{this.renderPicList()}
 				</div>
 				<ImgModal
 					visible={this.state.visible}
@@ -156,58 +110,71 @@ class PhotoGallery extends Component {
 		);
 	}
 
-	componentWillMount() {
-		this.getCategory('2', 0); // 初始加载的数据
+	renderPicList() {
+		const AutoResponsiveProps = this.getAutoResponsiveProps();
+		if (!this.state.picList.length) return null;
+		return (
+			<>
+				<p>全部：</p>
+				<div
+					style={{
+						width: AutoResponsiveProps.containerWidth,
+						margin: '0 auto',
+					}}>
+					<Autoresponsive {...AutoResponsiveProps}>
+						{this.arrayList.map(function(i, index) {
+							return (
+								<div
+									key={index}
+									onClick={() => {
+										this.clickItemHandle();
+									}}
+									style={i}
+									className="item">
+									{index}
+								</div>
+							);
+						}, this)}
+					</Autoresponsive>
+				</div>
+			</>
+		);
 	}
 
-	async getCategory(id = '2', index = 0) {
-		let { menuTabs } = this.state;
-
-		// tab 没有加载分类信息
-		if (menuTabs[index] && !menuTabs[index].categories) {
-			//  获取分类信息
-			let categories = [];
-			let selectTags = [];
-			const res = await get('/?y=common&d=category', { id });
-			if (res.success && res.data) {
-				categories = res.data.map((item) => {
-					const { id, name, sub } = item;
-
-					if (sub && sub.length) {
-						sub.unshift({ name: '全部', id: item.id }); // 默认值全部
-						selectTags.push(sub[0].id);
-					}
-
-					return {
-						id,
-						name,
-						data: sub || [],
-					};
-				});
-			}
-
-			menuTabs[index].categories = categories;
-			menuTabs[index].selectTags = selectTags;
-
-			this.setState({
-				menuTabs,
-			});
-		}
-	}
-	mouseEnterTab(item, index) {
-		this.getCategory(item.id, index);
+	onLoad() {
+		this.arrayList = this.arrayList.map((i) => this.getItemStyle());
+		this.resize = this.resize.bind(this);
+		this.setPageStatus(); // 设置页面状态
+		this.loadPicList(this.pageId); // 初始加载图库数据
 	}
 
-	onChange(index) {
-		// let { menuTabs, categories } = this.state;
-		// menuTabs[index].categories = categories;
-		// this.setState({
-		// 	menuTabs,
-		// });
+	onReady() {
+		this.setState({
+			containerWidth: ReactDOM.findDOMNode(this.refs.container)
+				.clientWidth,
+		});
+		window.addEventListener('resize', this.resize, false);
 	}
 
-	selectOptions(item) {
-		console.log(item);
+	// 选中的分类id 集合
+	selectTags(categroyIds = []) {
+		if (!categroyIds.length) return;
+		this.loadPicList(categroyIds);
+	}
+
+	// 加载图库列表
+	async loadPicList(categroyIds = []) {
+		const res = await get(api.picList, { ids: categroyIds });
+		const { picList = [1] } = res;
+		this.setPageStatus({
+			loading: false,
+			empty: !picList.length,
+		});
+		this.setState({
+			loading: false,
+			empty: true,
+			picList,
+		});
 	}
 
 	clickItemHandle() {
@@ -226,26 +193,9 @@ class PhotoGallery extends Component {
 				.clientWidth,
 		});
 	}
-	componentWillUnmount() {
+	onWillUnmount() {
 		// 销毁监听事件
 		window.removeEventListener('resize', this.resize);
-		this.setState = (state, callback) => {
-			return;
-		};
-	}
-
-	componentWillReceiveProps(nextProps) {
-		this.getMenutabsData(nextProps);
-	}
-
-	getMenutabsData(props) {
-		const { menuTabs } = this.state;
-		let tabs = props.secondaryMenu['photo'] || [];
-		if (menuTabs.toString() !== tabs.toString()) {
-			this.setState({
-				menuTabs: tabs,
-			});
-		}
 	}
 }
 
