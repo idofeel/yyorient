@@ -5,7 +5,7 @@ import ImgModal from '../ImgModal';
 import { get } from '../../utils/request';
 import api from '../../services/api';
 import Page from '../common/Page';
-
+import PageConfig from '../common/PageConfig';
 import './photoGallery.less';
 
 @connect()
@@ -25,7 +25,7 @@ class PhotoGallery extends Page {
 	}
 
 	pageId = '2'; // 图库页对应id
-	pageName = 'photo'; // 图库页对应名称
+	pageName = PageConfig[this.pageId]; // 图库页对应名称
 
 	arrayList = [
 		0,
@@ -144,8 +144,6 @@ class PhotoGallery extends Page {
 	onLoad() {
 		this.arrayList = this.arrayList.map((i) => this.getItemStyle());
 		this.resize = this.resize.bind(this);
-		this.setPageStatus(); // 设置页面状态
-		this.loadPicList(this.pageId); // 初始加载图库数据
 	}
 
 	onReady() {
@@ -158,21 +156,21 @@ class PhotoGallery extends Page {
 
 	// 选中的分类id 集合
 	selectTags(categroyIds = []) {
+		console.log('????');
+		this.setPageStatus();
 		if (!categroyIds.length) return;
 		this.loadPicList(categroyIds);
 	}
 
 	// 加载图库列表
 	async loadPicList(categroyIds = []) {
-		const res = await get(api.picList, { ids: categroyIds });
+		const res = await get(api.photoGallery.list, { ids: categroyIds });
 		const { picList = [1] } = res;
 		this.setPageStatus({
 			loading: false,
 			empty: !picList.length,
 		});
 		this.setState({
-			loading: false,
-			empty: true,
 			picList,
 		});
 	}
@@ -188,6 +186,7 @@ class PhotoGallery extends Page {
 	}
 
 	resize() {
+		if (!this.refs.container) return;
 		this.setState({
 			containerWidth: ReactDOM.findDOMNode(this.refs.container)
 				.clientWidth,

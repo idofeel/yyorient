@@ -5,14 +5,8 @@ import styles from './index.less';
 import { get } from '../../utils/request';
 import { connect } from 'dva';
 import api from '../../services/api';
+import routerKeys from '../common/PageConfig';
 
-const routerKeys = {
-	'2': 'photo',
-	'3': 'zone',
-	'4': 'video',
-	'5': 'famous',
-	'6': 'city',
-};
 @connect()
 class NavBar extends Component {
 	constructor(props) {
@@ -92,6 +86,12 @@ class NavBar extends Component {
 		const path = pathname.split('/'),
 			key = path && !path[1] ? 'home' : path[1];
 		return key;
+	}
+
+	componentWillUnmount() {
+		this.setState = (state, callback) => {
+			return;
+		};
 	}
 }
 

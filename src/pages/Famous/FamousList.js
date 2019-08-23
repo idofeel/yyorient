@@ -9,44 +9,14 @@ const { Title } = Typography;
 class FamousList extends Component {
 	constructor(props) {
 		super(props);
+		const { famous = [], agoFamous = [] } = props;
 		this.state = {
-			famous: [
-				{ avatar: '', name: 'ddd' },
-				{ avatar: '', name: 'ddd' },
-				{ avatar: '', name: 'ddd' },
-				{ avatar: '', name: 'ddd' },
-				{ avatar: '', name: 'ddd' },
-				{ avatar: '', name: 'ddd' },
-				{ avatar: '', name: 'ddd' },
-				{ avatar: '', name: 'ddd' },
-				{ avatar: '', name: 'ddd' },
-				{ avatar: '', name: 'ddd' },
-				{ avatar: '', name: 'ddd' },
-			],
-			historyFamous: [
-				{ name: '123' },
-				{ name: '123' },
-				{ name: '123' },
-				{ name: '123' },
-				{ name: '123' },
-				{ name: '123ddddd' },
-				{ name: '123ddddd' },
-				{ name: '大叔大叔大叔的' },
-				{ name: '123ddddd' },
-				{ name: '123ddddd' },
-				{ name: '123' },
-				{ name: '123' },
-				{ name: '123' },
-				{ name: '123' },
-				{ name: '123' },
-				{ name: '123' },
-				{ name: '123' },
-				{ name: '123' },
-			],
+			famous,
+			agoFamous,
 		};
 	}
 	render() {
-		const { famous, historyFamous } = this.state;
+		const { famous, agoFamous } = this.state;
 		return (
 			<>
 				<div className="famousContent">
@@ -74,7 +44,7 @@ class FamousList extends Component {
 						)}
 					/>
 				</div>
-				<div className="HistoryFamous">
+				<div className="agoFamous">
 					<Title level={4}>历代名家</Title>
 					<List
 						grid={{
@@ -84,7 +54,7 @@ class FamousList extends Component {
 							lg: 8,
 							xxl: 10,
 						}}
-						dataSource={historyFamous}
+						dataSource={agoFamous}
 						renderItem={(item) => (
 							<List.Item
 								onClick={() => {
@@ -113,6 +83,20 @@ class FamousList extends Component {
 		//         this.props.history.push('/famous/detail');
 		//     });
 	}
+
+	UNSAFE_componentWillReceiveProps(nextProps) {
+		const { famous: sfamous, agoFamous: sagoFamous } = this.state;
+		const { famous, agoFamous } = nextProps;
+		const data = {};
+
+		if (famous.toString() !== sfamous.toString()) {
+			data.famous = sfamous;
+		}
+
+		if (sagoFamous.toString() !== agoFamous.toString()) {
+			data.agoFamous = sagoFamous;
+		}
+	}
 }
 
-export default connect(({ global }) => ({ ...global }))(FamousList);
+export default connect(({ famous }) => ({ ...famous }))(FamousList);

@@ -8,7 +8,7 @@ import './page.less';
  * 菜单和分类
  *
  *
- * 根据 pageName 获取菜单数据
+ * 根据 pageId pageName 获取菜单数据
  *
  * renderBody(){}
  *
@@ -68,7 +68,7 @@ class Page extends Component {
 	onChange() {} //
 
 	selectTags() {}
-	selectOptions(item = []) {
+	selectOptions(item = [this.pageId]) {
 		if (!item.length) return;
 		this.selectTags(item);
 	}
@@ -77,6 +77,7 @@ class Page extends Component {
 	onTabEnd() {}
 	mouseEnterTab(item, index) {
 		this.onTab(item, index);
+		if (item.sub === '0' || !item.sub) return this.onTabEnd(); // 无分类
 		this.getCategory(item.id, index, this.onTabEnd);
 	}
 
@@ -133,7 +134,8 @@ class Page extends Component {
 	// 获取菜单数据
 	getMenutabsData(props) {
 		const { menuTabs } = this.state;
-		let tabs = props.secondaryMenu[this.pageName] || [];
+		const { secondaryMenu = [] } = props;
+		const tabs = secondaryMenu[this.pageName] || [];
 		if (menuTabs.toString() !== tabs.toString()) {
 			this.setState({
 				menuTabs: tabs,
@@ -145,7 +147,9 @@ class Page extends Component {
 	onLoad() {}
 	UNSAFE_componentWillMount() {
 		this.getMenutabsData(this.props); // 获取菜单数据
-		this.getCategory(this.pageId, 0); // 初始加载分类数据
+		// 初始加载分类数据
+		this.getCategory();
+		this.selectOptions();
 		this.onLoad();
 	}
 

@@ -14,7 +14,7 @@ const RoutersConfig = [
 				path: '/home',
 				component: () => import('./pages/Home/Home'),
 				redirect: true,
-				model: [import('./models/global')],
+				model: [],
 			},
 			{
 				path: '/photo',
@@ -47,7 +47,7 @@ const RoutersConfig = [
 				routes: [
 					{
 						path: '/famous/list',
-						model: [],
+						model: [import('./models/famous_model')],
 						component: () => import('./pages/Famous/FamousList'),
 					},
 					{
