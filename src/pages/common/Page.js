@@ -4,6 +4,7 @@ import api from '../../services/api';
 import { get } from '../../utils/request';
 import { Spin, Empty } from 'antd';
 import './page.less';
+import { queryString } from '../../utils';
 /**
  * 菜单和分类
  *
@@ -17,60 +18,120 @@ import './page.less';
 class Page extends Component {
 	constructor(props, state) {
 		super(props);
-		const { secondaryMenu = [] } = props;
+		const { secondaryMenu = [] } = props.global;
 		const menuTabs = secondaryMenu[this.pageName] || [];
+		const { cateid = '', cateIndex: activeKey = '0' } = queryString(
+			this.props.location.search,
+		);
+
+		const selectedTags = cateid.split(',');
+
 		this.state = {
-			menuTabs,
 			...state,
+			menuTabs,
+			activeKey, // 初始展示的菜单
+			nextActiveKey: '',
+			selectedTags,
 		};
+		this.pageId = props.pageId || this.pageId;
+		this.pageName = props.pageName || this.pageName;
+		this.selectTags = props.selectTags || this.selectTags || function() {};
 	}
 	loadMenu = true; // 是否加载菜单
-	loading = false; //页面loading状态
+	loading = false; //页面loading状态 存在时将不能加载内容
 	empty = false; //页面empty展示的状态
 	pageId = '0'; // 图库页对应id
 	pageName = 'home'; // 图库页对应名称
 
 	render() {
 		const { loading, empty } = this;
+		const { menuTabs, activeKey, nextActiveKey, selectedTags } = this.state;
 		return (
 			<div className="yyPage">
-				{this.loadMenu && this.renderMenu()}
+				{this.loadMenu && (
+					<SecondayClassfiy
+						tabs={menuTabs}
+						onChange={(index) => this.onChange(index)}
+						mouseEnterTab={(item, index) =>
+							this.mouseEnterTab(item, index)
+						}
+						selectOptions={(item, key) =>
+							this.selectOptions(item, key)
+						}
+						activeKey={activeKey}
+						// nextActiveKey={nextActiveKey}
+						selectedTags={selectedTags}
+					/>
+				)}
 				{
 					<>
-						<Spin spinning={loading} size="large" />
 						{empty ? (
 							<Empty
 								image={Empty.PRESENTED_IMAGE_SIMPLE}
 								description="暂无数据"
 							/>
+						) : loading ? (
+							<Spin spinning={loading} size="large" />
 						) : (
 							this.renderBody()
 						)}
 					</>
 				}
+				{this.renderFooter()}
 			</div>
 		);
 	}
 
+	renderFooter() {}
+	/**
+	 *
+	 * 二级分类移入
+	 * 二级分类选中 获取三级分类
+	 * 三级分类选中
+	 *
+	 *
+	 */
+
 	renderMenu() {
-		const { menuTabs } = this.state;
+		const { menuTabs, activeKey, nextActiveKey } = this.state;
 		return (
 			<SecondayClassfiy
+				ref="Sclass"
 				tabs={menuTabs}
 				onChange={(index) => this.onChange(index)}
 				mouseEnterTab={(item, index) => this.mouseEnterTab(item, index)}
-				selectOptions={(item) => this.selectOptions(item)}
+				selectOptions={(item, key) => this.selectOptions(item, key)}
+				activeKey={activeKey}
+				nextActiveKey={nextActiveKey}
 			/>
 		);
 	}
 
 	renderBody() {} // 渲染body 数据
-	onChange() {} //
+	// 二级菜单选中
+	onChange(index) {
+		this.setState({
+			activeKey: index + '',
+			nextActiveKey: '',
+		});
+		console.log('onChange', this.state.selectedTags);
+		this.selectTags(this.state.selectedTags, index + '');
+	} //
 
-	selectTags() {}
-	selectOptions(item = [this.pageId]) {
-		if (!item.length) return;
-		this.selectTags(item);
+	// selectTags() {}
+
+	// 三级菜单选中
+	selectOptions(item, activeKey) {
+		if (!item.length || !activeKey) return;
+		// this.selectTags(item);
+		this.setState(
+			{
+				selectedTags: item,
+			},
+			() => {
+				this.onChange(activeKey);
+			},
+		);
 	}
 
 	onTab() {}
@@ -88,13 +149,19 @@ class Page extends Component {
 	 * @param {Number} index 默认 0  全部
 	 * @param {Function} callback 默认 false 是否加载图库数据
 	 */
-	async getCategory(id = this.pageId, index = 0, callback = () => {}) {
-		let { menuTabs } = this.state;
-		// tab 没有加载分类信息
+	async getCategory(id, index = 0, callback = () => {}) {
+		let { menuTabs, activeKey } = this.state;
+		let selectTags = []; // 三级初始选中的标签
+
+		// tab没有分类
+		if (menuTabs[index] && menuTabs[index].sub === '0') {
+			menuTabs[index].categories = [];
+		}
+
+		// tab有分类 但没有加载分类信息
 		if (menuTabs[index] && !menuTabs[index].categories) {
 			//  获取分类信息
 			let categories = []; // 三级分类数据
-			let selectTags = []; // 三级初始选中的标签
 			const res = await get(api.category, { id });
 			if (res.success && res.data) {
 				// 处理三级分类数据
@@ -112,15 +179,18 @@ class Page extends Component {
 
 			menuTabs[index].categories = categories;
 			menuTabs[index].selectTags = selectTags;
-
 			// 刷新菜单的数据
-			this.setState(
-				{
-					menuTabs,
-				},
-				() => callback,
-			);
 		}
+
+		this.setState(
+			{
+				menuTabs,
+				// selectedTags: selectTags,
+			},
+			() => {
+				callback(selectTags, activeKey);
+			},
+		);
 	}
 
 	/**
@@ -134,7 +204,7 @@ class Page extends Component {
 	// 获取菜单数据
 	getMenutabsData(props) {
 		const { menuTabs } = this.state;
-		const { secondaryMenu = [] } = props;
+		const { secondaryMenu = [] } = props.global;
 		const tabs = secondaryMenu[this.pageName] || [];
 		if (menuTabs.toString() !== tabs.toString()) {
 			this.setState({
@@ -147,15 +217,19 @@ class Page extends Component {
 	onLoad() {}
 	UNSAFE_componentWillMount() {
 		this.getMenutabsData(this.props); // 获取菜单数据
-		// 初始加载分类数据
-		this.getCategory();
-		this.selectOptions();
 		this.onLoad();
 	}
 
-	// 组件已加载
+	// 组件已加载 // 获取三级菜单
 	onReady() {}
-	componentDidMount() {
+	async componentDidMount() {
+		try {
+			const { activeKey, menuTabs } = this.state,
+				category = menuTabs[activeKey];
+			if (category) {
+				await this.getCategory([category.id], activeKey); // 初始加载分类数据
+			}
+		} catch (error) {}
 		this.onReady();
 	}
 
@@ -163,16 +237,16 @@ class Page extends Component {
 	onReceive() {}
 	UNSAFE_componentWillReceiveProps(nextProps) {
 		this.getMenutabsData(nextProps);
-		this.onReceive();
+		this.onReceive(...arguments);
 	}
 
 	// 组件卸载
 	onWillUnmount() {}
 	componentWillUnmount() {
-		this.onWillUnmount();
 		this.setState = (state, callback) => {
 			return;
 		};
+		this.onWillUnmount();
 	}
 }
 

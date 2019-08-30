@@ -5,8 +5,8 @@
  *
  *  鼠标移动到tab时   参数
  *
- *  mouseEnterTab   call(item, index)
- *
+ *  mouseEnterTab   call(item, index) // 加载三级分类
+ * 	onChange call (index) 切换tab
  * 点击tab时
  *
  * 选取自选项时
@@ -23,31 +23,37 @@ const { CheckableTag } = Tag;
 export default class SecondayClassfiy extends Component {
 	constructor(props) {
 		super(props);
-
 		const {
 			tabs = [], // tabs
 			onChange = () => {}, // 点击tab 发生改变时
 			nextActiveKey = '', //
-			activeKey = '0', // 初始选中的tabKey
+			selectedTags,
+			activeKey, // 初始选中的tabKey
 			mouseEnterTab = (e) => {}, // 鼠标移入tab事件
 			selectOptions = (e) => {}, // 选中子选项
 		} = props;
 
 		this.state = {
+			selectedTags,
 			tabs,
 			nextActiveKey,
 			hidePop: true,
-			activeKey: activeKey || '0',
+			activeKey,
 		};
-
-		this.onChange = onChange;
+		this.onChange = onChange; //
 		this.mouseEnterTab = mouseEnterTab;
 		this.selectOptions = selectOptions;
 		this.skeletonLoding = false;
 	}
 
 	render() {
-		const { tabs, activeKey, nextActiveKey, hidePop } = this.state;
+		const {
+			tabs,
+			activeKey,
+			nextActiveKey,
+			hidePop,
+			selectedTags,
+		} = this.state;
 		const currentKey = nextActiveKey || activeKey;
 		if (!tabs.length) return null;
 		return (
@@ -67,11 +73,11 @@ export default class SecondayClassfiy extends Component {
 									<div
 										className="yy-tabs-tab"
 										onMouseEnter={() => {
-											this.mouseEnterTab(item, index);
 											this.nextCate(index);
+											this.mouseEnterTab(item, index);
 										}}
 										onMouseLeave={() => {
-											!item.categories && this.prevCate();
+											this.prevCate();
 										}}
 										onClick={() =>
 											this.tabClick(item, index)
@@ -84,18 +90,34 @@ export default class SecondayClassfiy extends Component {
 									<Reclassify
 										ref={'Reclassify' + index}
 										categories={item.categories || []}
-										selectedTags={item.selectTags || []}
+										selectedTags={
+											selectedTags ||
+											item.selectTags ||
+											[]
+										}
 										onSelect={(item) => this.onSelect(item)}
 										mouseLeave={(selecteds) =>
 											this.mouseLeave(selecteds)
 										}
 										getSelecteds={(selecteds) =>
-											this.selectOptions(selecteds)
+											this.selectOptions(selecteds, index)
 										}
+										seleteReay={(select) => {
+											// 组件初始化，是否是当前的tab
+											const cateId = select.length
+												? select
+												: [item.id];
+											activeKey == index
+												? this.onSelect(
+														cateId,
+														activeKey,
+												  )
+												: null;
+										}}
 										hidden={hidePop}
 									/>
 								) : (
-									this.renderSkeleton(item)
+									!hidePop && this.renderSkeleton(item)
 								)}
 							</TabPane>
 						))}
@@ -127,21 +149,17 @@ export default class SecondayClassfiy extends Component {
 			nextActiveKey: key + '',
 			hidePop: false,
 		});
-		this.onChange(key);
 	}
 
 	tabClick(item, index) {
-		this.setState({
-			activeKey: index + '',
-		});
-		let tagId = [item.id]; // 初始为父级id
+		let tagId = item.sub < 1 ? [item.id] : []; // 初始为父级id
 		// 当存在分类数据取分类的id
 		if (item.categories && item.categories.length) {
 			tagId = this.refs['Reclassify' + index].state.selectedTags;
 		}
-		this.selectOptions(tagId); // 选中的tagid
-		this.onChange(index);
+		this.onSelect(tagId); // 选中的tagid
 	}
+
 	mouseLeave(selecteds) {
 		this.prevCate();
 	}
@@ -155,17 +173,17 @@ export default class SecondayClassfiy extends Component {
 				hidePop: false,
 			});
 		}
-		this.selectOptions(item);
+		this.selectOptions(item, nextActiveKey || activeKey);
 	}
 
 	prevCate() {
 		const { activeKey } = this.state;
 		this.setState({
-			activeKey: activeKey,
+			activeKey,
 			nextActiveKey: '',
 			hidePop: true,
 		});
-		this.onChange(activeKey);
+		// this.onChange(activeKey);
 	}
 
 	UNSAFE_componentWillReceiveProps(nextProps) {
@@ -182,7 +200,6 @@ export default class SecondayClassfiy extends Component {
 export class Reclassify extends Component {
 	constructor(props) {
 		super(props);
-
 		const {
 			categories = [], // 分类数据
 			selectedTags = [], // 选中的分类
@@ -190,6 +207,7 @@ export class Reclassify extends Component {
 			onSelect = () => {}, // 选中分类回调的事件
 			getSelecteds = () => {}, // 获取选中的分类
 			hidden = false, // 是否隐藏分类
+			seleteReay = () => {},
 		} = props;
 
 		// 数据状态
@@ -202,10 +220,11 @@ export class Reclassify extends Component {
 		this.mouseLeave = mouseLeave; // 鼠标移出事件
 		this.onSelect = onSelect; // 选中分类回调的事件
 		this.getSelecteds = getSelecteds; // 获取选中的分类
+		this.seleteReay = seleteReay;
 	}
 
 	UNSAFE_componentWillReceiveProps(nextProps) {
-		const { categories } = this.state;
+		const { categories, selectedTags } = this.state;
 		const newdata = nextProps.categories.toString();
 		if (categories.toString() !== newdata) {
 			this.setState({
@@ -242,8 +261,6 @@ export class Reclassify extends Component {
 											selectedTags.indexOf(tag.id) > -1
 										}
 										onChange={(checked) => {
-											// this.onSelect(selectedTags)
-
 											this.handleChange(
 												item.data,
 												tag,
@@ -258,6 +275,9 @@ export class Reclassify extends Component {
 					))}
 			</div>
 		);
+	}
+	componentDidMount() {
+		this.seleteReay(this.state.selectedTags);
 	}
 	getSelecteds() {
 		return this.state.selectedTags;

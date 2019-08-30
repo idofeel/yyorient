@@ -12,4 +12,4 @@ class YCity extends Page {
 		return null;
 	}
 }
-export default connect(({ global }) => ({ ...global }))(YCity);
+export default connect()(YCity);

@@ -12,4 +12,4 @@ class YVideo extends Page {
 		return null;
 	}
 }
-export default connect(({ global }) => ({ ...global }))(YVideo);
+export default connect()(YVideo);

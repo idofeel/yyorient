@@ -8,7 +8,6 @@ import Page from '../common/Page';
 import PageConfig from '../common/PageConfig';
 import './photoGallery.less';
 
-@connect()
 class PhotoGallery extends Page {
 	constructor(props) {
 		super(props, {
@@ -22,10 +21,10 @@ class PhotoGallery extends Page {
 			nextActiveKey: '',
 			picList: [],
 		});
+		this.pageId = '2'; // 图库页对应id
+		this.pageName = PageConfig[this.pageId]; // 图库页对应名称
+		// console.log('PhotoGallery', props);
 	}
-
-	pageId = '2'; // 图库页对应id
-	pageName = PageConfig[this.pageId]; // 图库页对应名称
 
 	arrayList = [
 		0,
@@ -93,7 +92,7 @@ class PhotoGallery extends Page {
 		};
 	}
 
-	renderBody() {
+	renderFooter() {
 		return (
 			<>
 				<div className="AutoresponsiveContainer" ref="container">
@@ -147,6 +146,8 @@ class PhotoGallery extends Page {
 	}
 
 	onReady() {
+		this.setPageStatus();
+
 		this.setState({
 			containerWidth: ReactDOM.findDOMNode(this.refs.container)
 				.clientWidth,
@@ -156,9 +157,8 @@ class PhotoGallery extends Page {
 
 	// 选中的分类id 集合
 	selectTags(categroyIds = []) {
-		console.log('????');
 		this.setPageStatus();
-		if (!categroyIds.length) return;
+		if (!categroyIds.length) return this.setPageStatus({ loading: false });
 		this.loadPicList(categroyIds);
 	}
 
@@ -186,7 +186,7 @@ class PhotoGallery extends Page {
 	}
 
 	resize() {
-		if (!this.refs.container) return;
+		if (!this.refs || !this.refs.container) return;
 		this.setState({
 			containerWidth: ReactDOM.findDOMNode(this.refs.container)
 				.clientWidth,
@@ -198,4 +198,4 @@ class PhotoGallery extends Page {
 	}
 }
 
-export default connect(({ global }) => ({ ...global }))(PhotoGallery);
+export default connect()(PhotoGallery);

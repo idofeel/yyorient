@@ -9,6 +9,7 @@ import React from 'react';
 import { Route, Redirect } from 'dva/router';
 import dynamic from 'dva/dynamic';
 import NoMatch from '../components/NoMatch';
+import { connect } from 'dva';
 // 动态加载路由
 const dynamicComponent = ({
 	app,
@@ -16,6 +17,8 @@ const dynamicComponent = ({
 	component,
 	routes,
 	authorty,
+	global,
+	parmas,
 }) =>
 	dynamic({
 		app,
@@ -27,24 +30,20 @@ const dynamicComponent = ({
 					return () => <Redirect to={'/login'} />;
 				}
 				return (props) => (
-					<Component {...props} app={app} routes={routes} />
+					<Component
+						{...props}
+						app={app}
+						routes={routes}
+						global={global}
+						parmas={parmas}
+					/>
 				);
 			}),
 	});
 
 // 子路由组件
-function SubRoutes({ routes, app, component, model, authorty }) {
-	return (
-		<Route
-			component={dynamicComponent({
-				app,
-				model,
-				component,
-				routes,
-				authorty,
-			})}
-		/>
-	);
+function SubRoutes(props) {
+	return <Route component={dynamicComponent(props)} />;
 }
 
 //  重定向路由组件
@@ -62,4 +61,4 @@ export function NoMatchRoute({ status = 404 }) {
 }
 
 // 链接
-export default SubRoutes;
+export default connect(({ global }) => ({ global }))(SubRoutes);

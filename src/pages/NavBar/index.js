@@ -11,8 +11,9 @@ import routerKeys from '../common/PageConfig';
 class NavBar extends Component {
 	constructor(props) {
 		super(props);
+		const { menus = [] } = props.global || {};
 		this.state = {
-			menus: [],
+			menus,
 		};
 		this.menus = [];
 	}
@@ -38,29 +39,11 @@ class NavBar extends Component {
 		);
 	}
 
-	async componentDidMount() {
-		let { menus = [] } = this.props;
-		if (!menus.length) {
-			const res = await get(api.menus);
-			if (res.success) {
-				let secondaryMenu = {}; // 二级菜单 keys 对应路由
-				// 初始加载 一级菜单、二级菜单数据
-				menus = res.data.map(this.getMenuData);
-				menus.map(
-					(item) =>
-						(secondaryMenu[item.key] = this.secondaryMenu(item)),
-				);
-
-				this.props.dispatch({
-					type: 'global/menus',
-					payload: { menus, secondaryMenu },
-				});
-			}
-		}
-		this.setState({
-			menus,
-		});
-	}
+	// goPage(path) {
+	// 	// console.log(this.props.location.pathname === path);
+	// 	// if (this.props.location.pathname === path) return;
+	// 	this.props.history.push(path);
+	// }
 
 	getMenuData(item) {
 		const key = routerKeys[item.id] || 'home';
@@ -71,17 +54,6 @@ class NavBar extends Component {
 			name: item.name,
 		};
 	}
-	// 二级分类菜单数据
-	secondaryMenu(item) {
-		if (!item.sub && !item.sub.length) return [];
-		item.sub.unshift({
-			name: '全部',
-			id: item.id,
-			categories: [],
-		});
-		return item.sub;
-	}
-
 	setSelectKeys(pathname) {
 		const path = pathname.split('/'),
 			key = path && !path[1] ? 'home' : path[1];
@@ -95,4 +67,4 @@ class NavBar extends Component {
 	}
 }
 
-export default connect(({ global }) => ({ ...global }))(NavBar);
+export default connect()(NavBar);

@@ -17,4 +17,4 @@ class YZone extends Page {
 		console.log(tagsId);
 	}
 }
-export default connect(({ global }) => ({ ...global }))(YZone);
+export default connect()(YZone);
