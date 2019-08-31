@@ -2,6 +2,8 @@ import React from 'react';
 import { Modal, Icon } from 'antd';
 import PicView from '../../components/PictureViewer';
 import './index.less';
+import { get } from '../../utils/request';
+import api from '../../services/api';
 
 /**
  * 带modal的查看器
@@ -10,66 +12,74 @@ import './index.less';
 class ModalPic extends React.Component {
 	constructor(props) {
 		super(props);
-		const { visible = false } = props;
+		const { visible = false, dataSource, autorInfo, detailid } = props;
+		dataSource.splice(0, 1);
 		this.state = {
 			visible: visible,
+			dataSource,
+			autorInfo,
+			detailid,
 		};
+		// this.dataSource = dataSource;
+		console.log(dataSource);
 	}
-	dataSource = [];
+	// dataSource = [];
 
-	UNSAFE_componentWillMount() {
-		// 请求数据
-		let dataSource = [
-			{
-				sizeid: '01x',
-				imgw: 250,
-				imgh: 82,
-				rows: 1,
-				cols: 1,
-				wmax: 250,
-				hmax: 82,
-				baseurl: '/dist',
-				imgid: 'abcdef',
-			},
-			{
-				sizeid: '05x',
-				imgw: 1445,
-				imgh: 480,
-				rows: 1,
-				cols: 1,
-				wmax: 1445,
-				hmax: 480,
-				baseurl: '/dist',
-				imgid: 'abcdef',
-			},
-			{
-				sizeid: '1x',
-				imgw: 4337,
-				imgh: 1440,
-				rows: 1,
-				cols: 1,
-				wmax: 4337,
-				hmax: 1440,
-				baseurl: '/dist',
-				imgid: 'abcdef',
-			},
-			{
-				sizeid: '2x',
-				imgw: 6299,
-				imgh: 2091,
-				rows: 9,
-				cols: 25,
-				wmax: 255,
-				hmax: 255,
-				baseurl: '/dist',
-				imgid: 'abcdef',
-			},
-		];
-		dataSource.splice(0, 1);
-		this.dataSource = dataSource;
+	async UNSAFE_componentWillMount() {
+		// // 请求数据
+		// let dataSource = [
+		// 	{
+		// 		sizeid: '01x',
+		// 		imgw: 250,
+		// 		imgh: 82,
+		// 		rows: 1,
+		// 		cols: 1,
+		// 		wmax: 250,
+		// 		hmax: 82,
+		// 		baseurl: '/dist',
+		// 		imgid: 'abcdef',
+		// 	},
+		// 	{
+		// 		sizeid: '05x',
+		// 		imgw: 1445,
+		// 		imgh: 480,
+		// 		rows: 1,
+		// 		cols: 1,
+		// 		wmax: 1445,
+		// 		hmax: 480,
+		// 		baseurl: '/dist',
+		// 		imgid: 'abcdef',
+		// 	},
+		// 	{
+		// 		sizeid: '1x',
+		// 		imgw: 4337,
+		// 		imgh: 1440,
+		// 		rows: 1,
+		// 		cols: 1,
+		// 		wmax: 4337,
+		// 		hmax: 1440,
+		// 		baseurl: '/dist',
+		// 		imgid: 'abcdef',
+		// 	},
+		// 	{
+		// 		sizeid: '2x',
+		// 		imgw: 6299,
+		// 		imgh: 2091,
+		// 		rows: 9,
+		// 		cols: 25,
+		// 		wmax: 255,
+		// 		hmax: 255,
+		// 		baseurl: '/dist',
+		// 		imgid: 'abcdef',
+		// 	},
+		// ];
+		// dataSource.splice(0, 1);
+		// this.dataSource = dataSource;
 	}
 
 	render() {
+		const { dataSource, visible, authorInfo } = this.state;
+		if (!dataSource || !dataSource.length) return null;
 		return (
 			<Modal
 				footer={null}
@@ -85,20 +95,23 @@ class ModalPic extends React.Component {
 				style={this.props.style}
 				bodyStyle={{ height: '100%', padding: 0 }}
 				cancelButtonProps={<Icon type="left" />}
-				destroyOnClose={this.state.visible}>
+				destroyOnClose={visible}>
 				<PicView
 					uri={this.props.uri}
 					options={this.props.options}
 					drawerChange={(isShow) => {
 						isShow ? this.rmShowPop() : this.showPop();
 					}}
-					visible={this.state.visible}
-					dataSource={this.dataSource}
+					visible={visible}
+					dataSource={dataSource}
+					authorInfo={authorInfo}
+					detailid={this.state.detailid}
 				/>
 			</Modal>
 		);
 	}
 
+	async componentDidMount() {}
 	stopScroll(e) {
 		e.preventDefault();
 	}

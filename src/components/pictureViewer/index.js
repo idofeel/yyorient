@@ -1,6 +1,5 @@
-// import React, { Component } from 'react'
+import React, { Component } from 'react';
 import ScaleImg from '../ScaleImg';
-import './index.less';
 import {
 	Slider,
 	Icon,
@@ -12,8 +11,14 @@ import {
 	List,
 	Divider,
 } from 'antd';
+import { get } from '../../utils/request';
+import api from '../../services/api';
+
+import './index.less';
+
 // import InfiniteScroll from 'react-infinite-scroller';
-/**
+/**import request from '../../utils/request';
+
  * 基于图片缩放 使用ant design 给图片查看器提供一个工具组件。
  *
  *
@@ -21,7 +26,7 @@ import {
 
 export default class PictureTool extends ScaleImg {
 	constructor(props) {
-		const { drawerChange = () => {}, visible = false } = props;
+		const { drawerChange = () => {}, visible = false, detailid } = props;
 		super(props, {
 			ScaleValue: 0, //进度条的值
 			hideTools: false, //是否隐藏工具条
@@ -41,6 +46,7 @@ export default class PictureTool extends ScaleImg {
 		const container = this.state.hideTools
 			? 'sliderRange hideTools'
 			: 'sliderRange';
+		const { visivbleHeight } = this.getVisivbleWidthAndHeight(); //用于动态设置抽屉的
 		return (
 			<div
 				className={container}
@@ -108,102 +114,19 @@ export default class PictureTool extends ScaleImg {
 						/>
 					</Col>
 				</Row>
-				{this.renderImgInfo()}
-			</div>
-		);
-	}
-
-	renderImgInfo(info) {
-		// console.log(this.props.visible)
-		const { visivbleHeight } = this.getVisivbleWidthAndHeight(); //用于动态设置抽屉的
-
-		const data = [
-			{
-				title: '作者简介',
-				desc:
-					'作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介作者简介',
-			},
-			{
-				title: '作品详情',
-				desc:
-					'作品详情作品详情作品详情作品详情作品详情作品详情作品详情作品详情作品详情作品详情作品详情作品详情作品详情作品详情作品详情作品详情作品详情作品详情作品详情作品详情作品详情作品详情作品详情作品详情作品详情作品详情作品详情作品详情作品详情作品详情作品详情作品详情作品详情',
-			},
-		];
-		return (
-			<div className="imgInfo">
-				<Drawer
-					title={
-						<div>
-							作品介绍
-							<Icon
-								type="left"
-								style={{ float: 'right', color: '#fff' }}
-								onClick={() => {
-									this.toggleDrawer();
-								}}
-							/>
-						</div>
-					}
-					visible={this.state.drawerShow && this.props.visible} //
-					mask={false}
-					maskStyle={{ opacity: 0, background: 'none' }}
-					closable={false}
-					placement="left"
-					className="imgDetails"
-					afterVisibleChange={this.drawerChange}
-					zIndex={1000}
-					width={310}
+				<AuthorInfo
 					bodyStyle={{
 						overflow: 'auto',
 						height: visivbleHeight - 100,
 					}}
-					onClose={() => {
-						this.toggleDrawer();
-					}}>
-					<Descriptions
-						title="京畿瑞雪图"
-						column={1}
-						className="imgDesc">
-						<Descriptions.Item label="作者">
-							弘忍法师
-						</Descriptions.Item>
-						<Descriptions.Item label="年代">
-							南北朝
-						</Descriptions.Item>
-						<Descriptions.Item label="规格">
-							80*150cm
-						</Descriptions.Item>
-					</Descriptions>
-
-					<div className="btn-group">
-						<Button>
-							<Icon type="menu" /> 返回列表
-						</Button>
-						<Button>
-							<Icon type="heart" /> 添加收藏
-						</Button>
-					</div>
-					<h3 className="imgDescTitle">更多详情</h3>
-					<Divider />
-					<div className="listbox">
-						<List
-							dataSource={data}
-							renderItem={(item) => (
-								<List.Item>
-									<List.Item.Meta
-										title={item.title}
-										description={item.desc}
-									/>
-								</List.Item>
-							)}
-						/>
-					</div>
-				</Drawer>
+					toggleDrawer={() => this.toggleDrawer()}
+					drawerShow={this.state.drawerShow && this.props.visible} //
+					detailid={this.props.detailid}
+				/>
 			</div>
 		);
 	}
 
-	// 切换显示工具栏
 	toggleDrawer() {
 		this.setState({
 			drawerShow: !this.state.drawerShow,
@@ -300,5 +223,135 @@ export default class PictureTool extends ScaleImg {
 		if (Number.isNaN(val)) return;
 		const scaleState = this.getRangeToScale(val);
 		this.setState(scaleState);
+	}
+}
+
+class AuthorInfo extends Component {
+	constructor(props) {
+		super(props);
+		const { bodyStyle, drawerShow = true, drawerChange, detailid } = props;
+		this.state = {
+			title: '',
+			data: [],
+			details: [],
+			drawerShow,
+		};
+		this.drawerChange = drawerChange;
+	}
+
+	componentWillMount() {
+		this.getData();
+	}
+
+	render() {
+		const { title, data, details } = this.state;
+		const { bodyStyle } = this.props;
+		return (
+			<div className="imgInfo">
+				<Drawer
+					title={
+						<div>
+							作品介绍
+							<Icon
+								type="left"
+								style={{ float: 'right', color: '#fff' }}
+								onClick={() => {
+									this.toggleDrawer();
+								}}
+							/>
+						</div>
+					}
+					visible={this.state.drawerShow} //
+					mask={false}
+					maskStyle={{ opacity: 0, background: 'none' }}
+					closable={false}
+					placement="left"
+					className="imgDetails"
+					afterVisibleChange={this.drawerChange}
+					zIndex={1000}
+					width={310}
+					bodyStyle={bodyStyle}
+					onClose={() => {
+						this.toggleDrawer();
+					}}>
+					<Descriptions title={title} column={1} className="imgDesc">
+						{data.map((item, index) => (
+							<Descriptions.Item key={index} label={item.title}>
+								{item.content}
+							</Descriptions.Item>
+						))}
+					</Descriptions>
+
+					<div className="btn-group">
+						<Button>
+							<Icon type="menu" /> 返回列表
+						</Button>
+						<Button>
+							<Icon type="heart" /> 添加收藏
+						</Button>
+					</div>
+					{this.moreDetails(details)}
+				</Drawer>
+			</div>
+		);
+	}
+
+	moreDetails(detail) {
+		if (!detail.length) return null;
+		return (
+			<>
+				<h3 className="imgDescTitle">更多详情</h3>
+				<Divider />
+				<div className="listbox">
+					<List
+						dataSource={detail}
+						renderItem={(item) => (
+							<List.Item>
+								<List.Item.Meta
+									title={item.title}
+									description={item.desc}
+								/>
+							</List.Item>
+						)}
+					/>
+				</div>
+			</>
+		);
+	}
+
+	async getData() {
+		// 作品详情
+		const details = await get(api.photoGallery.detail, {
+			pid: this.props.detailid,
+		});
+
+		if (details.success) {
+			let author = details.data.authors.map((item) => {
+				return {
+					title: '作者',
+					content: item.aname,
+				};
+			});
+			this.setState({
+				title: details.pname,
+				data: [
+					{ title: '年代', content: details.data.eraname },
+					...author,
+				],
+				authors: details.authors,
+			});
+		}
+	}
+
+	// 切换显示工具栏
+	toggleDrawer() {
+		this.setState({
+			drawerShow: !this.state.drawerShow,
+		});
+	}
+
+	UNSAFE_componentWillReceiveProps(nextProps) {
+		nextProps.drawerShow !== this.state.drawerShow &&
+			this.setState({ drawerShow: nextProps.drawerShow });
 	}
 }

@@ -20,31 +20,39 @@ class Page extends Component {
 		super(props);
 		const { secondaryMenu = [] } = props.global;
 		const menuTabs = secondaryMenu[this.pageName] || [];
-		const { cateid = '', cateIndex: activeKey = '0' } = queryString(
+		const { cateId = '', cateIndex: activeKey } = queryString(
 			this.props.location.search,
 		);
 
-		const selectedTags = cateid.split(',');
-
+		let selectedTags = [],
+			cateids = cateId.split(',');
+		if (cateids.toString()) selectedTags[activeKey] = cateids;
 		this.state = {
-			...state,
 			menuTabs,
-			activeKey, // 初始展示的菜单
+			activeKey: activeKey || '0', // 初始展示的菜单
 			nextActiveKey: '',
 			selectedTags,
+			loading: true,
+			empty: false,
+			...state,
 		};
+		this.query = queryString(this.props.location.search);
 		this.pageId = props.pageId || this.pageId;
 		this.pageName = props.pageName || this.pageName;
 		this.selectTags = props.selectTags || this.selectTags || function() {};
+
+		this.loading = this.state.loading || true;
+		this.empty = this.state.empty || false;
 	}
 	loadMenu = true; // 是否加载菜单
-	loading = false; //页面loading状态 存在时将不能加载内容
-	empty = false; //页面empty展示的状态
+	// loading = true; //页面loading状态 存在时将不能加载内容
+	// empty = false; //页面empty展示的状态
 	pageId = '0'; // 图库页对应id
 	pageName = 'home'; // 图库页对应名称
 
 	render() {
-		const { loading, empty } = this;
+		let { loading, empty } = this.state;
+
 		const { menuTabs, activeKey, nextActiveKey, selectedTags } = this.state;
 		return (
 			<div className="yyPage">
@@ -64,18 +72,20 @@ class Page extends Component {
 					/>
 				)}
 				{
-					<>
+					<div ref="container">
 						{empty ? (
 							<Empty
 								image={Empty.PRESENTED_IMAGE_SIMPLE}
-								description="暂无数据"
+								description={
+									empty === true ? '暂无数据' : empty
+								}
 							/>
 						) : loading ? (
-							<Spin spinning={loading} size="large" />
+							<Spin spinning={loading} size="large"></Spin>
 						) : (
 							this.renderBody()
 						)}
-					</>
+					</div>
 				}
 				{this.renderFooter()}
 			</div>
@@ -83,30 +93,16 @@ class Page extends Component {
 	}
 
 	renderFooter() {}
-	/**
-	 *
-	 * 二级分类移入
-	 * 二级分类选中 获取三级分类
-	 * 三级分类选中
-	 *
-	 *
-	 */
 
-	renderMenu() {
-		const { menuTabs, activeKey, nextActiveKey } = this.state;
-		return (
-			<SecondayClassfiy
-				ref="Sclass"
-				tabs={menuTabs}
-				onChange={(index) => this.onChange(index)}
-				mouseEnterTab={(item, index) => this.mouseEnterTab(item, index)}
-				selectOptions={(item, key) => this.selectOptions(item, key)}
-				activeKey={activeKey}
-				nextActiveKey={nextActiveKey}
-			/>
-		);
+	getPath(ids = this.state.selectedTags, index = this.state.activeKey) {
+		return '?cateId=' + ids + '&cateIndex=' + index;
 	}
 
+	replaceState(ids, index) {
+		const pathName = this.props.location.pathname;
+		const path = '#' + pathName + this.getPath(ids, index);
+		window.history.replaceState({}, 0, path);
+	}
 	renderBody() {} // 渲染body 数据
 	// 二级菜单选中
 	onChange(index) {
@@ -115,8 +111,12 @@ class Page extends Component {
 			nextActiveKey: '',
 		});
 		console.log('onChange', this.state.selectedTags);
-		this.selectTags(this.state.selectedTags, index + '');
-	} //
+
+		const ids = this.state.selectedTags;
+
+		this.selectTags(ids, index + '');
+		this.replaceState(ids, index);
+	}
 
 	// selectTags() {}
 
@@ -227,7 +227,7 @@ class Page extends Component {
 			const { activeKey, menuTabs } = this.state,
 				category = menuTabs[activeKey];
 			if (category) {
-				await this.getCategory([category.id], activeKey); // 初始加载分类数据
+				await this.getCategory(category.id, activeKey); // 初始加载分类数据
 			}
 		} catch (error) {}
 		this.onReady();

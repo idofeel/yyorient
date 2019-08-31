@@ -38,6 +38,7 @@
 import React from 'react';
 // import logo from 'Assets/abcdef/abcdef-1x_0_0.jpg';
 import './ScaleImg.less';
+import { root } from '../../services/api';
 
 // const imgs = require('../../assets/images/3.jpg')
 export default class extends React.Component {
@@ -107,9 +108,9 @@ export default class extends React.Component {
 	imageSource = {};
 	imageData = [];
 	url = (data) =>
-		`${data.baseurl}/${data.imgid}/${data.imgid}-${data.sizeid}_${
-			data.row
-		}_${data.col}.${data.ex || 'jpg'}`;
+		`${root}${data.baseurl}/${data.imgid}-${data.sizeid}_${data.row}_${
+			data.col
+		}.${data.ex || 'jpg'}`;
 	onReay() {}
 	onLoad() {}
 	UNSAFE_componentWillMount() {
@@ -843,7 +844,7 @@ export default class extends React.Component {
 		let { AerialViewWidth: width, AerialViewHeight: height } = this;
 		const { imgWidth, imgHeight } = this.getPictrueWidthAndHeight(); // 图片高度
 
-		if (imgWidth > imgHeight) {
+		if (imgWidth * 1 > imgHeight * 1) {
 			height = width / (imgWidth / imgHeight); // 当图片宽度大于高度
 		} else {
 			width = height * (imgWidth / imgHeight); // 当图片高度大于宽度

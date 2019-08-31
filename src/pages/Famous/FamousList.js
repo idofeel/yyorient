@@ -3,19 +3,25 @@ import { Typography, Avatar, List } from 'antd';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
 import sessionData from '../../utils/sessionData';
+import Page from '../common/Page';
+import { get } from '../../utils/request';
+import api from '../../services/api';
 const { Title } = Typography;
 
 @connect()
-class FamousList extends Component {
+class FamousList extends Page {
 	constructor(props) {
-		super(props);
 		const { famous = [], agoFamous = [] } = props;
-		this.state = {
+		super(props, {
 			famous,
 			agoFamous,
-		};
+		});
 	}
-	render() {
+
+	pageId = '5'; // 图库页对应名称
+	pageName = 'famous'; // 图库页对应名称
+
+	renderBody() {
 		const { famous, agoFamous } = this.state;
 		return (
 			<>
@@ -70,33 +76,83 @@ class FamousList extends Component {
 	}
 
 	goDetailPage(item) {
+		// console.log(object)
 		const detailId = Math.random();
-		sessionData.set('detailId', detailId);
-		this.props.dispatch(
-			routerRedux.push({
-				pathname: '/famous/detail',
-				state: { detailId },
-			}),
-		);
+		const params = this.props.location.search || '';
+
+		this.props.history.push('/famous/detail' + this.getPath());
+
+		// this.props.dispatch(
+		// 	routerRedux.push({
+		// 		pathname: '/famous/detail' + this.getPath(),
+		// 		state: { detailId },
+		// 	}),
+		// );
 		//     .then(() => {
 		//         // 页面跳转
 		//         this.props.history.push('/famous/detail');
 		//     });
 	}
-
-	UNSAFE_componentWillReceiveProps(nextProps) {
-		const { famous: sfamous, agoFamous: sagoFamous } = this.state;
-		const { famous, agoFamous } = nextProps;
-		const data = {};
-
-		if (famous.toString() !== sfamous.toString()) {
-			data.famous = sfamous;
-		}
-
-		if (sagoFamous.toString() !== agoFamous.toString()) {
-			data.agoFamous = sagoFamous;
-		}
+	selectTags(ids) {
+		this.loadData(ids);
 	}
+
+	async loadData(ids) {
+		this.setState({ loading: true, empty: false });
+		const nowFamous = await get(api.famous.now, { ids });
+		const agoFamous = await get(api.famous.ago, { ids });
+		const data = {
+			famous: [
+				{ avatar: '', name: 'ddd' },
+				{ avatar: '', name: 'ddd' },
+				{ avatar: '', name: 'ddd' },
+				{ avatar: '', name: 'ddd' },
+				{ avatar: '', name: 'ddd' },
+				{ avatar: '', name: 'ddd' },
+				{ avatar: '', name: 'ddd' },
+				{ avatar: '', name: 'ddd' },
+				{ avatar: '', name: 'ddd' },
+				{ avatar: '', name: 'ddd' },
+				{ avatar: '', name: 'ddd' },
+			],
+			agoFamous: [
+				{ name: '123' },
+				{ name: '123' },
+				{ name: '123' },
+				{ name: '123' },
+				{ name: '123' },
+				{ name: '123ddddd' },
+				{ name: '123ddddd' },
+				{ name: '大叔大叔大叔的' },
+				{ name: '123ddddd' },
+				{ name: '123ddddd' },
+				{ name: '123' },
+				{ name: '123' },
+				{ name: '123' },
+				{ name: '123' },
+				{ name: '123' },
+				{ name: '123' },
+				{ name: '123' },
+				{ name: '123' },
+			],
+		};
+		// this.setPageStatus({ loading: false, empty: false });
+		this.setState({ loading: false, ...data });
+	}
+
+	// UNSAFE_componentWillReceiveProps(nextProps) {
+	// 	const { famous: sfamous, agoFamous: sagoFamous } = this.state;
+	// 	const { famous, agoFamous } = nextProps;
+	// 	const data = {};
+
+	// 	if (famous.toString() !== sfamous.toString()) {
+	// 		data.famous = sfamous;
+	// 	}
+
+	// 	if (sagoFamous.toString() !== agoFamous.toString()) {
+	// 		data.agoFamous = sagoFamous;
+	// 	}
+	// }
 }
 
 export default connect(({ famous }) => ({ ...famous }))(FamousList);

@@ -77,7 +77,7 @@ export default class SecondayClassfiy extends Component {
 											this.mouseEnterTab(item, index);
 										}}
 										onMouseLeave={() => {
-											this.prevCate();
+											item.sub === '0' && this.prevCate();
 										}}
 										onClick={() =>
 											this.tabClick(item, index)
@@ -91,7 +91,7 @@ export default class SecondayClassfiy extends Component {
 										ref={'Reclassify' + index}
 										categories={item.categories || []}
 										selectedTags={
-											selectedTags ||
+											selectedTags[index] ||
 											item.selectTags ||
 											[]
 										}
@@ -107,8 +107,9 @@ export default class SecondayClassfiy extends Component {
 											const cateId = select.length
 												? select
 												: [item.id];
+
 											activeKey == index
-												? this.onSelect(
+												? this.selectOptions(
 														cateId,
 														activeKey,
 												  )

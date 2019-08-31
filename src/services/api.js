@@ -1,3 +1,7 @@
+const domain = 'http://yy.aijk.xyz/';
+
+exports.root = domain;
+
 export default {
 	menus: '/?y=common&d=menu', // 无   一级、二级菜单
 	category: '/?y=common&d=category', // {id}  三级分类

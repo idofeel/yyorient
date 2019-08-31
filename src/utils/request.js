@@ -61,8 +61,11 @@ const urlEncoded = (data) => {
 		if (!data.hasOwnProperty(k)) return;
 		let v = data[k];
 		if (typeof v === 'string') v = encodeURIComponent(v);
-		if (v == undefined) v = '';
-		params.push(`${encodeURIComponent(k)}=${v}`);
+		if (Array.isArray(v)) {
+			params.push(`${encodeURIComponent(k)}[]=${v}`);
+		} else {
+			params.push(`${encodeURIComponent(k)}=${v}`);
+		}
 	}
 	return params.join('&');
 };

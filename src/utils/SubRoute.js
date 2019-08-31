@@ -49,7 +49,6 @@ function SubRoutes(props) {
 //  重定向路由组件
 // 将路由 / 指向RoutersConfig中的第一个
 export function RedirectRoute({ routes, from, exact }) {
-	// console.log(routes, from, exact)
 	const redirect = routes.filter((item) => item.redirect);
 	const to = redirect.length ? redirect[0].path : routes[0].path;
 	return <Redirect exact={exact} from={from} to={to} />;
