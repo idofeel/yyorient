@@ -1,13 +1,10 @@
-import React, { Component } from 'react';
 import { Typography, Avatar, List } from 'antd';
 import { connect } from 'dva';
-import { routerRedux } from 'dva/router';
-import sessionData from '../../utils/sessionData';
 import Page from '../common/Page';
 import { get } from '../../utils/request';
 import api from '../../services/api';
+import { joinUrlEncoded } from '../../utils';
 const { Title } = Typography;
-
 @connect()
 class FamousList extends Page {
 	constructor(props) {
@@ -76,22 +73,15 @@ class FamousList extends Page {
 	}
 
 	goDetailPage(item) {
-		// console.log(object)
+		console.log(item);
 		const detailId = Math.random();
 		const params = this.props.location.search || '';
+		const detailPath = joinUrlEncoded('/famous/detail' + this.getPath(), {
+			detailId: item.id,
+		});
+		this.props.history.push(detailPath);
 
-		this.props.history.push('/famous/detail' + this.getPath());
-
-		// this.props.dispatch(
-		// 	routerRedux.push({
-		// 		pathname: '/famous/detail' + this.getPath(),
-		// 		state: { detailId },
-		// 	}),
-		// );
-		//     .then(() => {
-		//         // 页面跳转
-		//         this.props.history.push('/famous/detail');
-		//     });
+		// urlEncoded
 	}
 	selectTags(ids) {
 		this.loadData(ids);
@@ -103,7 +93,7 @@ class FamousList extends Page {
 		const agoFamous = await get(api.famous.ago, { ids });
 		const data = {
 			famous: [
-				{ avatar: '', name: 'ddd' },
+				{ avatar: '', name: 'ddd', id: 1 },
 				{ avatar: '', name: 'ddd' },
 				{ avatar: '', name: 'ddd' },
 				{ avatar: '', name: 'ddd' },

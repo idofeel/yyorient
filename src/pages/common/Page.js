@@ -4,7 +4,7 @@ import api from '../../services/api';
 import { get } from '../../utils/request';
 import { Spin, Empty } from 'antd';
 import './page.less';
-import { queryString } from '../../utils';
+import { queryString, joinUrlEncoded } from '../../utils';
 /**
  * 菜单和分类
  *
@@ -27,6 +27,7 @@ class Page extends Component {
 		let selectedTags = [],
 			cateids = cateId.split(',');
 		if (cateids.toString()) selectedTags[activeKey] = cateids;
+		console.log('object,activeKey', activeKey);
 		this.state = {
 			menuTabs,
 			activeKey: activeKey || '0', // 初始展示的菜单
@@ -93,31 +94,39 @@ class Page extends Component {
 	}
 
 	renderFooter() {}
-
-	getPath(ids = this.state.selectedTags, index = this.state.activeKey) {
-		return '?cateId=' + ids + '&cateIndex=' + index;
-	}
-
-	replaceState(ids, index) {
-		const pathName = this.props.location.pathname;
-		const path = '#' + pathName + this.getPath(ids, index);
-		window.history.replaceState({}, 0, path);
-	}
 	renderBody() {} // 渲染body 数据
 	// 二级菜单选中
 	onChange(index) {
-		this.setState({
-			activeKey: index + '',
-			nextActiveKey: '',
-		});
-		console.log('onChange', this.state.selectedTags);
-
-		const ids = this.state.selectedTags;
-
-		this.selectTags(ids, index + '');
-		this.replaceState(ids, index);
+		const idx = index + '';
+		this.setState(
+			{
+				activeKey: idx,
+				nextActiveKey: '',
+			},
+			() => {
+				const ids = this.state.selectedTags;
+				this.replaceState();
+				this.selectTags(ids, idx);
+			},
+		);
 	}
 
+	getPath(ids = this.state.selectedTags, index = this.state.activeKey) {
+		console.log(this.props.location.search);
+		return '?cateId=' + ids + '&cateIndex=' + index;
+	}
+
+	replaceState() {
+		const pathName = this.props.location.pathname;
+		// 保留原有参数更新地址栏
+		let params = {
+			...queryString(this.props.location.search),
+			cateId: this.state.selectedTags,
+			cateIndex: this.state.activeKey,
+		};
+		const path = joinUrlEncoded('#' + pathName, params);
+		window.history.replaceState({}, 0, path);
+	}
 	// selectTags() {}
 
 	// 三级菜单选中

@@ -5,7 +5,7 @@ exports.queryString = (url) => {
 	return json;
 };
 
-function parseUrl(url) {
+const parseUrl = (url) => {
 	if (!url || url == null) return {};
 	let queryArr = decodeURIComponent(url).split('&'),
 		result = {};
@@ -13,9 +13,10 @@ function parseUrl(url) {
 		result[item.split('=')[0]] = item.split('=')[1];
 	});
 	return result;
-}
+};
+exports.parseUrl = parseUrl;
 
-exports.urlEncoded = (data) => {
+const urlEncoded = (data) => {
 	if (typeof data === 'string') return encodeURIComponent(data);
 	let params = [];
 	for (let k in data) {
@@ -26,4 +27,15 @@ exports.urlEncoded = (data) => {
 		params.push(`${encodeURIComponent(k)}=${v}`);
 	}
 	return params.join('&');
+};
+exports.urlEncoded = urlEncoded;
+
+exports.joinUrlEncoded = (url, data) => {
+	const params = urlEncoded(data);
+	if (url.indexOf('?') < 0 && params) {
+		url += '?' + params;
+	} else {
+		url += '&' + params;
+	}
+	return url;
 };

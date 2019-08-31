@@ -1,4 +1,5 @@
 import fetch from 'dva/fetch';
+import { joinUrlEncoded } from '.';
 
 function parseJSON(response) {
 	return response.json();
@@ -30,12 +31,7 @@ export default function request(url, options) {
 }
 
 exports.get = (url, data) => {
-	const params = urlEncoded(data);
-	if (url.indexOf('?') < 0 && params) {
-		url += '?' + params;
-	} else {
-		url += '&' + params;
-	}
+	url = joinUrlEncoded(url, data);
 	return request(url, {
 		method: 'GET',
 		mode: 'cors',
@@ -54,18 +50,18 @@ exports.post = (url, data) => {
 	});
 };
 
-const urlEncoded = (data) => {
-	if (typeof data === 'string') return encodeURIComponent(data);
-	let params = [];
-	for (let k in data) {
-		if (!data.hasOwnProperty(k)) return;
-		let v = data[k];
-		if (typeof v === 'string') v = encodeURIComponent(v);
-		if (Array.isArray(v)) {
-			params.push(`${encodeURIComponent(k)}[]=${v}`);
-		} else {
-			params.push(`${encodeURIComponent(k)}=${v}`);
-		}
-	}
-	return params.join('&');
-};
+// const urlEncoded = (data) => {
+// 	if (typeof data === 'string') return encodeURIComponent(data);
+// 	let params = [];
+// 	for (let k in data) {
+// 		if (!data.hasOwnProperty(k)) return;
+// 		let v = data[k];
+// 		if (typeof v === 'string') v = encodeURIComponent(v);
+// 		if (Array.isArray(v)) {
+// 			params.push(`${encodeURIComponent(k)}[]=${v}`);
+// 		} else {
+// 			params.push(`${encodeURIComponent(k)}=${v}`);
+// 		}
+// 	}
+// 	return params.join('&');
+// };
