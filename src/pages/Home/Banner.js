@@ -6,7 +6,7 @@ import './banner.less';
 export default class HomeBanner extends React.Component {
 	render() {
 		return (
-			<Carousel autoplay>
+			<Carousel autoplay className="homeBanner">
 				<div>
 					<img src={logo} alt="" />
 				</div>

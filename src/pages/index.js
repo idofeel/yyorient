@@ -7,8 +7,8 @@ import { connect } from 'dva';
 import { get } from '../utils/request';
 import api from '../services/api';
 import PageConfig from './common/PageConfig';
+import Footer from './common/footer/index';
 // const { Header, Footer, Sider, Content } = Layout; //全局样式覆盖
-
 @connect()
 class index extends Component {
 	constructor(props) {
@@ -31,6 +31,7 @@ class index extends Component {
 					<RedirectRoute exact={true} from={'/'} routes={routes} />
 					<NoMatchRoute />
 				</Switch>
+				{/* <Footer /> */}
 			</>
 		);
 	}

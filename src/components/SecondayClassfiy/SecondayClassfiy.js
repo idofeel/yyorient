@@ -15,11 +15,10 @@
  */
 
 import React, { Component } from 'react';
-import { Tabs, Anchor, Tag, Skeleton } from 'antd';
+import { Tabs, Anchor, Tag, Skeleton, Affix } from 'antd';
 import './SecomdayClassfiy.less';
 const { TabPane } = Tabs;
 const { CheckableTag } = Tag;
-
 export default class SecondayClassfiy extends Component {
 	constructor(props) {
 		super(props);
@@ -58,7 +57,7 @@ export default class SecondayClassfiy extends Component {
 		if (!tabs.length) return null;
 		return (
 			<>
-				<Anchor className="yy-tabs-wrapper">
+				<Affix className="yy-tabs-wrapper">
 					<Tabs
 						tabBarGutter={0}
 						// animated={false}
@@ -123,7 +122,7 @@ export default class SecondayClassfiy extends Component {
 							</TabPane>
 						))}
 					</Tabs>
-				</Anchor>
+				</Affix>
 				<div
 					className="cateBoxMask"
 					onClick={(e) => this.mouseLeave()}
