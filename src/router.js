@@ -67,6 +67,11 @@ const RoutersConfig = [
 				component: () => import('./pages/User/register'),
 				model: [],
 			},
+			{
+				path: '/profile',
+				component: () => import('./pages/User/ProfilePage'),
+				model: [],
+			},
 		],
 	},
 ];
