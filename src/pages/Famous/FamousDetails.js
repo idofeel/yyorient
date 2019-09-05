@@ -1,6 +1,8 @@
+import React, { Component } from 'react';
 import { connect } from 'dva';
 import Page from '../common/Page';
 import { Message, Carousel, Row, Tabs, Card, Icon, Avatar } from 'antd';
+import Video from '../../components/Video/Video';
 import './famousDetails.less';
 import index from '../index';
 
@@ -9,7 +11,9 @@ const { Meta } = Card;
 @connect()
 class FamousDetails extends Page {
 	constructor(props) {
-		super(props, {});
+		super(props, {
+			source: 'https://media.w3.org/2010/05/sintel/trailer_hd.mp4',
+		});
 
 		this.detailId = this.getDetailId();
 	}
@@ -63,7 +67,22 @@ class FamousDetails extends Page {
 			0: <FamouseResume />,
 			1: <FamousWorks />,
 			2: <FamousWorks />,
-			3: <FamousVideo />,
+			3: (
+				<FamousVideo
+					ref="FamousVideo"
+					src={this.state.source}
+					onClickHandle={(item) => {
+						console.log('click', this);
+						this.setState(
+							{
+								source:
+									'http://media.w3.org/2010/05/bunny/movie.mp4',
+							},
+							this.refs['FamousVideo'].player().load(),
+						);
+					}}
+				/>
+			),
 		};
 		return component[index] || null;
 	}
@@ -77,59 +96,70 @@ class FamousDetails extends Page {
 	}
 }
 
-function FamousVideo(props) {
-	const {
-		famousVideo = [
-			{
-				cover:
-					'https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png',
-				name: '12313123',
-			},
-			{
-				cover:
-					'https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png',
-				name: '12313123',
-			},
-			{
-				cover:
-					'https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png',
-				name: '12313123',
-			},
-			{
-				cover:
-					'https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png',
-				name: '12313123',
-			},
-			{
-				cover:
-					'https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png',
-				name: '12313123',
-			},
-		],
-	} = props;
-	return (
-		<div className="famousVideo">
-			{famousVideo.map((item, index) => (
-				<Card
-					key={index}
-					className="famousItem"
-					bordered={false}
-					hoverable={true}
-					cover={
-						<div className="imgBox">
-							<img alt={item.name} src={item.cover} />
-							<Icon
-								type="play-circle"
-								theme="filled"
-								className="videoPlay"
-							/>
-						</div>
-					}>
-					<Meta description={item.name} />
-				</Card>
-			))}
-		</div>
-	);
+class FamousVideo extends Component {
+	render() {
+		const {
+			famousVideo = [
+				{
+					cover:
+						'https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png',
+					name: '12313123',
+				},
+				{
+					cover:
+						'https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png',
+					name: '12313123',
+				},
+				{
+					cover:
+						'https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png',
+					name: '12313123',
+				},
+				{
+					cover:
+						'https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png',
+					name: '12313123',
+				},
+				{
+					cover:
+						'https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png',
+					name: '12313123',
+				},
+			],
+		} = this.props;
+		return (
+			<div className="famousVideo">
+				{famousVideo.map((item, index) => (
+					<Card
+						key={index}
+						className="famousItem"
+						bordered={false}
+						hoverable={true}
+						onClick={() => {
+							this.props.onClickHandle(item, index);
+						}}
+						cover={
+							<div className="imgBox">
+								<img alt={item.name} src={item.cover} />
+								<Icon
+									type="play-circle"
+									theme="filled"
+									className="videoPlay"
+								/>
+							</div>
+						}>
+						<Meta description={item.name} />
+					</Card>
+				))}
+				{/* <video src={this.props.src} controls /> */}
+				<Video src={this.props.src} ref="video" autoPlay={true} />
+			</div>
+		);
+	}
+
+	player() {
+		return this.refs['video'].player;
+	}
 }
 
 function FamousWorks(props) {

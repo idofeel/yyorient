@@ -1,0 +1,50 @@
+:global {
+    .videoPlayer {
+
+        &:hover {
+            .video-react-big-play-button {
+                border-color: @primary-color;
+                background: rgba(255, 166, 0, 0.2);
+            }
+
+        }
+
+        .videoControl {
+            .video-react-progress-control {
+
+                // 进度条
+                .video-react-play-progress,
+                .video-react-load-progress {
+                    background: @primary-color;
+                }
+
+            }
+        }
+
+        .video-react-volume-level {
+            background: @primary-color;
+        }
+
+        .video-react-control-bar {
+            color: @primary-color;
+        }
+
+
+        .video-react-big-play-button {
+            width: 2.4em;
+            height: 2.4em;
+            margin: -1.2rem 0 0 -1.2rem;
+            border-radius: 50%;
+            color: @primary-color;
+            border-color: @primary-color;
+
+            &:before {
+                line-height: 2.2em;
+            }
+        }
+
+        .video-react-bezel {
+            background: rgba(255, 166, 0, 0.5);
+        }
+    }
+}

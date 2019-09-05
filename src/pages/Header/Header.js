@@ -9,7 +9,7 @@ const Search = Input.Search;
 
 class yyHeader extends React.Component {
 	render() {
-		const { isLogin = true } = this.props;
+		const { isLogin = false } = this.props;
 		return (
 			<header className={style.header}>
 				<Row type="flex" justify="space-around" align="middle">
@@ -38,6 +38,7 @@ class yyHeader extends React.Component {
 								placeholder=""
 								onSearch={(value) => console.log(value)}
 								enterButton
+								className="searchIcon"
 							/>
 						</Col>
 						<Col span={24}>

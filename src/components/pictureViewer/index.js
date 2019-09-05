@@ -345,9 +345,7 @@ class AuthorInfo extends Component {
 
 	// 切换显示工具栏
 	toggleDrawer() {
-		this.setState({
-			drawerShow: !this.state.drawerShow,
-		});
+		this.props.toggleDrawer();
 	}
 
 	UNSAFE_componentWillReceiveProps(nextProps) {
