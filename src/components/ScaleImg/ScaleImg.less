@@ -45,7 +45,7 @@
         .aerialView {
             position: absolute;
             right: 0;
-            bottom: 0;
+            bottom: 41px;
             width: 200px;
             height: 200px;
             border: 1px solid @primary-color;
@@ -55,6 +55,7 @@
             justify-content: center;
             background: rgba(0, 0, 0, .3);
             transition: right .2s ease;
+            box-sizing: content-box;
             z-index: 1100;
 
             :local {

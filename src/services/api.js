@@ -1,6 +1,6 @@
 const domain = 'http://yy.aijk.xyz/';
 
-exports.root = domain;
+exports.RootBase = domain;
 
 export default {
 	menus: '/?y=common&d=menu', // 无   一级、二级菜单

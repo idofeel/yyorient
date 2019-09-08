@@ -6,6 +6,11 @@ const authorty = false;
 // 顶级路由
 const RoutersConfig = [
 	{
+		path: '/test',
+		component: () => import('./pages/TestPage'),
+		model: [],
+	},
+	{
 		path: '/',
 		component: () => import('./pages'),
 		model: [],
@@ -13,8 +18,8 @@ const RoutersConfig = [
 			{
 				path: '/home',
 				component: () => import('./pages/Home/Home'),
-				redirect: true,
 				model: [],
+				redirect: true,
 			},
 			{
 				path: '/photo',

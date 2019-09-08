@@ -50,7 +50,8 @@ export default class PictureTool extends ScaleImg {
 		return (
 			<div
 				className={container}
-				style={{ paddingRight: this.state.paddingRight }}>
+				// style={{ paddingRight: this.state.paddingRight }}
+			>
 				<Row className="toolsBox">
 					<Col md={1} sm={2} xs={3}>
 						<Icon

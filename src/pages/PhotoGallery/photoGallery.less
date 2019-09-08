@@ -77,10 +77,43 @@
 
         .picitem {
             width: 250px;
+            text-align: left;
 
             img {
                 width: 100%;
             }
+
+            .ant-card-body {
+                position: relative;
+                padding: 15px 10px;
+
+                .ant-card-meta-title {
+                    margin: 0;
+                    line-height: 1.8;
+                }
+
+                .ant-typography {
+                    margin: 0;
+                }
+
+                .yy-collect {
+                    position: absolute;
+                    top: 0;
+                    font-size: 36px;
+                    color: #999;
+                    right: 0;
+                }
+
+                .yy-collect-active {
+                    color: red;
+                }
+            }
+        }
+
+        .noMore {
+            color: #ccc;
+            font-size: 12px;
+            font-weight: 400;
         }
     }
 

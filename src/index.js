@@ -1,5 +1,10 @@
 import dva from 'dva';
 import './index.less';
+import Promise from 'babel-polyfill';
+
+if (!window.Promise) {
+	window.Promise = Promise;
+}
 
 // 1. Initialize
 const app = dva();

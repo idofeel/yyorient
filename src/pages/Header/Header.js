@@ -51,7 +51,7 @@ class yyHeader extends React.Component {
 								<>
 									<Icon type="user" className={style.icon} />
 									<Link to="/login">登录</Link>
-									<a href="javascript:;">/</a>
+									<span>/</span>
 									<Link to="/register">注册</Link>
 								</>
 							)}

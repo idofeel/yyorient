@@ -1,14 +1,20 @@
 import ReactDOM from 'react-dom';
 import { connect } from 'dva';
 import Autoresponsive from 'autoresponsive-react';
+import InfiniteScroll from 'react-infinite-scroller';
 import ImgModal from '../ImgModal';
 import { get } from '../../utils/request';
-import api from '../../services/api';
+import api, { RootBase } from '../../services/api';
 import Page from '../common/Page';
 import PageConfig from '../common/PageConfig';
 import './photoGallery.less';
-import { Spin } from 'antd';
+import { Spin, Card, Typography, Icon, message, Divider } from 'antd';
 
+const { Meta } = Card;
+
+const IconFont = Icon.createFromIconfontCN({
+	scriptUrl: '//at.alicdn.com/t/font_1396747_qda951ow38.js',
+});
 class PhotoGallery extends Page {
 	constructor(props) {
 		super(props, {
@@ -24,6 +30,7 @@ class PhotoGallery extends Page {
 			// nextActiveKey: '',
 			picList: [],
 			picLoading: false,
+			hasMore: false, // 是否有更多
 		});
 		this.pageId = '2'; // 图库页对应id
 		this.pageName = PageConfig[this.pageId]; // 图库页对应名称
@@ -99,10 +106,10 @@ class PhotoGallery extends Page {
 	renderBody() {
 		const { source, detailid, picLoading } = this.state;
 		return (
-			<Spin spinning={picLoading} size="large">
-				<div className="AutoresponsiveContainer">
+			<div className="AutoresponsiveContainer">
+				<Spin spinning={picLoading} size="large">
 					{this.renderPicList()}
-				</div>
+				</Spin>
 				{source.length ? (
 					<ImgModal
 						visible={this.state.visible}
@@ -114,13 +121,13 @@ class PhotoGallery extends Page {
 						}}
 					/>
 				) : null}
-			</Spin>
+			</div>
 		);
 	}
 
 	renderPicList() {
 		const AutoResponsiveProps = this.getAutoResponsiveProps();
-		const { picList } = this.state;
+		const { picList, hasMore } = this.state;
 		if (!picList.length) return null;
 		return (
 			<>
@@ -130,24 +137,78 @@ class PhotoGallery extends Page {
 						width: AutoResponsiveProps.containerWidth,
 						margin: '0 auto',
 					}}>
-					<Autoresponsive {...AutoResponsiveProps}>
-						{picList.map(function(i, index) {
-							return (
-								<div
+					<InfiniteScroll
+						initialLoad={false}
+						pageStart={this.next}
+						loadMore={() => {
+							this.loadMore();
+						}}
+						hasMore={hasMore}
+						loader={<Spin key="loader" />}>
+						<Autoresponsive {...AutoResponsiveProps}>
+							{picList.map((i, index) => (
+								// <div
+								// 	key={index}
+								// 	onClick={() => {
+								// 		this.clickItemHandle(i);
+								// 	}}
+								// 	style={{ width: i.imgw, height: i.imgh }}
+								// 	className="picitem">
+								// 	<img src={RootBase + i.img} alt={i.pname} />
+								// </div>
+								<Card
+									hoverable
 									key={index}
-									onClick={() => {
-										this.clickItemHandle(i);
+									style={{
+										width: i.imgw,
+										height: i.imgh * 1 + 80,
 									}}
-									style={{ width: i.imgw, height: i.imgh }}
-									className="picitem">
-									<img
-										src={'http://47.104.79.113/' + i.img}
-										alt={i.pname}
+									className="picitem"
+									cover={
+										<img
+											src={RootBase + i.img}
+											alt={i.pname}
+											onClick={() => {
+												this.clickItemHandle(i);
+											}}
+										/>
+									}>
+									<Meta
+										title={i.pname}
+										description={
+											<Typography.Paragraph
+												ellipsis
+												alt={i.pname}>
+												{this.getAuthorsName(i.authors)}
+											</Typography.Paragraph>
+										}
+										onClick={() => {
+											this.clickItemHandle(i);
+										}}
 									/>
-								</div>
-							);
-						}, this)}
-					</Autoresponsive>
+									<IconFont
+										type="yyorientcollect-copy"
+										className={`yy-collect ${
+											i.fav ? 'yy-collect-active' : ''
+										}`}
+										onClick={() => {
+											console.log('object');
+											i.fav = !i.fav;
+											this.setState({
+												picList,
+											});
+											i.fav
+												? message.success('收藏成功')
+												: message.info('取消收藏');
+										}}
+									/>
+								</Card>
+							))}
+						</Autoresponsive>
+					</InfiniteScroll>
+					<Divider hidden={hasMore} className="noMore">
+						别扒拉了，我们是有底线的！
+					</Divider>
 				</div>
 			</>
 		);
@@ -169,11 +230,21 @@ class PhotoGallery extends Page {
 	// 选中的分类id 集合
 	selectTags(categroyIds = []) {
 		if (!categroyIds.length) return;
-		this.setState({ loading: false, empty: false, picLoading: true });
+		this.setState(
+			{
+				loading: false,
+				empty: false,
+				picLoading: true,
+				picList: [],
+			},
+			() => {},
+		);
 		this.next = 0;
+		this.lastRenderIds = categroyIds.toString();
 		this.loadPicList(categroyIds);
 	}
 	next = 0;
+	lastRenderIds = '';
 	// 加载图库列表
 	async loadPicList(categroyIds = [], start = this.next) {
 		if (start === -1)
@@ -186,38 +257,49 @@ class PhotoGallery extends Page {
 			start,
 		});
 
-		let pageStatus = {
-			loading: false,
-			picLoading: false,
-		};
-
 		let {
 			data: picList = [],
 			success,
 			faildesc = '暂无数据',
 			next = -1,
 		} = res;
-
+		let pageStatus = {
+			loading: false,
+			picLoading: false,
+			hasMore: !(next < 0),
+		};
 		if (success) {
 			// picList = this.arrayList.map((item) => picList[0]);
 			this.next = next;
 			pageStatus.empty = !picList.length;
 		} else {
 			pageStatus.empty = faildesc;
+			pageStatus.picList = []; //
+			this.next = 0;
 		}
 		// this.setPageStatus(pageStatus);
-		this.setState({
-			picList,
-			...pageStatus,
-		});
+		picList = this.state.picList.concat(picList);
+		this.lastRenderIds === categroyIds.toString() &&
+			this.setState({
+				picList,
+				...pageStatus,
+			});
 	}
 
+	loadMore() {
+		const { selectedTags } = this.state;
+		this.loadPicList(selectedTags, this.next);
+	}
+
+	getAuthorsName(authors = []) {
+		return authors.map((item) => item.aname).join();
+	}
 	async clickItemHandle(item = {}) {
 		this.setState({ picLoading: true });
 
 		const { pid } = item;
 		const files = await get(api.photoGallery.files, { pid });
-
+		files.data.splice(0, 1);
 		this.setState({
 			loading: false,
 			picLoading: false,

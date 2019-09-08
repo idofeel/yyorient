@@ -13,7 +13,7 @@ class ModalPic extends React.Component {
 	constructor(props) {
 		super(props);
 		const { visible = false, dataSource, autorInfo, detailid } = props;
-		dataSource.splice(0, 1);
+		// dataSource.splice(0, 1);
 		this.state = {
 			visible: visible,
 			dataSource,
@@ -78,7 +78,8 @@ class ModalPic extends React.Component {
 	}
 
 	render() {
-		const { dataSource, visible, authorInfo } = this.state;
+		const { visible, authorInfo } = this.state;
+		const { dataSource } = this.props;
 		if (!dataSource || !dataSource.length) return null;
 		return (
 			<Modal
@@ -96,17 +97,19 @@ class ModalPic extends React.Component {
 				bodyStyle={{ height: '100%', padding: 0 }}
 				cancelButtonProps={<Icon type="left" />}
 				destroyOnClose={visible}>
-				<PicView
-					uri={this.props.uri}
-					options={this.props.options}
-					drawerChange={(isShow) => {
-						isShow ? this.rmShowPop() : this.showPop();
-					}}
-					visible={visible}
-					dataSource={dataSource}
-					authorInfo={authorInfo}
-					detailid={this.state.detailid}
-				/>
+				{visible && (
+					<PicView
+						uri={this.props.uri}
+						options={this.props.options}
+						drawerChange={(isShow) => {
+							isShow ? this.rmShowPop() : this.showPop();
+						}}
+						visible={visible}
+						dataSource={dataSource}
+						authorInfo={authorInfo}
+						detailid={this.state.detailid}
+					/>
+				)}
 			</Modal>
 		);
 	}

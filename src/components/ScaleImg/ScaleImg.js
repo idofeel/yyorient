@@ -38,7 +38,7 @@
 import React from 'react';
 // import logo from 'Assets/abcdef/abcdef-1x_0_0.jpg';
 import './ScaleImg.less';
-import { root } from '../../services/api';
+import { RootBase } from '../../services/api';
 
 // const imgs = require('../../assets/images/3.jpg')
 export default class extends React.Component {
@@ -104,11 +104,11 @@ export default class extends React.Component {
 	touchTime = 0; //记录touch端是否双击
 	bounceTimer = null;
 	doc = document;
-	docFrag = document.createDocumentFragment();
+	// docFrag = document.createDocumentFragment();
 	imageSource = {};
 	imageData = [];
 	url = (data) =>
-		`${root}${data.baseurl}/${data.imgid}-${data.sizeid}_${data.row}_${
+		`${RootBase}${data.baseurl}/${data.imgid}-${data.sizeid}_${data.row}_${
 			data.col
 		}.${data.ex || 'jpg'}`;
 	onReay() {}
@@ -325,8 +325,8 @@ export default class extends React.Component {
 		} = this.state;
 		// const { uri } = this.props;
 		const pictrueStyle = {
-			width,
-			height,
+			width: width * 1,
+			height: height * 1,
 			top,
 			left,
 			transform: `scale(${scaleX},${scaleY}) translate(${translateX}, ${translateY})`,
@@ -540,7 +540,7 @@ export default class extends React.Component {
 
 	renderBlock(index) {
 		let meta = this.dataSource[index];
-		meta.baseurl = '/src/assets';
+		// meta.baseurl = '/src/assets';
 		const lastRow = meta.imgw % meta.wmax || meta.wmax,
 			lastCol = meta.imgh % meta.hmax || meta.hmax,
 			metaLen = meta.rows * meta.cols,
