@@ -26,7 +26,12 @@ import './index.less';
 
 export default class PictureTool extends ScaleImg {
 	constructor(props) {
-		const { drawerChange = () => {}, visible = false, detailid } = props;
+		const {
+			drawerChange = () => {},
+			visible = false,
+			detailid,
+			backList = () => {},
+		} = props;
 		super(props, {
 			ScaleValue: 0, //进度条的值
 			hideTools: false, //是否隐藏工具条
@@ -35,6 +40,7 @@ export default class PictureTool extends ScaleImg {
 			visible: visible,
 		});
 		this.drawerChange = drawerChange;
+		this.backList = backList;
 	}
 
 	// data= {
@@ -123,6 +129,11 @@ export default class PictureTool extends ScaleImg {
 					toggleDrawer={() => this.toggleDrawer()}
 					drawerShow={this.state.drawerShow && this.props.visible} //
 					detailid={this.props.detailid}
+					backList={() => {
+						this.toggleDrawer();
+						this.backList();
+					}}
+					addCollect={() => {}}
 				/>
 			</div>
 		);
@@ -228,6 +239,10 @@ export default class PictureTool extends ScaleImg {
 }
 
 class AuthorInfo extends Component {
+	static defaultProps = {
+		backList: () => {}, // 返回列表
+		addCollect: () => {}, // 添加收藏
+	};
 	constructor(props) {
 		super(props);
 		const { bodyStyle, drawerShow = true, drawerChange, detailid } = props;
@@ -284,11 +299,13 @@ class AuthorInfo extends Component {
 					</Descriptions>
 
 					<div className="btn-group">
-						<Button>
-							<Icon type="menu" /> 返回列表
+						<Button onClick={() => this.props.backList()}>
+							<Icon type="menu" />
+							返回列表
 						</Button>
-						<Button>
-							<Icon type="heart" /> 添加收藏
+						<Button onClick={() => this.props.addCollect()}>
+							<Icon type="heart" />
+							添加收藏
 						</Button>
 					</div>
 					{this.moreDetails(details)}
@@ -297,7 +314,7 @@ class AuthorInfo extends Component {
 		);
 	}
 
-	moreDetails(detail) {
+	moreDetails(detail = []) {
 		if (!detail.length) return null;
 		return (
 			<>
@@ -327,19 +344,29 @@ class AuthorInfo extends Component {
 		});
 
 		if (details.success) {
-			let author = details.data.authors.map((item) => {
+			const { data = [] } = details;
+			// 作者
+			const author = data.authors.map((item) => {
 				return {
 					title: '作者',
 					content: item.aname,
 				};
 			});
+			const detail = data.detail.map((item) => {
+				return {
+					title: item.cname,
+					content: item.value,
+				};
+			});
+
 			this.setState({
-				title: details.pname,
+				title: data.pname,
 				data: [
 					{ title: '年代', content: details.data.eraname },
 					...author,
+					...detail,
 				],
-				authors: details.authors,
+				// details: details.data.detail,
 			});
 		}
 	}

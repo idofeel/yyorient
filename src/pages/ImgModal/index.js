@@ -10,6 +10,9 @@ import api from '../../services/api';
  */
 
 class ModalPic extends React.Component {
+	static defaultProps = {
+		backList: () => {},
+	};
 	constructor(props) {
 		super(props);
 		const { visible = false, dataSource, autorInfo, detailid } = props;
@@ -96,7 +99,7 @@ class ModalPic extends React.Component {
 				style={this.props.style}
 				bodyStyle={{ height: '100%', padding: 0 }}
 				cancelButtonProps={<Icon type="left" />}
-				destroyOnClose={visible}>
+				destroyOnClose={true}>
 				{visible && (
 					<PicView
 						uri={this.props.uri}
@@ -108,6 +111,11 @@ class ModalPic extends React.Component {
 						dataSource={dataSource}
 						authorInfo={authorInfo}
 						detailid={this.state.detailid}
+						backList={() => {
+							this.hideModal();
+							this.props.hideModal();
+						}}
+						addCollect={() => {}}
 					/>
 				)}
 			</Modal>

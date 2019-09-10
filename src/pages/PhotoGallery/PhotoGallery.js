@@ -192,7 +192,6 @@ class PhotoGallery extends Page {
 											i.fav ? 'yy-collect-active' : ''
 										}`}
 										onClick={() => {
-											console.log('object');
 											i.fav = !i.fav;
 											this.setState({
 												picList,
