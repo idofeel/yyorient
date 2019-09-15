@@ -15,6 +15,12 @@ const { Meta } = Card;
 const IconFont = Icon.createFromIconfontCN({
 	scriptUrl: '//at.alicdn.com/t/font_1396747_qda951ow38.js',
 });
+
+message.config({
+	duration: 1,
+	maxCount: 1,
+});
+
 class PhotoGallery extends Page {
 	constructor(props) {
 		super(props, {
@@ -246,6 +252,8 @@ class PhotoGallery extends Page {
 	lastRenderIds = '';
 	// 加载图库列表
 	async loadPicList(categroyIds = [], start = this.next) {
+		console.log('加载图库', categroyIds);
+
 		if (start === -1)
 			return this.setState({
 				loading: false,
@@ -286,8 +294,8 @@ class PhotoGallery extends Page {
 	}
 
 	loadMore() {
-		const { selectedTags } = this.state;
-		this.loadPicList(selectedTags, this.next);
+		const { selectedTags, activeKey } = this.state;
+		this.loadPicList(selectedTags[activeKey], this.next);
 	}
 
 	getAuthorsName(authors = []) {

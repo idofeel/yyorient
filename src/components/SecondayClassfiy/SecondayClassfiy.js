@@ -20,6 +20,9 @@ import './SecomdayClassfiy.less';
 const { TabPane } = Tabs;
 const { CheckableTag } = Tag;
 export default class SecondayClassfiy extends Component {
+	static defaultProps = {
+		tabChange: (item, index) => {}, //tab改变
+	};
 	constructor(props) {
 		super(props);
 		const {
@@ -28,19 +31,20 @@ export default class SecondayClassfiy extends Component {
 			nextActiveKey = '', //
 			selectedTags,
 			activeKey, // 初始选中的tabKey
-			mouseEnterTab = (e) => {}, // 鼠标移入tab事件
+			// mouseEnterTab = (e) => {}, // 鼠标移入tab事件
 			selectOptions = (e) => {}, // 选中子选项
+			hideCate = false,
 		} = props;
 
 		this.state = {
 			selectedTags,
 			tabs,
 			nextActiveKey,
-			hidePop: true,
+			hidePop: hideCate,
 			activeKey,
 		};
 		this.onChange = onChange; //
-		this.mouseEnterTab = mouseEnterTab;
+		// this.mouseEnterTab = mouseEnterTab;
 		this.selectOptions = selectOptions;
 		this.skeletonLoding = false;
 	}
@@ -51,8 +55,9 @@ export default class SecondayClassfiy extends Component {
 			activeKey,
 			nextActiveKey,
 			hidePop,
-			selectedTags,
+			// selectedTags,
 		} = this.state;
+		const { selectedTags } = this.props;
 		const currentKey = nextActiveKey || activeKey;
 		if (!tabs.length) return null;
 		return (
@@ -66,59 +71,59 @@ export default class SecondayClassfiy extends Component {
 							this.onChange(index);
 						}}
 						className="menuTabs">
-						{tabs.map((item, index) => (
+						{tabs.map((item, tabIndex) => (
 							<TabPane
 								tab={
 									<div
 										className="yy-tabs-tab"
 										onMouseEnter={() => {
-											this.nextCate(index);
-											this.mouseEnterTab(item, index);
-										}}
-										onMouseLeave={() => {
-											item.sub === '0' && this.prevCate();
+											if (item.sub === '0') return;
+											if (tabIndex != currentKey) return;
+											this.setState({
+												hidePop: false,
+											});
 										}}
 										onClick={() =>
-											this.tabClick(item, index)
+											this.tabClick(item, tabIndex)
 										}>
 										{item.name}
 									</div>
 								}
-								key={index}>
-								{item.categories ? (
-									<Reclassify
-										ref={'Reclassify' + index}
-										categories={item.categories || []}
-										selectedTags={
-											selectedTags[index] ||
-											item.selectTags ||
-											[]
-										}
-										onSelect={(item) => this.onSelect(item)}
-										mouseLeave={(selecteds) =>
-											this.mouseLeave(selecteds)
-										}
-										getSelecteds={(selecteds) =>
-											this.selectOptions(selecteds, index)
-										}
-										seleteReay={(select) => {
-											// 组件初始化，是否是当前的tab
-											const cateId = select.length
-												? select
-												: [item.id];
-
-											activeKey == index
-												? this.selectOptions(
-														cateId,
-														activeKey,
-												  )
-												: null;
-										}}
-										hidden={hidePop}
-									/>
-								) : (
-									!hidePop && this.renderSkeleton(item)
-								)}
+								key={tabIndex}>
+								<Reclassifys
+									source={item.categories}
+									loading={item.sub * 1}
+									hidden={item.sub === '0' || hidePop}
+									// onMouseLeave={() => {
+									// 	this.setState({
+									// 		hidePop: true,
+									// 	});
+									// }}
+									selectedTags={selectedTags[tabIndex]}
+									renderItem={(item, idx) => (
+										<ReclassifysItem
+											ref="ReclassifysItem"
+											item={item}
+											key={idx}
+											selectedTags={
+												selectedTags[tabIndex]
+											}
+											tagChange={(
+												checked,
+												tags,
+												tagindex,
+											) => {
+												//
+												this.props.selectOptions(
+													item,
+													tabIndex,
+													tags,
+												);
+												console.log(checked, item, idx);
+											}}
+										/>
+									)}
+								/>
 							</TabPane>
 						))}
 					</Tabs>
@@ -131,18 +136,6 @@ export default class SecondayClassfiy extends Component {
 			</>
 		);
 	}
-	renderSkeleton(item) {
-		if (item.sub < 1) return null;
-		return (
-			<Skeleton
-				active={true}
-				loading={true}
-				paragraph={{
-					rows: item.sub * 1 - 1 || 0,
-				}}
-			/>
-		);
-	}
 
 	nextCate(key) {
 		this.setState({
@@ -152,160 +145,101 @@ export default class SecondayClassfiy extends Component {
 	}
 
 	tabClick(item, index) {
-		let tagId = item.sub < 1 ? [item.id] : []; // 初始为父级id
-		// 当存在分类数据取分类的id
-		if (item.categories && item.categories.length) {
-			tagId = this.refs['Reclassify' + index].state.selectedTags;
-		}
-		this.onSelect(tagId); // 选中的tagid
-	}
-
-	mouseLeave(selecteds) {
-		this.prevCate();
-	}
-	// 选择菜单选项
-	onSelect(item) {
-		const { nextActiveKey, activeKey } = this.state;
-		if (nextActiveKey && nextActiveKey !== activeKey) {
-			this.setState({
-				activeKey: nextActiveKey,
-				nextActiveKey: '',
-				hidePop: false,
-			});
-		}
-		this.selectOptions(item, nextActiveKey || activeKey);
-	}
-
-	prevCate() {
-		const { activeKey } = this.state;
+		console.log(this.state.hidePop);
 		this.setState({
-			activeKey,
-			nextActiveKey: '',
+			activeKey: index + '',
+			hidePop: false,
+		});
+		this.props.tabChange(item, index);
+	}
+
+	mouseLeave() {
+		this.setState({
 			hidePop: true,
 		});
-		// this.onChange(activeKey);
 	}
 
 	UNSAFE_componentWillReceiveProps(nextProps) {
-		const { tabs } = this.state;
+		const { tabs, hidePop } = this.state;
 		const propsTab = nextProps.tabs || [];
+		const hideCate = nextProps.hideCate;
 		if (tabs.toString() !== propsTab.toString()) {
 			this.setState({
 				tabs: propsTab,
 			});
 		}
+		if (hidePop !== hideCate) {
+			this.setState({
+				hidePop: hideCate,
+			});
+		}
+
+		// if (selectedTags.toString() !== nextProps.selectedTags.toString()) {
+		// 	this.setState({
+		// 		selectedTags: nextProps.selectedTags,
+		// 	});
+		// }
 	}
 }
 
-export class Reclassify extends Component {
-	constructor(props) {
-		super(props);
-		const {
-			categories = [], // 分类数据
-			selectedTags = [], // 选中的分类
-			mouseLeave = () => {}, // 鼠标移出事件
-			onSelect = () => {}, // 选中分类回调的事件
-			getSelecteds = () => {}, // 获取选中的分类
-			hidden = false, // 是否隐藏分类
-			seleteReay = () => {},
-		} = props;
-
-		// 数据状态
-		this.state = {
-			categories,
-			selectedTags,
-			hidden,
-		};
-
-		this.mouseLeave = mouseLeave; // 鼠标移出事件
-		this.onSelect = onSelect; // 选中分类回调的事件
-		this.getSelecteds = getSelecteds; // 获取选中的分类
-		this.seleteReay = seleteReay;
-	}
-
-	UNSAFE_componentWillReceiveProps(nextProps) {
-		const { categories, selectedTags } = this.state;
-		const newdata = nextProps.categories.toString();
-		if (categories.toString() !== newdata) {
-			this.setState({
-				categories: nextProps.categories,
-			});
-		}
-	}
-
+export class Reclassifys extends Component {
 	render() {
-		const { categories, selectedTags } = this.state;
-		const { hidden } = this.props;
-		if (categories.length < 1) return null;
+		const { source, renderItem = () => {}, hidden } = this.props;
 		return (
 			<div
 				className="categoriesBox"
-				onMouseLeave={() => {
-					this.setState({
-						hidden: true,
-					});
-					this.mouseLeave(selectedTags);
-				}}
-				hidden={hidden}>
-				{categories &&
-					categories.map((item, idx) => (
-						<div className="categories" key={idx}>
-							<h4 style={{ marginRight: 8, display: 'inline' }}>
-								{item.name}:
-							</h4>
-							{item.data &&
-								item.data.map((tag) => (
-									<CheckableTag
-										key={tag.id}
-										checked={
-											selectedTags.indexOf(tag.id) > -1
-										}
-										onChange={(checked) => {
-											this.handleChange(
-												item.data,
-												tag,
-												checked,
-												idx,
-											);
-										}}>
-										{tag.name}
-									</CheckableTag>
-								))}
-						</div>
-					))}
+				hidden={hidden}
+				{...this.props.__proto__}>
+				{source ? source.map(renderItem) : this.renderSkeleton()}
 			</div>
 		);
 	}
-	componentDidMount() {
-		this.seleteReay(this.state.selectedTags);
+
+	renderSkeleton() {
+		const { loading } = this.props;
+		if (!loading) return null;
+		return (
+			<Skeleton
+				active={true}
+				loading={true}
+				paragraph={{
+					rows: loading - 1,
+				}}
+			/>
+		);
 	}
-	getSelecteds() {
-		return this.state.selectedTags;
-	}
+}
 
-	handleChange(itemData = [], tag, checked, index) {
-		const { selectedTags } = this.state;
-		if (selectedTags.indexOf(tag.id) > -1) return; // 已存在id
+export class ReclassifysItem extends Component {
+	static defaultProps = {
+		item: {},
+		selectedTags: [],
+		tagChange: () => {},
+	};
 
-		let nextSelectedTags = selectedTags;
-		// 同行单选，删除一行数据中已选中的id
-		itemData.forEach((i) => {
-			nextSelectedTags = nextSelectedTags.filter((t) => t !== i.id); // 删除单行数据中的所有tagid
-		});
-		// checked ? 保存新的id : 删除当前
-		nextSelectedTags = checked
-			? [...nextSelectedTags, tag.id]
-			: selectedTags.filter((t) => t !== tag.id);
-
-		// 刷新数据，重新渲染
-		this.setState(
-			{
-				selectedTags: nextSelectedTags,
-				// activeKey: index + '',
-			},
-			() => {
-				this.onSelect(this.state.selectedTags);
-			},
+	render() {
+		const { item, selectedTags, tagChange } = this.props;
+		return (
+			<div className="categories">
+				<h4
+					style={{
+						marginRight: 8,
+						display: 'inline',
+					}}>
+					{item.name}:
+				</h4>
+				{item.data &&
+					item.data.map((tag, index) => (
+						<CheckableTag
+							key={tag.id}
+							checked={selectedTags.indexOf(tag.id) > -1}
+							onChange={(checked) => {
+								tagChange(checked, tag, index);
+							}}>
+							{tag.name}
+						</CheckableTag>
+					))}
+			</div>
 		);
 	}
 }

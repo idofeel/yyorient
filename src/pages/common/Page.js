@@ -27,7 +27,7 @@ class Page extends Component {
 		let selectedTags = [],
 			cateids = cateId.split(',');
 		if (cateids.toString()) selectedTags[activeKey] = cateids;
-		console.log('object,activeKey', activeKey);
+
 		this.state = {
 			menuTabs,
 			activeKey: activeKey || '0', // 初始展示的菜单
@@ -35,6 +35,7 @@ class Page extends Component {
 			selectedTags,
 			loading: true,
 			empty: false,
+			hideCate: false,
 			...state,
 		};
 		this.query = queryString(this.props.location.search);
@@ -54,26 +55,46 @@ class Page extends Component {
 	render() {
 		let { loading, empty } = this.state;
 
-		const { menuTabs, activeKey, nextActiveKey, selectedTags } = this.state;
+		const {
+			menuTabs,
+			activeKey,
+			nextActiveKey,
+			selectedTags,
+			hideCate,
+		} = this.state;
 		return (
 			<div className="yyPage">
 				{this.loadMenu && (
 					<SecondayClassfiy
+						tabChange={(item, index) => this.tabChange(item, index)}
 						tabs={menuTabs}
-						onChange={(index) => this.onChange(index)}
-						mouseEnterTab={(item, index) =>
-							this.mouseEnterTab(item, index)
-						}
-						selectOptions={(item, key) =>
-							this.selectOptions(item, key)
+						// onChange={(index) => this.onChange(index)}
+						// mouseEnterTab={(item, index) =>
+						// 	this.mouseEnterTab(item, index)
+						// }
+						selectOptions={(item, key, tags) =>
+							this.selectOptions(item, key, tags)
 						}
 						activeKey={activeKey}
 						// nextActiveKey={nextActiveKey}
 						selectedTags={selectedTags}
+						hideCate={hideCate}
 					/>
 				)}
 				{
-					<div ref="container">
+					<div
+						ref="container"
+						onMouseEnter={() => {
+							this.setState({
+								hideCate: true,
+							});
+						}}
+						onMouseLeave={() => {
+							// this.setState({
+							// 	hideCate: false,
+							// });
+							// console.log('hide');
+						}}>
 						{empty ? (
 							<Empty
 								image={Empty.PRESENTED_IMAGE_SIMPLE}
@@ -93,62 +114,59 @@ class Page extends Component {
 		);
 	}
 
-	renderFooter() {}
-	renderBody() {} // 渲染body 数据
-	// 二级菜单选中
-	onChange(index) {
-		const idx = index + '';
-		this.setState(
-			{
-				activeKey: idx,
-				nextActiveKey: '',
-			},
-			() => {
-				const ids = this.state.selectedTags;
-				this.replaceState();
-				this.selectTags(ids, idx);
-			},
-		);
+	// 二级菜单tab发生变化
+	tabChange(item, index) {
+		const tagid = item.sub < 1 ? [item.id] : [];
+		if (item.sub < 1) {
+			// 没有分类
+		} else {
+			// 有分类
+			this.getCategory(item.id, index);
+		}
 	}
 
+	renderFooter() {}
+	renderBody() {} // 渲染body 数据
+
 	getPath(ids = this.state.selectedTags, index = this.state.activeKey) {
-		console.log(this.props.location.search);
 		return '?cateId=' + ids + '&cateIndex=' + index;
 	}
 
 	replaceState() {
 		const pathName = this.props.location.pathname;
+		const { selectedTags, activeKey } = this.state;
 		// 保留原有参数更新地址栏
 		let params = {
 			...queryString(this.props.location.search),
-			cateId: this.state.selectedTags,
-			cateIndex: this.state.activeKey,
+			cateId: selectedTags[activeKey],
+			cateIndex: activeKey,
 		};
 		const path = joinUrlEncoded('#' + pathName, params);
 		window.history.replaceState({}, 0, path);
+		console.log('加载数据', selectedTags, activeKey, params.cateId);
+		this.selectTags(params.cateId);
 	}
 	// selectTags() {}
 
 	// 三级菜单选中
-	selectOptions(item, activeKey) {
-		if (!item.length || !activeKey) return;
-		// this.selectTags(item);
-		this.setState(
-			{
-				selectedTags: item,
-			},
-			() => {
-				this.onChange(activeKey);
-			},
-		);
+	selectOptions(tabItem, tabIndex, tags = {}) {
+		console.log('三级菜单选中');
+		let { selectedTags } = this.state;
+		let nextSeleted = selectedTags[tabIndex];
+
+		tabItem.data.forEach((i) => {
+			nextSeleted = nextSeleted.filter((t) => t !== i.id); // 删除单行数据中的所有tagid
+		});
+		if (tags.id) nextSeleted = [...nextSeleted, tags.id];
+		selectedTags[tabIndex] = nextSeleted;
+		this.setState({ selectedTags }, () => this.readyLoad());
 	}
 
 	onTab() {}
 	onTabEnd() {}
-	mouseEnterTab(item, index) {
-		this.onTab(item, index);
-		if (item.sub === '0' || !item.sub) return this.onTabEnd(); // 无分类
-		this.getCategory(item.id, index, this.onTabEnd);
+
+	readyLoad() {
+		this.replaceState();
 	}
 
 	/**
@@ -159,9 +177,8 @@ class Page extends Component {
 	 * @param {Function} callback 默认 false 是否加载图库数据
 	 */
 	async getCategory(id, index = 0, callback = () => {}) {
-		let { menuTabs, activeKey } = this.state;
+		let { menuTabs, activeKey, selectedTags } = this.state;
 		let selectTags = []; // 三级初始选中的标签
-
 		// tab没有分类
 		if (menuTabs[index] && menuTabs[index].sub === '0') {
 			menuTabs[index].categories = [];
@@ -187,19 +204,47 @@ class Page extends Component {
 			}
 
 			menuTabs[index].categories = categories;
-			menuTabs[index].selectTags = selectTags;
-			// 刷新菜单的数据
 		}
+
+		// 处理三级分类ID选中
+		if (!selectedTags[index]) selectedTags[index] = selectTags;
+
+		// 当前选中的分类是否在
+		const tagId = this.getOnlyTagId(
+			menuTabs[index].categories,
+			selectedTags[index],
+		);
+		selectedTags[index] = tagId.length ? tagId : [menuTabs[index].id];
 
 		this.setState(
 			{
 				menuTabs,
-				// selectedTags: selectTags,
+				selectedTags,
+				activeKey: index + '',
+				hideCate: false,
 			},
-			() => {
-				callback(selectTags, activeKey);
-			},
+			() => this.readyLoad(),
 		);
+	}
+
+	// 保证加载数据时 id 的唯一性,自动纠错
+	getOnlyTagId(categories, selectedTag) {
+		let tempTags = [];
+		categories.map((item) => {
+			// 当前tab分类的每一行数据保证直有一个选中
+			const temptag = item.data.filter((tags) => {
+				return selectedTag.filter((tag) => tag === tags.id)[0];
+			});
+
+			if (temptag.length === 1) {
+				// 找到tagid
+				tempTags.push(temptag[0].id);
+			} else {
+				// 当前行未找到对应的id 设置未全部
+				tempTags.push(item.id);
+			}
+		});
+		return tempTags;
 	}
 
 	/**
@@ -211,7 +256,7 @@ class Page extends Component {
 		this.empty = status.empty;
 	}
 	// 获取菜单数据
-	getMenutabsData(props) {
+	getMenutabsData(props = this.props) {
 		const { menuTabs } = this.state;
 		const { secondaryMenu = [] } = props.global;
 		const tabs = secondaryMenu[this.pageName] || [];
@@ -225,7 +270,7 @@ class Page extends Component {
 	// 组件准备加载
 	onLoad() {}
 	UNSAFE_componentWillMount() {
-		this.getMenutabsData(this.props); // 获取菜单数据
+		this.getMenutabsData(); // 获取菜单数据
 		this.onLoad();
 	}
 
