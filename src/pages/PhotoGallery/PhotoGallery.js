@@ -263,34 +263,40 @@ class PhotoGallery extends Page {
 			ids: categroyIds,
 			start,
 		});
-
-		let {
-			data: picList = [],
-			success,
-			faildesc = '暂无数据',
-			next = -1,
-		} = res;
-		let pageStatus = {
-			loading: false,
-			picLoading: false,
-			hasMore: !(next < 0),
-		};
-		if (success) {
-			// picList = this.arrayList.map((item) => picList[0]);
-			this.next = next;
-			pageStatus.empty = !picList.length;
-		} else {
-			pageStatus.empty = faildesc;
-			pageStatus.picList = []; //
-			this.next = 0;
+		//
+		if (this.lastRenderIds === categroyIds.toString()) {
+			let {
+				data: picList = [],
+				success,
+				faildesc = '暂无数据',
+				next = -1,
+			} = res;
+			let pageStatus = {
+				loading: false,
+				picLoading: false,
+				hasMore: !(next < 0),
+			};
+			if (success) {
+				// picList = this.arrayList.map((item) => picList[0]);
+				this.next = next;
+				pageStatus.empty = !picList.length;
+			} else {
+				pageStatus.empty = faildesc;
+				pageStatus.picList = []; //
+				this.next = 0;
+			}
+			// this.setPageStatus(pageStatus);
+			picList = this.state.picList.concat(picList);
+			this.setState(
+				{
+					picList,
+					...pageStatus,
+				},
+				() => {
+					this.replaceState();
+				},
+			);
 		}
-		// this.setPageStatus(pageStatus);
-		picList = this.state.picList.concat(picList);
-		this.lastRenderIds === categroyIds.toString() &&
-			this.setState({
-				picList,
-				...pageStatus,
-			});
 	}
 
 	loadMore() {
@@ -336,4 +342,4 @@ class PhotoGallery extends Page {
 	}
 }
 
-export default connect()(PhotoGallery);
+export default connect(({ menus }) => ({ menus }))(PhotoGallery);

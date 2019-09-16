@@ -255,7 +255,7 @@ class AuthorInfo extends Component {
 		this.drawerChange = drawerChange;
 	}
 
-	componentWillMount() {
+	componentDidMount() {
 		this.getData();
 	}
 

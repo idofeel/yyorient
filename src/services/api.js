@@ -25,6 +25,7 @@ export default {
 	video: {
 		list: '/y=video&d=list', //{ids,start} 视频列表
 	},
+	// 空间接口
 	zone: {
 		list: '/?y=space&d=list', //{ids,start} 空间列表
 		info: '/?y=space&d=info', // {sid} 获得某一空间简介

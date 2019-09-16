@@ -31,7 +31,7 @@ export default class SecondayClassfiy extends Component {
 			nextActiveKey = '', //
 			selectedTags,
 			activeKey, // 初始选中的tabKey
-			// mouseEnterTab = (e) => {}, // 鼠标移入tab事件
+			mouseEnterTab = (e) => {}, // 鼠标移入tab事件
 			selectOptions = (e) => {}, // 选中子选项
 			hideCate = false,
 		} = props;
@@ -44,7 +44,7 @@ export default class SecondayClassfiy extends Component {
 			activeKey,
 		};
 		this.onChange = onChange; //
-		// this.mouseEnterTab = mouseEnterTab;
+		this.mouseEnterTab = mouseEnterTab;
 		this.selectOptions = selectOptions;
 		this.skeletonLoding = false;
 	}
@@ -57,7 +57,7 @@ export default class SecondayClassfiy extends Component {
 			hidePop,
 			// selectedTags,
 		} = this.state;
-		const { selectedTags } = this.props;
+		const { selectedTags, hideCate } = this.props;
 		const currentKey = nextActiveKey || activeKey;
 		if (!tabs.length) return null;
 		return (
@@ -77,11 +77,12 @@ export default class SecondayClassfiy extends Component {
 									<div
 										className="yy-tabs-tab"
 										onMouseEnter={() => {
-											if (item.sub === '0') return;
-											if (tabIndex != currentKey) return;
-											this.setState({
-												hidePop: false,
-											});
+											this.mouseEnterTab(item, tabIndex);
+											// if (item.sub === '0') return;
+											// if (tabIndex != currentKey) return;
+											// this.setState({
+											// 	hidePop: false,
+											// });
 										}}
 										onClick={() =>
 											this.tabClick(item, tabIndex)
@@ -93,7 +94,7 @@ export default class SecondayClassfiy extends Component {
 								<Reclassifys
 									source={item.categories}
 									loading={item.sub * 1}
-									hidden={item.sub === '0' || hidePop}
+									hidden={item.sub === '0' || hideCate}
 									// onMouseLeave={() => {
 									// 	this.setState({
 									// 		hidePop: true,
@@ -158,28 +159,6 @@ export default class SecondayClassfiy extends Component {
 			hidePop: true,
 		});
 	}
-
-	UNSAFE_componentWillReceiveProps(nextProps) {
-		const { tabs, hidePop } = this.state;
-		const propsTab = nextProps.tabs || [];
-		const hideCate = nextProps.hideCate;
-		if (tabs.toString() !== propsTab.toString()) {
-			this.setState({
-				tabs: propsTab,
-			});
-		}
-		if (hidePop !== hideCate) {
-			this.setState({
-				hidePop: hideCate,
-			});
-		}
-
-		// if (selectedTags.toString() !== nextProps.selectedTags.toString()) {
-		// 	this.setState({
-		// 		selectedTags: nextProps.selectedTags,
-		// 	});
-		// }
-	}
 }
 
 export class Reclassifys extends Component {
@@ -187,8 +166,8 @@ export class Reclassifys extends Component {
 		const { source, renderItem = () => {}, hidden } = this.props;
 		return (
 			<div
-				className="categoriesBox"
-				hidden={hidden}
+				className={`categoriesBox ${hidden ? ' hideBox' : ''}`}
+				// hidden={hidden}
 				{...this.props.__proto__}>
 				{source ? source.map(renderItem) : this.renderSkeleton()}
 			</div>

@@ -6,15 +6,15 @@ const authorty = false;
 // 顶级路由
 const RoutersConfig = [
 	{
-		path: '/test',
-		component: () => import('./pages/TestPage'),
-		model: [],
-	},
-	{
 		path: '/',
 		component: () => import('./pages'),
-		model: [],
+		model: [import('./models/menus')],
 		routes: [
+			{
+				path: '/test',
+				component: () => import('./pages/TestPage'),
+				model: [],
+			},
 			{
 				path: '/home',
 				component: () => import('./pages/Home/Home'),
@@ -31,6 +31,19 @@ const RoutersConfig = [
 				component: () => import('./pages/YZone/YZone'),
 				authorty,
 				model: [],
+				routes: [
+					{
+						path: '/zone/list',
+						model: [],
+						component: () => import('./pages/YZone/list/ZoneList'),
+					},
+					{
+						path: '/zone/detail',
+						model: [],
+						component: () =>
+							import('./pages/YZone/detail/ZoneDetail'),
+					},
+				],
 			},
 			{
 				path: '/city',
@@ -82,6 +95,7 @@ const RoutersConfig = [
 ];
 
 function RouterConfig({ history, app }) {
+	console.log('RouterConfig');
 	return (
 		<Router history={history}>
 			<Switch>

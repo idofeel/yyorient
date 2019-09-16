@@ -7,18 +7,9 @@ import { connect } from 'dva';
 import api from '../../services/api';
 import routerKeys from '../common/PageConfig';
 
-@connect()
 class NavBar extends Component {
-	constructor(props) {
-		super(props);
-		const { menus = [] } = props.global || {};
-		this.state = {
-			menus,
-		};
-		this.menus = [];
-	}
 	render() {
-		const { menus } = this.state;
+		const { topCategory = [] } = this.props.menus || {};
 		const selectedKeys = this.setSelectKeys(
 			this.props.location.pathname || 'home',
 		);
@@ -29,7 +20,7 @@ class NavBar extends Component {
 					mode="horizontal"
 					// defaultSelectedKeys={selectedKeys}
 					selectedKeys={[selectedKeys]}>
-					{menus.map(({ key, path, name, className }) => (
+					{topCategory.map(({ key, path, name, className }) => (
 						<Menu.Item key={key} className={className}>
 							<Link to={path}>{name}</Link>
 						</Menu.Item>
@@ -38,12 +29,6 @@ class NavBar extends Component {
 			</nav>
 		);
 	}
-
-	// goPage(path) {
-	// 	// console.log(this.props.location.pathname === path);
-	// 	// if (this.props.location.pathname === path) return;
-	// 	this.props.history.push(path);
-	// }
 
 	getMenuData(item) {
 		const key = routerKeys[item.id] || 'home';
@@ -65,6 +50,12 @@ class NavBar extends Component {
 			return;
 		};
 	}
+
+	// shouldComponentUpdate() {
+	// 	console.log(...arguments);
+
+	// 	return true;
+	// }
 }
 
-export default connect()(NavBar);
+export default NavBar;
