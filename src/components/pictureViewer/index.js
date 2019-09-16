@@ -29,7 +29,7 @@ export default class PictureTool extends ScaleImg {
 		const {
 			drawerChange = () => {},
 			visible = false,
-			detailid,
+			// detailid,
 			backList = () => {},
 		} = props;
 		super(props, {
@@ -245,7 +245,7 @@ class AuthorInfo extends Component {
 	};
 	constructor(props) {
 		super(props);
-		const { bodyStyle, drawerShow = true, drawerChange, detailid } = props;
+		const { drawerShow = true, drawerChange } = props;
 		this.state = {
 			title: '',
 			data: [],
@@ -376,8 +376,8 @@ class AuthorInfo extends Component {
 		this.props.toggleDrawer();
 	}
 
-	UNSAFE_componentWillReceiveProps(nextProps) {
-		nextProps.drawerShow !== this.state.drawerShow &&
-			this.setState({ drawerShow: nextProps.drawerShow });
-	}
+	// UNSAFE_componentWillReceiveProps(nextProps) {
+	// 	nextProps.drawerShow !== this.state.drawerShow &&
+	// 		this.setState({ drawerShow: nextProps.drawerShow });
+	// }
 }

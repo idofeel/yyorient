@@ -1,21 +1,12 @@
 import React, { Component } from 'react';
-import {
-	Form,
-	Input,
-	Icon,
-	Select,
-	Row,
-	Col,
-	Button,
-	AutoComplete,
-} from 'antd';
+import { Form, Input, Icon, Row, Col, Button } from 'antd';
 
 // 样式加载
 import './register.less';
 import logo from 'images/logo.png';
 
-const { Option } = Select;
-const AutoCompleteOption = AutoComplete.Option;
+// const { Option } = Select;
+// const AutoCompleteOption = AutoComplete.Option;
 class Register extends Component {
 	state = {
 		confirmDirty: false,
@@ -55,7 +46,7 @@ class Register extends Component {
 
 	render() {
 		const { getFieldDecorator } = this.props.form;
-		const { autoCompleteResult } = this.state;
+		// const { autoCompleteResult } = this.state;
 
 		// const formItemLayout = {
 		// 	labelCol: {
@@ -217,7 +208,7 @@ class Register extends Component {
 							)}
 						</Col>
 						<Col span={9}>
-							<img src={logo} width="100%" />
+							<img src={logo} width="100%" alt="" />
 						</Col>
 					</Row>
 				</Form.Item>

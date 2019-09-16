@@ -112,23 +112,11 @@ export default class extends React.Component {
 			data.col
 		}.${data.ex || 'jpg'}`;
 	onReay() {}
-	onLoad() {}
-	UNSAFE_componentWillMount() {
-		// 文档碎片
-		this.onLoad();
-		// let { imgWidth, imgHeight } = this.getPictrueWidthAndHeight();
-
+	componentDidMount() {
 		this.scales = this.dataSource.map(
 			(item) => (item.imgw / this.initLoadData.imgw).toFixed(1) * 1,
 		);
 
-		// this.setState({
-		//     width: imgWidth,
-		//     height: imgHeight
-		// });
-	}
-
-	componentDidMount() {
 		this.onReay();
 		this.screenChange(); // 监听屏幕改变
 		this.reset(); // 重置
@@ -1043,7 +1031,7 @@ export default class extends React.Component {
 		clearTimeout(this.bounceTimer);
 	}
 	onUpdate() {}
-	componentDidUpdate(prevProps, prevState) {
+	UNSAFE_componentDidUpdate(prevProps, prevState) {
 		this.onUpdate(prevProps, prevState);
 	}
 }

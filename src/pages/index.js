@@ -4,10 +4,7 @@ import Header from './Header/Header';
 import SubRoutes, { RedirectRoute, NoMatchRoute } from '../utils/SubRoute';
 import './global.less';
 import { connect } from 'dva';
-import { get } from '../utils/request';
-import api from '../services/api';
-import PageConfig from './common/PageConfig';
-import Footer from './common/footer/index';
+// import Footer from './common/footer/index';
 // const { Header, Footer, Sider, Content } = Layout; //全局样式覆盖
 
 @connect()
@@ -31,7 +28,7 @@ class index extends Component {
 		);
 	}
 	componentDidMount() {
-		const { topCategory, secondaryMenu } = this.props.menus;
+		const { topCategory } = this.props.menus || {};
 		if (!topCategory.length) {
 			this.props.dispatch({
 				type: 'menus/setMenus',

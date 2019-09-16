@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
 import { connect } from 'dva';
 import Page from '../common/Page';
-import { Message, Carousel, Row, Tabs, Card, Icon, Avatar } from 'antd';
+import { Message, Carousel, Row, Tabs, Card, Icon } from 'antd';
 import Video from '../../components/Video/Video';
 import './famousDetails.less';
-import index from '../index';
 
 const { TabPane } = Tabs;
 const { Meta } = Card;
@@ -90,7 +89,7 @@ class FamousDetails extends Page {
 	callback() {}
 	selectTags(ids) {
 		this.setState({ loading: false });
-		if (this.state.selectedTags.toString() !== this.query.cateId) {
+		if (!this.query.cateId) {
 			this.props.history.push('/famous/list' + this.getPath(ids));
 		}
 	}
@@ -330,4 +329,6 @@ function FamouseResume(props) {
 	);
 }
 
-export default connect()(FamousDetails);
+const detailsProps = ({ menus }) => ({ menus });
+
+export default connect(detailsProps)(FamousDetails);

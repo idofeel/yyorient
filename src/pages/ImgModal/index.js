@@ -2,8 +2,6 @@ import React from 'react';
 import { Modal, Icon } from 'antd';
 import PicView from '../../components/pictureViewer';
 import './index.less';
-import { get } from '../../utils/request';
-import api from '../../services/api';
 
 /**
  * 带modal的查看器
@@ -141,9 +139,9 @@ class ModalPic extends React.Component {
 		if (this.state.visible === nextState.visible) return false;
 		return true;
 	}
-	UNSAFE_componentWillReceiveProps(nextProps) {
-		this.state.visible !== nextProps.visible && this.setState(nextProps);
-	}
+	// UNSAFE_componentWillReceiveProps(nextProps) {
+	// 	this.state.visible !== nextProps.visible && this.setState(nextProps);
+	// }
 
 	hideModal(e) {
 		this.setState({

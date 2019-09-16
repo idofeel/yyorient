@@ -15,7 +15,7 @@
  */
 
 import React, { Component } from 'react';
-import { Tabs, Anchor, Tag, Skeleton, Affix } from 'antd';
+import { Tabs, Tag, Skeleton, Affix } from 'antd';
 import './SecomdayClassfiy.less';
 const { TabPane } = Tabs;
 const { CheckableTag } = Tag;

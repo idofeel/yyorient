@@ -3,6 +3,7 @@
 	"scripts": {
 		"start": "roadhog server",
 		"build": "roadhog build",
+		"clean": "rm -rf node_modules && npm cache clean --force",
 		"lint": "eslint --ext .js src test",
 		"precommit": "npm run lint"
 	},

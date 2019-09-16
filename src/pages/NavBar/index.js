@@ -2,9 +2,6 @@ import React, { Component } from 'react';
 import { Menu } from 'antd';
 import { Link } from 'dva/router';
 import styles from './index.less';
-import { get } from '../../utils/request';
-import { connect } from 'dva';
-import api from '../../services/api';
 import routerKeys from '../common/PageConfig';
 
 class NavBar extends Component {

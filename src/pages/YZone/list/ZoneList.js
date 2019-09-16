@@ -3,13 +3,12 @@ import { connect } from 'dva';
 import InfiniteScroll from 'react-infinite-scroller';
 import Page from '../../common/Page';
 import PageConfig from '../../common/PageConfig';
-import { Typography, Card, Spin, Message } from 'antd';
+import { Card, Spin } from 'antd';
 import api, { RootBase } from '../../../services/api';
 import { get } from '../../../utils/request';
 import '../yzone.less';
+import { joinUrlEncoded } from '../../../utils';
 
-const { Title } = Typography;
-@connect()
 class YZoneList extends Page {
 	constructor(props) {
 		super(props, {
@@ -46,8 +45,7 @@ class YZoneList extends Page {
 							) : null
 						}
 						onClick={(item, index) => {
-							console.log(item, index);
-							this.loadDetails(item, index);
+							this.goDetailPage(item, index);
 						}}
 					/>
 				</InfiniteScroll>
@@ -55,6 +53,9 @@ class YZoneList extends Page {
 		);
 	}
 
+	onReady() {
+		this.initState();
+	}
 	initState(call = () => {}) {
 		this.setState(
 			{
@@ -67,7 +68,6 @@ class YZoneList extends Page {
 	}
 
 	selectTags(tagsId) {
-		this.initState();
 		this.loadZone(tagsId);
 	}
 
@@ -79,6 +79,7 @@ class YZoneList extends Page {
 		});
 		this.lastRenderIds = tagsId;
 		const res = await get(api.zone.list, { ids: tagsId, start });
+		this.replaceState();
 		const { data, success, faildesc } = res;
 
 		if (this.lastRenderIds.toString() === tagsId.toString()) {
@@ -91,7 +92,7 @@ class YZoneList extends Page {
 				return;
 			}
 
-			const source = data.map((item) => {
+			let source = data.map((item) => {
 				return {
 					title: item.sname,
 					desc: item.sname1,
@@ -100,7 +101,11 @@ class YZoneList extends Page {
 				};
 			});
 
-			this.setState({ source, loading: false, empty: false });
+			for (let i = 0; i < 20; i++) {
+				source[i] = source[0];
+			}
+
+			this.setState({ source, loading: false, empty: false }, () => {});
 		}
 	}
 
@@ -109,14 +114,24 @@ class YZoneList extends Page {
 		this.loadZone(selectedTags[activeKey], this.next);
 	}
 
-	loadDetails(item) {}
+	goDetailPage(item) {
+		console.log(item);
+		// const detailId = Math.random();
+		// const params = this.props.location.search || '';
+		const detailPath = joinUrlEncoded('/zone/detail' + this.getPath(), {
+			detailId: item.id,
+		});
+		this.props.history.push(detailPath);
+
+		// urlEncoded
+	}
 }
 
 function Special(props) {
 	const { titile = null } = props;
 	return (
 		<div className="specialPage">
-			{props.title}
+			{titile}
 			<ZoneItem {...props} />
 		</div>
 	);
@@ -154,7 +169,7 @@ class ZoneItem extends Component {
 							</h3>
 						}
 						bordered={false}>
-						<img src={RootBase + item.img} />
+						<img src={RootBase + item.img} alt="" />
 					</Card>
 				))}
 			</div>
@@ -162,4 +177,4 @@ class ZoneItem extends Component {
 	}
 }
 
-export default connect((params) => ({ ...params }))(YZoneList);
+export default connect(({ menus }) => ({ menus }))(YZoneList);

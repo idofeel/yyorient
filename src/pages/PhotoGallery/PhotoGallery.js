@@ -219,12 +219,9 @@ class PhotoGallery extends Page {
 		);
 	}
 
-	onLoad() {
+	onReady() {
 		this.arrayList = this.arrayList.map((i) => this.getItemStyle());
 		this.resize = this.resize.bind(this);
-	}
-
-	onReady() {
 		// this.setState({
 		// 	containerWidth: ReactDOM.findDOMNode(this.refs.container)
 		// 		.clientWidth,

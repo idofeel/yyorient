@@ -120,8 +120,12 @@ class Page extends Component {
 	renderFooter() {}
 	renderBody() {} // 渲染body 数据
 
-	getPath(ids = this.state.selectedTags, index = this.state.activeKey) {
-		return '?cateId=' + ids + '&cateIndex=' + index;
+	getPath(ids, index) {
+		const { selectedTags, activeKey } = this.state;
+		return joinUrlEncoded('', {
+			cateId: ids || selectedTags[activeKey],
+			cateIndex: index || activeKey,
+		});
 	}
 
 	replaceState() {
@@ -161,6 +165,7 @@ class Page extends Component {
 	readyLoad() {
 		const { selectedTags, activeKey } = this.state;
 		this.selectTags(selectedTags[activeKey]);
+		this.replaceState();
 	}
 
 	/**
@@ -172,7 +177,7 @@ class Page extends Component {
 	 */
 	async getCategory(id, index = 0, callback = () => {}) {
 		console.log('getCategory');
-		let { menuTabs, activeKey, selectedTags } = this.state;
+		let { menuTabs, selectedTags } = this.state;
 		let selectTags = []; // 三级初始选中的标签
 		const items = menuTabs[index];
 		if (items) {
@@ -213,7 +218,6 @@ class Page extends Component {
 			selectedTags[index],
 		);
 		selectedTags[index] = tagId.length ? tagId : [menuTabs[index].id];
-
 		this.setState(
 			{
 				menuTabs,
@@ -221,14 +225,16 @@ class Page extends Component {
 				activeKey: index + '',
 				hideCate: false,
 			},
-			() => this.readyLoad(),
+			() => {
+				this.readyLoad();
+			},
 		);
 	}
 
 	// 保证加载数据时 id 的唯一性,自动纠错
 	getOnlyTagId(categories, selectedTag) {
 		let tempTags = [];
-		categories.map((item) => {
+		categories.forEach((item) => {
 			// 当前tab分类的每一行数据保证直有一个选中
 			const temptag = item.data.filter((tags) => {
 				return selectedTag.filter((tag) => tag === tags.id)[0];
@@ -269,12 +275,20 @@ class Page extends Component {
 	onLoad() {}
 	UNSAFE_componentWillMount() {
 		this.getMenutabsData(); // 获取菜单数据
-		this.onLoad();
 	}
 
 	// 组件已加载 // 获取三级菜单
 	onReady() {}
 	async componentDidMount() {
+		const { menuTabs } = this.state;
+		const { secondaryMenu = [] } = this.props.menus || {};
+		const tabs = secondaryMenu[this.pageName] || [];
+		if (menuTabs.toString() !== tabs.toString()) {
+			this.setState({
+				menuTabs: tabs,
+			});
+		}
+
 		try {
 			const { activeKey, menuTabs } = this.state,
 				category = menuTabs[activeKey];

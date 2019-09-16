@@ -1,6 +1,6 @@
 exports.queryString = (url) => {
 	let param = url.split('?'),
-		type = (param[0] || '').split('://'),
+		// type = (param[0] || '').split('://'),
 		json = param.length > 0 ? parseUrl(param[1]) : {};
 	return json;
 };
@@ -23,7 +23,7 @@ const urlEncoded = (data) => {
 		if (!data.hasOwnProperty(k)) return;
 		let v = data[k];
 		if (typeof v === 'string') v = encodeURIComponent(v);
-		if (v == undefined) v = '';
+		if (v === undefined) v = '';
 		params.push(`${encodeURIComponent(k)}=${v}`);
 	}
 	return params.join('&');

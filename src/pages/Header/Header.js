@@ -1,6 +1,5 @@
 import React from 'react';
 import { Row, Col, Input, Icon, Avatar } from 'antd';
-import { connect } from 'dva';
 import NavBar from '../NavBar/index';
 import logo from 'images/logo.png';
 import style from './header.less';

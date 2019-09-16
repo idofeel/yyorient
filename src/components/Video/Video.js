@@ -4,7 +4,7 @@ import {
 	ControlBar,
 	BigPlayButton,
 	PlaybackRateMenuButton,
-	VolumeMenuButton,
+	// VolumeMenuButton,
 } from 'video-react';
 import 'video-react/dist/video-react.css';
 import './video.less';
@@ -15,9 +15,9 @@ export default class Video extends Component {
 		autoPlay: false,
 	};
 
-	constructor(props) {
-		super(props);
-	}
+	// constructor(props) {
+	// 	super(props);
+	// }
 
 	render() {
 		const { position, src, autoPlay } = this.props;
