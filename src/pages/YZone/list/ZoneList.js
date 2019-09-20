@@ -18,7 +18,7 @@ class YZoneList extends Page {
 	}
 	pageId = '3'; // 图库页对应名称
 	pageName = PageConfig[this.pageId]; // 图库页对应名称
-
+	pagePath = '/zone/list';
 	lastRenderIds = '';
 
 	renderBody() {
@@ -120,6 +120,14 @@ class YZoneList extends Page {
 		// const params = this.props.location.search || '';
 		const detailPath = joinUrlEncoded('/zone/detail' + this.getPath(), {
 			detailId: item.id,
+			name: item.title,
+		});
+		let { breadcrumb } = this.state;
+		breadcrumb.push({
+			path: detailPath,
+		});
+		this.setState({
+			breadcrumb,
 		});
 		this.props.history.push(detailPath);
 

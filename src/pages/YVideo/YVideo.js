@@ -1,7 +1,7 @@
 import { connect } from 'dva';
 import Page from '../common/Page';
 import Video from '../../components/Video/Video';
-@connect()
+
 class YVideo extends Page {
 	constructor(props) {
 		const state = {
@@ -11,6 +11,7 @@ class YVideo extends Page {
 	}
 	pageId = '4'; // 图库页对应id
 	pageName = 'video'; // 图库页对应名称
+	pagePath = '/video'; // 图库页对应名称
 
 	renderBody() {
 		const { src } = this.state;
@@ -18,7 +19,11 @@ class YVideo extends Page {
 	}
 
 	selectTags(ids) {
-		this.setState({ loading: false });
+		console.log(ids);
+		this.setState({ loading: false, empty: false });
 	}
 }
-export default connect()(YVideo);
+
+const videoProps = ({ menus }) => ({ menus });
+
+export default connect(videoProps)(YVideo);

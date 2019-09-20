@@ -12,4 +12,7 @@ class YCity extends Page {
 		return null;
 	}
 }
-export default connect()(YCity);
+
+const cityProps = ({ menus }) => ({ menus });
+
+export default connect(cityProps)(YCity);

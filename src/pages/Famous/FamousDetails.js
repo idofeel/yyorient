@@ -282,6 +282,9 @@ function FamousWorks(props) {
 					className="famousItem"
 					bordered={false}
 					hoverable={true}
+					onClick={()=>{
+						alert(1)
+					}}
 					cover={
 						<div className="imgBox">
 							<img alt="example" src={item.img} />

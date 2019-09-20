@@ -1,16 +1,21 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { connect } from 'dva';
+import { Message, Card } from 'antd';
 import Page from '../../common/Page';
 import PageConfig from '../../common/PageConfig';
-import { Message } from 'antd';
+import './zoneDetail.less';
+const { Meta } = Card;
+
 class ZoneDetail extends Page {
 	constructor(props) {
 		super(props, {
-			detailId: '',
+			bodyClass: 'bodyClass',
 		});
+		this.detailId = this.query.detailId;
 	}
 	pageId = '3'; // 图库页对应名称
 	pageName = PageConfig[this.pageId]; // 图库页对应名称
+	pagePath = '/zone/list';
 	onReady() {
 		this.setState({
 			detailId: this.getDetailId(),
@@ -29,17 +34,54 @@ class ZoneDetail extends Page {
 
 	renderBody() {
 		const { detailId } = this.state;
-		return <div>{detailId}</div>;
+		return <div className="zoneDetails"></div>;
 	}
 
 	selectTags(ids) {
-		this.setState({
-			loading: false,
-			empty: false,
-		});
+		if (this.query.cateId === ids.toString()) {
+			const { pathname, search } = this.props.location;
+			const breadcrumb = this.pushTrack({
+				name: this.query.name,
+				path: pathname + search,
+			});
+			this.setState({
+				loading: false,
+				empty: false,
+				breadcrumb,
+			});
+		} else {
+			this.props.history.push(this.pagePath + this.getPath());
+		}
 	}
 }
 
 const detailsProps = ({ menus }) => ({ menus });
 
 export default connect(detailsProps)(ZoneDetail);
+
+class detailsList extends Component {
+	static defaultProps = {
+		backList: () => {}, // 返回列表
+		addCollect: () => {}, // 添加收藏
+	};
+
+	render() {
+		return (
+			<Card
+				// key={index}
+				className="famousItem"
+				bordered={false}
+				hoverable={true}
+				onClick={() => {
+					alert(1);
+				}}
+				cover={
+					<div className="imgBox">
+						<img alt="example" src={'item.img'} />
+					</div>
+				}>
+				<Meta description={'123'} />
+			</Card>
+		);
+	}
+}

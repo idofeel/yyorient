@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import SecondayClassfiy from '../../components/SecondayClassfiy/SecondayClassfiy';
 import api from '../../services/api';
 import { get } from '../../utils/request';
-import { Spin, Empty } from 'antd';
+import { Spin, Empty, Breadcrumb } from 'antd';
 import './page.less';
 import { queryString, joinUrlEncoded } from '../../utils';
 /**
@@ -18,7 +18,7 @@ import { queryString, joinUrlEncoded } from '../../utils';
 class Page extends Component {
 	constructor(props, state) {
 		super(props);
-		const { secondaryMenu = [] } = props.menus || {};
+		const { secondaryMenu = {}, topCategory = [] } = props.menus || {};
 		const menuTabs = secondaryMenu[this.pageName] || [];
 		const { cateId = '', cateIndex: activeKey } = queryString(
 			this.props.location.search,
@@ -27,6 +27,10 @@ class Page extends Component {
 			cateids = cateId.split(',');
 		if (cateids.toString()) selectedTags[activeKey] = cateids;
 
+		// const breadcrumb = topCategory.filter(
+		// 	(item) => item.path === props.location.pathname,
+		// );
+
 		this.state = {
 			menuTabs,
 			activeKey: activeKey || '0', // 初始展示的菜单
@@ -34,9 +38,12 @@ class Page extends Component {
 			selectedTags,
 			loading: true,
 			empty: false,
-			hideCate: false,
+			hideCate: true,
+			breadcrumb: [],
+			showBreadcrumb: true,
 			...state,
 		};
+
 		this.query = queryString(this.props.location.search);
 		this.pageId = props.pageId || this.pageId;
 		this.pageName = props.pageName || this.pageName;
@@ -44,12 +51,56 @@ class Page extends Component {
 
 		this.loading = this.state.loading || true;
 		this.empty = this.state.empty || false;
+		console.log(this);
 	}
 	loadMenu = true; // 是否加载菜单
 	// loading = true; //页面loading状态 存在时将不能加载内容
 	// empty = false; //页面empty展示的状态
+
 	pageId = '0'; // 图库页对应id
 	pageName = 'home'; // 图库页对应名称
+	pagePath = '/home';
+
+	getBreadcrumb() {
+		const { topCategory = [] } = this.props.menus || {};
+
+		// const tabs = secondaryMenu[this.pageName] || [];
+
+		// const { activeKey } = this.state;
+
+		// 一级菜单
+		let breadcrumb = topCategory.filter(
+			(item) => this.props.location.pathname.indexOf(item.path) > -1,
+		);
+		breadcrumb.unshift({
+			name: '首页',
+			path: '/home',
+		});
+		// // 二级菜单
+		// this.setBreadcrumb;
+		// let temptabs = tabs[tabIndex || activeKey];
+		// temptabs.path = this.getPath();
+		// breadcrumb.push();
+
+		return breadcrumb;
+	}
+	setBreadcrumb(ids, tabIndex) {
+		const tabs = this.state.menuTabs[tabIndex];
+		return {
+			name: tabs.name,
+			path: this.pagePath + this.getPath(ids, tabIndex),
+		};
+	}
+
+	/**
+	 *
+	 * @param {object} params path | name
+	 */
+	pushTrack(params) {
+		let { breadcrumb } = this.state;
+		breadcrumb.push(params);
+		return breadcrumb;
+	}
 
 	render() {
 		const {
@@ -59,6 +110,8 @@ class Page extends Component {
 			hideCate,
 			loading,
 			empty,
+			breadcrumb,
+			showBreadcrumb,
 		} = this.state;
 		return (
 			<div className="yyPage">
@@ -77,14 +130,28 @@ class Page extends Component {
 						hideCate={hideCate}
 					/>
 				)}
+
 				{
 					<div
 						ref="container"
+						className={this.state.bodyClass}
 						onMouseEnter={() => {
-							this.setState({
-								hideCate: true,
-							});
+							!this.state.hideCate &&
+								this.setState({
+									hideCate: true,
+								});
 						}}>
+						{showBreadcrumb && (
+							<Breadcrumb separator=">" className="pageBreadcumb">
+								{breadcrumb.map((item, index) => (
+									<Breadcrumb.Item
+										key={index}
+										href={'#' + item.path}>
+										{item.name}
+									</Breadcrumb.Item>
+								))}
+							</Breadcrumb>
+						)}
 						{empty ? (
 							<Empty
 								image={Empty.PRESENTED_IMAGE_SIMPLE}
@@ -113,18 +180,28 @@ class Page extends Component {
 
 	// 二级菜单tab发生变化
 	tabChange(item, index) {
+		let breadcrumb = this.getBreadcrumb();
+		breadcrumb.push(this.setBreadcrumb('', index));
+		this.setState({
+			breadcrumb,
+			loading: true,
+			empty: false,
+		});
 		// const tagid = item.sub < 1 ? [item.id] : [];
 		this.getCategory(item.id, index);
 	}
 
 	renderFooter() {}
-	renderBody() {} // 渲染body 数据
+	renderBody() {
+		return null;
+	} // 渲染body 数据
 
 	getPath(ids, index) {
 		const { selectedTags, activeKey } = this.state;
+		const cateIndex = index || index == 0 ? index : activeKey;
 		return joinUrlEncoded('', {
 			cateId: ids || selectedTags[activeKey],
-			cateIndex: index || activeKey,
+			cateIndex,
 		});
 	}
 
@@ -165,7 +242,6 @@ class Page extends Component {
 	readyLoad() {
 		const { selectedTags, activeKey } = this.state;
 		this.selectTags(selectedTags[activeKey]);
-		this.replaceState();
 	}
 
 	/**
@@ -176,7 +252,7 @@ class Page extends Component {
 	 * @param {Function} callback 默认 false 是否加载图库数据
 	 */
 	async getCategory(id, index = 0, callback = () => {}) {
-		console.log('getCategory');
+		console.log('getCategory', index);
 		let { menuTabs, selectedTags } = this.state;
 		let selectTags = []; // 三级初始选中的标签
 		const items = menuTabs[index];
@@ -218,12 +294,17 @@ class Page extends Component {
 			selectedTags[index],
 		);
 		selectedTags[index] = tagId.length ? tagId : [menuTabs[index].id];
+		let breadcrumb = this.getBreadcrumb();
+		breadcrumb.push(this.setBreadcrumb(selectedTags[index], index));
 		this.setState(
 			{
 				menuTabs,
 				selectedTags,
 				activeKey: index + '',
 				hideCate: false,
+				loading: false,
+				empty: false,
+				breadcrumb,
 			},
 			() => {
 				this.readyLoad();
@@ -291,7 +372,8 @@ class Page extends Component {
 
 		try {
 			const { activeKey, menuTabs } = this.state,
-				category = menuTabs[activeKey];
+				category = menuTabs[activeKey] || tabs[activeKey];
+
 			if (category) {
 				await this.getCategory(category.id, activeKey); // 初始加载分类数据
 			}

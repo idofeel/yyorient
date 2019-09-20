@@ -139,9 +139,9 @@ class ModalPic extends React.Component {
 		if (this.state.visible === nextState.visible) return false;
 		return true;
 	}
-	// UNSAFE_componentWillReceiveProps(nextProps) {
-	// 	this.state.visible !== nextProps.visible && this.setState(nextProps);
-	// }
+	UNSAFE_componentWillReceiveProps(nextProps) {
+		this.state.visible !== nextProps.visible && this.setState(nextProps);
+	}
 
 	hideModal(e) {
 		this.setState({
