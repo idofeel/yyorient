@@ -302,7 +302,7 @@ class Page extends Component {
 				selectedTags,
 				activeKey: index + '',
 				hideCate: false,
-				loading: false,
+				// loading: false,
 				empty: false,
 				breadcrumb,
 			},
@@ -376,9 +376,9 @@ class Page extends Component {
 
 			if (category) {
 				await this.getCategory(category.id, activeKey); // 初始加载分类数据
+				this.onReady();
 			}
 		} catch (error) {}
-		this.onReady();
 	}
 
 	// 组件接收参数

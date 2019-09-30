@@ -3,5 +3,118 @@
         max-width: 1200px;
         background: #fff;
         margin: 0 auto;
+
+    }
+
+    .zoneDetails {
+        text-align: left;
+        padding: 10px;
+        border-top: 1px solid #eee;
+
+        >h3 {
+            margin-bottom: 0;
+        }
+
+        .toolsBar {
+            display: flex;
+            justify-content: space-between;
+
+            .tools {
+                display: inline-block;
+
+                span {
+                    color: #c8c8c8;
+                    margin-right: 15px;
+                    cursor: pointer;
+
+                    .anticon {
+                        color: inherit;
+                        margin-right: 5px;
+                    }
+                }
+            }
+        }
+    }
+
+    .carouselBox {
+        position: relative;
+
+        .detailCarousel {
+            border: @primary-border;
+
+            .slick-slide {
+                text-align: center;
+                height: auto;
+                // line-height: 160px;
+                // background: #364d79;
+                overflow: hidden;
+            }
+
+            .slick-slide h3 {
+                color: #fff;
+            }
+
+            .imgItem {
+                height: 500px;
+
+
+                .img {
+                    max-width: 100%;
+                    max-height: 100%;
+                    margin: 0 auto;
+                }
+            }
+        }
+
+        .caroTools {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+        }
+
+        .prev,
+        .next {
+            position: absolute;
+            top: 50%;
+            height: 88px;
+            background: #c8c8c8;
+            width: 40px;
+            text-align: center;
+            vertical-align: middle;
+            transform: translateY(-50%);
+            line-height: 88px;
+            font-weight: 800;
+            font-size: 16px;
+            color: #fff;
+        }
+
+        .prev {
+            left: 0;
+        }
+
+        .next {
+            right: 0;
+        }
+
+
+    }
+
+    .desc {
+        margin-top: 20px;
+
+
+        .ant-typography {
+            font-size: 32px;
+            color: @primary-color;
+        }
+
+        .pageNum {
+            border-right: @primary-border;
+            font-size: 14px;
+            padding-right: 30px;
+            margin-right: 20px;
+        }
+
     }
 }

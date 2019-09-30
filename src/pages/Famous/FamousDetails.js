@@ -4,6 +4,7 @@ import Page from '../common/Page';
 import { Message, Carousel, Row, Tabs, Card, Icon } from 'antd';
 import Video from '../../components/Video/Video';
 import './famousDetails.less';
+import AutoCard from '../common/autoCard/autoCard';
 
 const { TabPane } = Tabs;
 const { Meta } = Card;
@@ -167,7 +168,7 @@ function FamousWorks(props) {
 			{
 				img:
 					'https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png',
-				detail: [
+				meta: [
 					{ name: '名称', content: '内容' },
 					{ name: '规格', content: '150*200' },
 					{ name: '年代', content: '去年' },
@@ -176,7 +177,7 @@ function FamousWorks(props) {
 			{
 				img:
 					'https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png',
-				detail: [
+				meta: [
 					{ name: '名称', content: '内容' },
 					{ name: '规格', content: '150*200' },
 					{ name: '年代', content: '去年' },
@@ -185,7 +186,7 @@ function FamousWorks(props) {
 			{
 				img:
 					'https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png',
-				detail: [
+				meta: [
 					{ name: '名称', content: '内容' },
 					{ name: '规格', content: '150*200' },
 					{ name: '年代', content: '去年' },
@@ -194,7 +195,7 @@ function FamousWorks(props) {
 			{
 				img:
 					'https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png',
-				detail: [
+				meta: [
 					{ name: '名称', content: '内容' },
 					{ name: '规格', content: '150*200' },
 					{ name: '年代', content: '去年' },
@@ -203,7 +204,7 @@ function FamousWorks(props) {
 			{
 				img:
 					'https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png',
-				detail: [
+				meta: [
 					{ name: '名称', content: '内容' },
 					{ name: '规格', content: '150*200' },
 					{ name: '年代', content: '去年' },
@@ -212,7 +213,7 @@ function FamousWorks(props) {
 			{
 				img:
 					'https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png',
-				detail: [
+				meta: [
 					{ name: '名称', content: '内容' },
 					{ name: '规格', content: '150*200' },
 					{ name: '年代', content: '去年' },
@@ -221,7 +222,7 @@ function FamousWorks(props) {
 			{
 				img:
 					'https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png',
-				detail: [
+				meta: [
 					{ name: '名称', content: '内容' },
 					{ name: '规格', content: '150*200' },
 					{ name: '年代', content: '去年' },
@@ -230,7 +231,7 @@ function FamousWorks(props) {
 			{
 				img:
 					'https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png',
-				detail: [
+				meta: [
 					{ name: '名称', content: '内容' },
 					{ name: '规格', content: '150*200' },
 					{ name: '年代', content: '去年' },
@@ -239,7 +240,7 @@ function FamousWorks(props) {
 			{
 				img:
 					'https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png',
-				detail: [
+				meta: [
 					{ name: '名称', content: '内容' },
 					{ name: '规格', content: '150*200' },
 					{ name: '年代', content: '去年' },
@@ -248,7 +249,7 @@ function FamousWorks(props) {
 			{
 				img:
 					'https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png',
-				detail: [
+				meta: [
 					{ name: '名称', content: '内容' },
 					{ name: '规格', content: '150*200' },
 					{ name: '年代', content: '去年' },
@@ -257,7 +258,7 @@ function FamousWorks(props) {
 			{
 				img:
 					'https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png',
-				detail: [
+				meta: [
 					{ name: '名称', content: '内容' },
 					{ name: '规格', content: '150*200' },
 					{ name: '年代', content: '去年' },
@@ -266,7 +267,7 @@ function FamousWorks(props) {
 			{
 				img:
 					'https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png',
-				detail: [
+				meta: [
 					{ name: '名称', content: '内容' },
 					{ name: '规格', content: '150*200' },
 					{ name: '年代', content: '去年' },
@@ -274,6 +275,20 @@ function FamousWorks(props) {
 			},
 		],
 	} = props;
+
+	return (
+		<AutoCard
+			source={famousWorks}
+			cardCover={true}
+			renderMeta={(item, index) => {
+				return item.meta.map((meta, idx) => (
+					<p key={idx}>
+						{meta.name}:{meta.content}
+					</p>
+				));
+			}}
+		/>
+	);
 	return (
 		<div className="famousWorks">
 			{famousWorks.map((item, index) => (
@@ -282,8 +297,8 @@ function FamousWorks(props) {
 					className="famousItem"
 					bordered={false}
 					hoverable={true}
-					onClick={()=>{
-						alert(1)
+					onClick={() => {
+						alert(1);
 					}}
 					cover={
 						<div className="imgBox">
