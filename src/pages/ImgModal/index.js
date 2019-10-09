@@ -98,24 +98,22 @@ class ModalPic extends React.Component {
 				bodyStyle={{ height: '100%', padding: 0 }}
 				cancelButtonProps={<Icon type="left" />}
 				destroyOnClose={true}>
-				{visible && (
-					<PicView
-						uri={this.props.uri}
-						options={this.props.options}
-						drawerChange={(isShow) => {
-							isShow ? this.rmShowPop() : this.showPop();
-						}}
-						visible={visible}
-						dataSource={dataSource}
-						authorInfo={authorInfo}
-						detailid={this.state.detailid}
-						backList={() => {
-							this.hideModal();
-							this.props.hideModal();
-						}}
-						addCollect={() => {}}
-					/>
-				)}
+				<PicView
+					uri={this.props.uri}
+					options={this.props.options}
+					drawerChange={(isShow) => {
+						isShow ? this.rmShowPop() : this.showPop();
+					}}
+					visible={visible}
+					dataSource={dataSource}
+					authorInfo={authorInfo}
+					detailid={this.state.detailid}
+					backList={() => {
+						this.hideModal();
+						this.props.hideModal();
+					}}
+					addCollect={() => {}}
+				/>
 			</Modal>
 		);
 	}

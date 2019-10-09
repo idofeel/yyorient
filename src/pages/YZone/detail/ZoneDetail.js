@@ -1,13 +1,27 @@
 import React, { Component, PureComponent } from 'react';
 import { connect } from 'dva';
-import { Message, Icon, Row, Carousel, Typography, List } from 'antd';
+import {
+	Message,
+	Icon,
+	Row,
+	Carousel,
+	Typography,
+	List,
+	Modal,
+	Drawer,
+} from 'antd';
 import Page from '../../common/Page';
 import PageConfig from '../../common/PageConfig';
 import { get } from '../../../utils/request';
 import api, { RootBase } from '../../../services/api';
 
-import './zoneDetail.less';
 import AutoCard from '../../common/autoCard/autoCard';
+// import YModal from '../../../components/ymodal/ymodal';
+import Video from '../../../components/Video/Video';
+import FullscreenModal from '../../common/fullscreenModal/fullscreenModal';
+import BannerList from '../../common/BannerList/BannerList';
+
+import './zoneDetail.less';
 
 const { Text } = Typography;
 
@@ -84,7 +98,7 @@ class ZoneDetail extends Page {
 									列表查看
 								</span>
 								<span>|</span>
-								<span>
+								<span onClick={() => this.openModal()}>
 									<Icon type="fullscreen" />
 									全屏查看
 								</span>
@@ -97,10 +111,54 @@ class ZoneDetail extends Page {
 					source={detailData}
 					title={title}
 				/>
+				<FullscreenModal
+					type={this.state.mode}
+					title={title}
+					detailData={detailData}
+					visible={this.state.visible}
+					onCancel={() => this.closeModal()}
+				/>
 			</Row>
 		);
 	}
+	openModal() {
+		this.fullScreen();
 
+		this.setState({
+			visible: true,
+		});
+	}
+
+	// 全屏显示
+	fullScreen() {
+		const de = document.documentElement;
+		if (de.requestFullscreen) {
+			de.requestFullscreen();
+		} else if (de.mozRequestFullScreen) {
+			de.mozRequestFullScreen();
+		} else if (de.webkitRequestFullScreen) {
+			de.webkitRequestFullScreen();
+		}
+	}
+
+	// 退出全屏
+	exitFullscreen() {
+		const de = document;
+		if (de.exitFullscreen) {
+			de.exitFullscreen();
+		} else if (de.mozCancelFullScreen) {
+			de.mozCancelFullScreen();
+		} else if (de.webkitCancelFullScreen) {
+			de.webkitCancelFullScreen();
+		}
+	}
+
+	closeModal() {
+		this.setState({
+			visible: false,
+		});
+		this.exitFullscreen();
+	}
 	changeMode(mode) {
 		if (mode === this.state.mode) return;
 		this.setState({
@@ -177,10 +235,11 @@ class ZoneItem extends PureComponent {
 				)}
 				ItemStyle={{
 					height: 300,
-					width: 284,
+					width: 280,
 				}}
 				coverStyle={{
-					height: 237,
+					height: 240,
+					width: 280,
 					padding: 40,
 				}}
 			/>
@@ -188,89 +247,97 @@ class ZoneItem extends PureComponent {
 	}
 
 	carousel() {
-		return <DetailCarousel {...this.props} />;
+		return <BannerList {...this.props} height={500} />;
 	}
 }
+exports.ZoneItem = ZoneItem;
 
-class DetailCarousel extends Component {
-	static defaultProps = { source: [] };
+// class DetailCarousel extends Component {
+// 	static defaultProps = { source: [], beforeChange: () => {} };
 
-	state = {
-		currentIndex: 1,
-		data: [
-			// {
-			// 	title:'',
-			// 	currentIndex,
-			// 	totalLen,
-			// 	desc: source[currentIndex - 1].desc,
-			// },
-		],
-	};
-	carousel = null;
-	render() {
-		const { source, title } = this.props,
-			{ currentIndex, data } = this.state;
-		const totalLen = source.length;
+// 	state = {
+// 		currentIndex: 1,
+// 		data: [
+// 			// {
+// 			// 	title:'',
+// 			// 	currentIndex,
+// 			// 	totalLen,
+// 			// 	desc: source[currentIndex - 1].desc,
+// 			// },
+// 		],
+// 	};
+// 	carousel = null;
+// 	render() {
+// 		const { source, title, height } = this.props;
+// 		const totalLen = source.length;
 
-		return (
-			<>
-				<div className="carouselBox">
-					<Carousel
-						ref={(ref) => (this.carousel = ref)}
-						className="detailCarousel"
-						dots={false}
-						beforeChange={(form, to) =>
-							this.beforeChange(form, to)
-						}>
-						{source.map((item, index) => (
-							<div className="imgItem" key={index}>
-								<img src={item.img} className="img" />
-							</div>
-						))}
-					</Carousel>
-					<Icon
-						type="left"
-						className="prev"
-						onClick={() => this.carousel.prev()}
-					/>
-					<Icon
-						type="right"
-						className="next"
-						onClick={() => this.carousel.next()}
-					/>
-				</div>
-				<List
-					itemLayout="horizontal"
-					dataSource={[
-						{
-							currentIndex,
-							totalLen,
-							title,
-							desc: source[currentIndex - 1].desc,
-						},
-					]}
-					className="desc"
-					renderItem={(item) => (
-						<List.Item>
-							<List.Item.Meta
-								avatar={
-									<div className="pageNum">
-										<Text type="warning">
-											{item.currentIndex}
-										</Text>
-										/ {item.totalLen}
-									</div>
-								}
-								title={item.title}
-								description={item.desc}
-							/>
-						</List.Item>
-					)}
-				/>
-			</>
-		);
-	}
-	beforeChange(prev, next) {
-		this.setState({ currentIndex: next + 1 });
-	}
-}
+// 		return (
+// 			<>
+// 				<div className="carouselBox">
+// 					<Carousel
+// 						ref={(ref) => (this.carousel = ref)}
+// 						className="detailCarousel"
+// 						dots={false}
+// 						beforeChange={(form, to) =>
+// 							this.beforeChange(form, to)
+// 						}>
+// 						{source.map((item, index) => (
+// 							<div>
+// 								<div
+// 									className="imgItem"
+// 									style={{ height }}
+// 									key={index}>
+// 									<img src={item.img} className="img" />
+// 								</div>
+// 							</div>
+// 						))}
+// 					</Carousel>
+// 					<Icon
+// 						type="left"
+// 						className="prev"
+// 						onClick={() => this.carousel.prev()}
+// 					/>
+// 					<Icon
+// 						type="right"
+// 						className="next"
+// 						onClick={() => this.carousel.next()}
+// 					/>
+// 				</div>
+// 				{/* <List
+// 					itemLayout="horizontal"
+// 					dataSource={[
+// 						{
+// 							currentIndex,
+// 							totalLen,
+// 							title,
+// 							desc: source[currentIndex - 1].desc,
+// 						},
+// 					]}
+// 					className="desc"
+// 					renderItem={(item) => (
+// 						<List.Item>
+// 							<List.Item.Meta
+// 								avatar={
+// 									<div className="pageNum">
+// 										<Text type="warning">
+// 											{item.currentIndex}
+// 										</Text>
+// 										/ {item.totalLen}
+// 									</div>
+// 								}
+// 								title={item.title}
+// 								description={item.desc}
+// 							/>
+// 						</List.Item>
+// 					)}
+// 				/> */}
+// 			</>
+// 		);
+// 	}
+// 	beforeChange(prev, next) {
+// 		this.props.beforeChange(prev, next);
+// 		this.setState({ currentIndex: next + 1 });
+// 	}
+// }
+
+// exports.DetailCarousel = DetailCarousel;

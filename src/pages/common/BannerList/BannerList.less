@@ -1,0 +1,69 @@
+:gloabl {
+
+    .bannerList {
+        .carouselBox {
+            position: relative;
+
+            .detailCarousel {
+                border: @primary-border;
+
+                .slick-slide {
+                    text-align: center;
+                    height: auto;
+                    // line-height: 160px;
+                    // background: #364d79;
+                    overflow: hidden;
+                }
+
+                .slick-slide h3 {
+                    color: #fff;
+                }
+
+                .imgItem {
+                    max-height: 100%;
+
+
+                    .img {
+                        max-width: 100%;
+                        max-height: 100%;
+                        margin: 0 auto;
+                    }
+                }
+            }
+
+            .caroTools {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                top: 0;
+            }
+
+            .prev,
+            .next {
+                position: absolute;
+                top: 50%;
+                height: 88px;
+                background: #c8c8c8;
+                width: 40px;
+                text-align: center;
+                vertical-align: middle;
+                transform: translateY(-50%);
+                line-height: 88px;
+                font-weight: 800;
+                font-size: 16px;
+                color: #fff;
+            }
+
+            .prev {
+                left: 0;
+            }
+
+            .next {
+                right: 0;
+            }
+
+
+        }
+
+    }
+}

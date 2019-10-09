@@ -1,0 +1,111 @@
+:global {
+
+    .Ymodal {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+
+        .ant-modal {
+            height: 100%;
+            overflow: hidden;
+
+            .ant-modal-content {
+                border-radius: 0;
+                height: 100%;
+                overflow: hidden;
+            }
+
+            .ant-modal-body {
+                height: 100%;
+                overflow: hidden;
+                padding: 0;
+            }
+        }
+
+        .modalClose {
+            font-size: 24px;
+            padding: 20px;
+            position: fixed;
+            top: 0;
+            right: 0;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .carouselBox {
+            .detailCarousel {
+                border: none;
+            }
+
+            .prev,
+            .next {
+                font-size: 24px;
+                background: #000;
+                width: auto;
+                height: auto;
+                padding: 30px 10px;
+                background: rgba(200, 200, 200, 0.05);
+                color: @deafult-color;
+            }
+
+            .prev:hover,
+            .next:hover {
+                background: rgba(200, 200, 200, 0.1)
+            }
+        }
+    }
+
+
+    .desc {
+        margin-top: 20px;
+
+
+        .ant-typography {
+            font-size: 32px;
+            color: @primary-color;
+        }
+
+        .pageNum {
+            border-right: @primary-border;
+            font-size: 14px;
+            padding-right: 30px;
+            margin-right: 20px;
+            color: @deafult-color;
+        }
+
+        .ant-list-item-meta-title,
+        .ant-list-item-meta-description,
+        .ant-empty-description {
+            color: @deafult-color;
+        }
+
+        .ant-list-item-meta-content {
+            max-height: 70px;
+            overflow: scroll;
+        }
+    }
+
+    .yDrawer {
+        .desc {
+            margin: 0;
+        }
+
+        .ant-drawer-body {
+            padding: 0 10px;
+            margin: 0;
+            background: #000;
+            color: @deafult-color;
+        }
+    }
+
+
+    @media (max-width: 767px) {
+        .Ymodal {
+            .ant-modal {
+                max-width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+        }
+    }
+}

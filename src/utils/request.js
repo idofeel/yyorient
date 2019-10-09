@@ -1,4 +1,5 @@
 import fetch from 'dva/fetch';
+import { RootBase } from '../services/api';
 import { joinUrlEncoded } from '.';
 
 function parseJSON(response) {
@@ -23,10 +24,13 @@ function checkStatus(response) {
  * @return {object}           An object containing either "data" or "err"
  */
 export default function request(url, options) {
-	return fetch('http://47.104.79.113' + url, options)
+	return fetch(RootBase + url, options)
 		.then(checkStatus)
 		.then(parseJSON)
-		.then((data) => data)
+		.then((data) => {
+			// console.log((window.location.href = '/'));
+			return data;
+		})
 		.catch((err) => ({ err }));
 }
 

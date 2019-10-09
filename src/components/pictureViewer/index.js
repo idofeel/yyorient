@@ -140,6 +140,7 @@ export default class PictureTool extends ScaleImg {
 	}
 
 	toggleDrawer() {
+		console.log(!this.state.drawerShow, this.props.visible);
 		this.setState({
 			drawerShow: !this.state.drawerShow,
 		});
@@ -261,7 +262,7 @@ class AuthorInfo extends Component {
 
 	render() {
 		const { title, data, details } = this.state;
-		const { bodyStyle } = this.props;
+		const { bodyStyle, drawerShow } = this.props;
 		return (
 			<div className="imgInfo">
 				<Drawer
@@ -277,7 +278,7 @@ class AuthorInfo extends Component {
 							/>
 						</div>
 					}
-					visible={this.state.drawerShow} //
+					visible={drawerShow} //
 					mask={false}
 					maskStyle={{ opacity: 0, background: 'none' }}
 					closable={false}
