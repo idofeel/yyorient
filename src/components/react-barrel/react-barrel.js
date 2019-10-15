@@ -88,23 +88,22 @@ class ReactBarrel extends Component {
 	 * 窗口重置事件，重新初始化渲染
 	 */
 	resize() {
+		if (this.totalWidth === this.getAutoWidh()) return;
 		this.totalWidth = this.props.width || this.getAutoWidh(); // 重置高度
 		this.initRender(this.firstLoadData);
 	}
 
 	/**
 	 *
-	 * @param {*} data
+	 * @param {[{width,height,src}]}} data
 	 */
 	initRender(data) {
 		this.firstLoadData = data; // 保留初始化加载的数据，当屏幕重置时重新计算
 		// 获取行高一样的图片数据
 		const rowHeights = this.getStandardHeight(data);
-		console.log(this.totalWidth);
-		// 定义图片的宽度总和
-		let wholeWidth = 0;
-		let barrelData = [];
-		let tempBarrel = [];
+		let barrelData = []; // 最终渲染的数据
+		let wholeWidth = 0; // 计算一行图片的宽度总和
+		let tempBarrel = []; // 临时存储一行的数据
 		rowHeights.forEach((item) => {
 			// 最小高度
 			let minHeight = (wholeWidth / this.totalWidth) * this.baseHeight,
@@ -113,14 +112,13 @@ class ReactBarrel extends Component {
 			wholeWidth += item.width;
 			// 将数据放入渲染
 			tempBarrel.push(item);
+			// 是否够一行数据
 			if (wholeWidth > this.totalWidth) {
 				// 已经够一行的数据
-				// 最大高度
-				maxHeight = (wholeWidth / this.totalWidth) * this.baseHeight;
-				// 最小高度和基础高度差
-				const minh = this.baseHeight - minHeight;
-				// 最大高度和基础高度差
-				const maxh = maxHeight - this.baseHeight;
+				maxHeight = (wholeWidth / this.totalWidth) * this.baseHeight; // 最大高度
+
+				const minh = this.baseHeight - minHeight, // 最小高度和基础高度差
+					maxh = maxHeight - this.baseHeight; // 最大高度和基础高度差
 
 				if (maxh < minh) {
 					// 超出部分离基础值最近
@@ -140,11 +138,17 @@ class ReactBarrel extends Component {
 		});
 
 		barrelData.push(...tempBarrel); //将剩余的不够一行的数据追加到最后
+
+		// 渲染数据
 		this.setState({
 			barrelData,
 		});
 	}
-
+	/**
+	 * @method 按总宽度获取一行的平均高度
+	 * @param {width,height,src} tempBarrel
+	 * @returns {width,height,src,marign}
+	 */
 	getBarrel(tempBarrel) {
 		if (!tempBarrel.length) return tempBarrel;
 		let sumWidth =
@@ -167,6 +171,11 @@ class ReactBarrel extends Component {
 		return res;
 	}
 
+	/**
+	 *
+	 * @param {*} currentWidth
+	 * @param {*} baseHeight
+	 */
 	barrelLayout(currentWidth, baseHeight = this.baseHeight) {
 		return (currentWidth / this.totalWidth) * baseHeight;
 	}
@@ -174,6 +183,7 @@ class ReactBarrel extends Component {
 	/**
 	 *	1.根据获取的实际宽高设置成标准高度
 	 * @param {[{width:number,height:number,src:string}]} imgwh 图片的宽高
+	 * @returns {width,height,src,margin} // 返回标准高度的等比例
 	 */
 	getStandardHeight(
 		imgwh,
@@ -197,6 +207,7 @@ class ReactBarrel extends Component {
 	/**
 	 * 0.获取图片真实宽高
 	 * @param {*} url 图片地址
+	 * @returns {Promise}  res {width,height,src}
 	 */
 	getImgInfo(url) {
 		return new Promise((resolve, reject) => {

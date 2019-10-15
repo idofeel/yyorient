@@ -2,6 +2,7 @@ import { connect } from 'dva';
 import Page from '../common/Page';
 import ReactBarrel from '../../components/react-barrel/react-barrel';
 import './ycity.less';
+import MouseDirection from '../../components/MouseDiretion/MouseDirection';
 
 @connect()
 class YCity extends Page {
@@ -13,22 +14,36 @@ class YCity extends Page {
 	renderBody() {
 		return (
 			<div>
+				<MouseDirection />
 				<ReactBarrel
 					wrapClassName="barrel_container"
 					margin={10}
-					// renderItem={(item, index) => {
-					// 	const imgProps = {
-					// 		key: index,
-					// 		src: item.src,
-					// 		style: {
-					// 			width: item.width,
-					// 			height: item.height,
-					// 			marginRight: item.margin,
-					// 			marginBottom: this.margin,
-					// 		},
-					// 	};
-					// 	return <img {...imgProps} />;
-					// }}
+					loadMode=""
+					renderItem={(item, index) => {
+						const imgProps = {
+							key: index,
+							src: item.src,
+							style: {
+								width: item.width,
+								height: item.height,
+							},
+						};
+						return (
+							<div style={{ display: 'inline-block' }}>
+								<MouseDirection
+									wrapClassName=""
+									bodyStyle={{
+										marginRight: item.margin,
+										marginBottom: 10,
+									}}
+									onMouseDirection={() => {
+										console.log(...arguments, item);
+									}}>
+									<img {...imgProps} />
+								</MouseDirection>
+							</div>
+						);
+					}}
 				/>
 			</div>
 		);
