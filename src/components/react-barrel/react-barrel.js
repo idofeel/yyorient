@@ -1,18 +1,25 @@
 import React, { Component } from 'react';
 
-let fakeData = ['http://yy.aijk.xyz/rs/img//1/1/1-2_0_0.jpg'];
-for (let i = 1; i < 37; i++) {
-	fakeData[i] = require(`./images/${i}.jpg`);
-}
-
-fakeData[37] = ['http://yy.aijk.xyz/rs/img//1/1/1-2_0_0.jpg'];
-
 /**
  *
  *
  * @class ReactBarrel
  * @extends {Component}
  *
+ * api
+ *
+ * params 			default		type		desc
+ *
+ * wrapClassName	''			String		外层容器的类名，用于修改样式
+ * baseHeight  		250			Number		基础高度
+ * totalWidth		null		Number		继承父级的宽度
+ * margin			5			Number		设置每个元素之间的间距
+ * children 		null		ReactNode
+ * data				[item]		Array		渲染的数据，加载的类型不一样数组的item也不一样（item的数据格式参考loadMethod参数）
+ * autoload			true		Boolean		自动加载图片，自动从图片中获取宽高，进行布局(注：{src)
+ * 					false		Boolean		关闭自动加载。item为Object，格式：{width,height}
+ *
+ * renderItem	(item,index)=>{}	function	自定义渲染，回调item，index 样式包含在item中，用于进行自定义调整。
  *
  */
 
@@ -20,10 +27,11 @@ class ReactBarrel extends Component {
 	// 默认传入的参数
 	static defaultProps = {
 		baseHeight: 250, // 基础高度
-		imgUrls: fakeData || [], // 数据
-		margin: 5,
+		data: [], // 数据
+		margin: 5, // 图片间的间距
 		totalWidth: null,
 		wrapClassName: '', // 外层容器的类名
+		autoload: true, // 自动加载图片
 	};
 	constructor(props) {
 		super(props);
@@ -34,9 +42,11 @@ class ReactBarrel extends Component {
 		this.totalWidth = props.width; // 木桶布局总宽度
 		this.baseHeight = props.baseHeight; // 基础高度
 		this.margin = props.margin; // 图片之间间距
-
+		this.autoload = props.autoload === undefined ? true : props.autoload; // 自动加载
 		this.resize = this.resize.bind(this); // 绑定事件 窗口重置事件
 		this.BarrelContainer = React.createRef();
+		if (props.renderItem && typeof props.renderItem !== 'function')
+			throw 'renderItem is a not function';
 		this.renderItem = props.renderItem || this.renderItem;
 	}
 	render() {
@@ -61,14 +71,16 @@ class ReactBarrel extends Component {
 				marginBottom: this.margin,
 			},
 		};
-		return <img {...imgProps} />;
+		return <img {...imgProps} alt="" />;
 	}
 	async componentDidMount() {
 		this.totalWidth = this.totalWidth || this.getAutoWidh();
 		// 获取所有来源的图片实际宽高
-		const data = await Promise.all(
-			fakeData.map((item) => this.getImgInfo(item)),
-		);
+		let { data } = this.props;
+		data = this.autoload
+			? await Promise.all(data.map((item) => this.getImgInfo(item.src)))
+			: data;
+		console.log(data);
 		this.initRender(data);
 		// 监听屏幕变化
 		window.addEventListener('resize', this.resize);
@@ -76,8 +88,9 @@ class ReactBarrel extends Component {
 	}
 
 	getAutoWidh() {
-		const dom = this.BarrelContainer.current,
-			style = window.getComputedStyle(dom),
+		const dom = this.BarrelContainer.current;
+		if (!dom) return 0;
+		const style = window.getComputedStyle(dom),
 			width =
 				dom.offsetWidth -
 				parseInt(style.paddingLeft) -
@@ -101,6 +114,7 @@ class ReactBarrel extends Component {
 		this.firstLoadData = data; // 保留初始化加载的数据，当屏幕重置时重新计算
 		// 获取行高一样的图片数据
 		const rowHeights = this.getStandardHeight(data);
+
 		let barrelData = []; // 最终渲染的数据
 		let wholeWidth = 0; // 计算一行图片的宽度总和
 		let tempBarrel = []; // 临时存储一行的数据
@@ -213,17 +227,36 @@ class ReactBarrel extends Component {
 		return new Promise((resolve, reject) => {
 			let img = new Image();
 			img.src = url;
-			let timer = setInterval(function() {
+			const run = () => {
 				if (img.width > 0 || img.height > 0) {
 					resolve({
 						width: img.width,
 						height: img.height,
 						src: url,
 					});
-					clearInterval(timer);
+				} else {
+					window.requestAnimationFrame(run);
 				}
-			}, 50);
+			};
+			run();
+
+			// let timer = setInterval(function () {
+
+			// 	if (img.width > 0 || img.height > 0) {
+			// 		resolve({
+			// 			width: img.width,
+			// 			height: img.height,
+			// 			src: url,
+			// 		});
+			// 		clearInterval(timer);
+			// 	}
+			// }, 50);
 		});
+	}
+	componentWillUnmount() {
+		this.setState = (state, callback) => {
+			return;
+		};
 	}
 }
 

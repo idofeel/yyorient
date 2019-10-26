@@ -9,11 +9,12 @@ import Page from '../common/Page';
 import PageConfig from '../common/PageConfig';
 import './photoGallery.less';
 import { Spin, Card, Typography, Icon, message, Divider } from 'antd';
+import ReactBarrel from '../../components/react-barrel';
 
 const { Meta } = Card;
 
 const IconFont = Icon.createFromIconfontCN({
-	scriptUrl: '//at.alicdn.com/t/font_1396747_qda951ow38.js',
+	scriptUrl: '//at.alicdn.com/t/font_1466546_e5rpye7uors.js',
 });
 
 message.config({
@@ -194,7 +195,7 @@ class PhotoGallery extends Page {
 										}}
 									/>
 									<IconFont
-										type="yyorientcollect-copy"
+										type="icon-collect"
 										className={`yy-collect ${
 											i.fav ? 'yy-collect-active' : ''
 										}`}

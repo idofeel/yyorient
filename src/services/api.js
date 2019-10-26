@@ -23,7 +23,7 @@ export default {
 	},
 	// 视频类接口
 	video: {
-		list: '/y=video&d=list', //{ids,start} 视频列表
+		list: '/?y=video&d=list', //{ids,start} 视频列表
 	},
 	// 空间接口
 	zone: {

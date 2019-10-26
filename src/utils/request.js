@@ -1,7 +1,12 @@
 import fetch from 'dva/fetch';
 import { RootBase } from '../services/api';
 import { joinUrlEncoded } from '.';
-
+import { Message } from 'antd';
+Message.config({
+	top: 100,
+	duration: 2,
+	maxCount: 3,
+});
 function parseJSON(response) {
 	return response.json();
 }
@@ -28,6 +33,8 @@ export default function request(url, options) {
 		.then(checkStatus)
 		.then(parseJSON)
 		.then((data) => {
+			if (data.success === false && data.faildesc !== '')
+				Message.warning(data.faildesc);
 			// console.log((window.location.href = '/'));
 			return data;
 		})

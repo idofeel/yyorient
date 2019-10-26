@@ -1,8 +1,16 @@
 import { connect } from 'dva';
 import Page from '../common/Page';
-import ReactBarrel from '../../components/react-barrel/react-barrel';
+import ReactBarrel from '../../components/react-barrel';
 import './ycity.less';
 import MouseDirection from '../../components/MouseDiretion/MouseDirection';
+import InfiniteScroll from 'react-infinite-scroller';
+
+let fakeData = [{ src: 'http://yy.aijk.xyz/rs/img//1/1/1-2_0_0.jpg' }];
+for (let i = 1; i < 37; i++) {
+	fakeData[i] = { src: require(`./images/${i}.jpg`) };
+}
+
+fakeData[37] = { src: 'http://yy.aijk.xyz/rs/img//1/1/1-2_0_0.jpg' };
 
 @connect()
 class YCity extends Page {
@@ -12,13 +20,22 @@ class YCity extends Page {
 	pageName = 'city'; // 图库页对应名称
 
 	renderBody() {
+		return <div>{this.renderBarrel()}</div>;
+	}
+
+	renderBarrel() {
 		return (
-			<div>
-				<MouseDirection />
+			<InfiniteScroll
+				initialLoad={false}
+				pageStart={0}
+				hasMore={true}
+				loadMore={() => {
+					this.loadMore();
+				}}>
 				<ReactBarrel
 					wrapClassName="barrel_container"
 					margin={10}
-					loadMode=""
+					data={fakeData}
 					renderItem={(item, index) => {
 						const imgProps = {
 							key: index,
@@ -26,11 +43,17 @@ class YCity extends Page {
 							style: {
 								width: item.width,
 								height: item.height,
+								marginRight: item.margin,
 							},
 						};
 						return (
-							<div style={{ display: 'inline-block' }}>
-								<MouseDirection
+							<div
+								key={index}
+								style={{
+									float: 'left',
+									marginBottom: 10,
+								}}>
+								{/* <MouseDirection
 									wrapClassName=""
 									bodyStyle={{
 										marginRight: item.margin,
@@ -38,18 +61,35 @@ class YCity extends Page {
 									}}
 									onMouseDirection={() => {
 										console.log(...arguments, item);
-									}}>
-									<img {...imgProps} />
-								</MouseDirection>
+									}}> */}
+								<img {...imgProps} />
+								<div>123123</div>
+								{/* </MouseDirection> */}
 							</div>
 						);
 					}}
 				/>
-			</div>
+			</InfiniteScroll>
 		);
 	}
-	onReady() {
+
+	renderGraphic() {
+		return null;
+	}
+
+	renderList() {
+		return null;
+	}
+
+	selectTags(item) {
 		this.setState({ loading: false });
+		this.getData();
+	}
+	pageStart = 0; //起始页
+
+	getData() {}
+	loadMore() {
+		console.log('load');
 	}
 }
 

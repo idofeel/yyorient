@@ -350,3 +350,5 @@ function FamouseResume(props) {
 const detailsProps = ({ menus }) => ({ menus });
 
 export default connect(detailsProps)(FamousDetails);
+
+exports.VideoList = FamousVideo;
