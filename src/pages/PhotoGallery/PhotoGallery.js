@@ -42,7 +42,7 @@ class PhotoGallery extends Page {
 		this.pageId = '2'; // 图库页对应id
 		this.pageName = PageConfig[this.pageId]; // 图库页对应名称
 		this.pagePath = '/photo'; // 图库页对应名称
-		// console.log('PhotoGallery', props);
+		console.log('PhotoGallery', props);
 	}
 
 	arrayList = [

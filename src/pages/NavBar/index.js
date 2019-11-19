@@ -3,6 +3,7 @@ import { Menu } from 'antd';
 import { Link } from 'dva/router';
 import styles from './index.less';
 import routerKeys from '../common/PageConfig';
+import { connect } from 'dva';
 
 class NavBar extends Component {
 	render() {
@@ -14,7 +15,7 @@ class NavBar extends Component {
 			<nav className={styles.navbar}>
 				<Menu
 					className={styles.navmenu}
-					mode="horizontal"
+					mode='horizontal'
 					// defaultSelectedKeys={selectedKeys}
 					selectedKeys={[selectedKeys]}>
 					{topCategory.map(({ key, path, name, className }) => (
@@ -55,4 +56,4 @@ class NavBar extends Component {
 	// }
 }
 
-export default NavBar;
+export default connect((menus) => ({ ...menus }))(NavBar);

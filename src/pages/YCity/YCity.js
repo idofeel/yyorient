@@ -33,7 +33,7 @@ class YCity extends Page {
 					this.loadMore();
 				}}>
 				<ReactBarrel
-					wrapClassName="barrel_container"
+					wrapClassName='barrel_container'
 					margin={10}
 					data={fakeData}
 					renderItem={(item, index) => {

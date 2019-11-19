@@ -25,7 +25,7 @@ class YZoneList extends Page {
 		const { selectedTags = [], activeKey, source, hasMore } = this.state;
 		const specialTitle = selectedTags[activeKey].indexOf('16') > -1;
 		return (
-			<div className="yyZone">
+			<div className='yyZone'>
 				<InfiniteScroll
 					initialLoad={false}
 					pageStart={this.next}
@@ -33,12 +33,12 @@ class YZoneList extends Page {
 						this.loadMore();
 					}}
 					hasMore={hasMore}
-					loader={<Spin key="loader" />}>
+					loader={<Spin key='loader' />}>
 					<Special
 						source={source}
 						title={
 							specialTitle ? (
-								<div className="pageTitle">
+								<div className='pageTitle'>
 									<h3>空间精选</h3>
 									<h4>···· SPECIAL ····</h4>
 								</div>
@@ -138,7 +138,7 @@ class YZoneList extends Page {
 function Special(props) {
 	const { titile = null } = props;
 	return (
-		<div className="specialPage">
+		<div className='specialPage'>
 			{titile}
 			<ZoneItem {...props} />
 		</div>
@@ -162,22 +162,22 @@ class ZoneItem extends Component {
 			],
 		} = this.props;
 		return (
-			<div className="zoneItemContainer">
+			<div className='zoneItemContainer'>
 				{source.map((item, index) => (
 					<Card
 						key={index}
-						className="zoneItem"
+						className='zoneItem'
 						onClick={() => {
 							this.props.onClick(item, index);
 						}}
 						title={
-							<h3 className="zoneItemTitle">
+							<h3 className='zoneItemTitle'>
 								{item.title}
 								<span> {item.desc}</span>
 							</h3>
 						}
 						bordered={false}>
-						<img src={RootBase + item.img} alt="" />
+						<img src={RootBase + item.img} alt='' />
 					</Card>
 				))}
 			</div>
@@ -185,4 +185,4 @@ class ZoneItem extends Component {
 	}
 }
 
-export default connect(({ menus }) => ({ menus }))(YZoneList);
+export default connect()(YZoneList);

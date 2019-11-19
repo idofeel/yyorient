@@ -36,7 +36,7 @@ class Page extends Component {
 			activeKey: activeKey || '0', // 初始展示的菜单
 			nextActiveKey: '',
 			selectedTags,
-			loading: true,
+			loading: false,
 			empty: false,
 			hideCate: true,
 			breadcrumb: [],
@@ -49,9 +49,9 @@ class Page extends Component {
 		this.pageName = props.pageName || this.pageName;
 		this.selectTags = props.selectTags || this.selectTags || function() {};
 
-		this.loading = this.state.loading || true;
+		this.loading = false;
 		this.empty = this.state.empty || false;
-		console.log(this);
+		console.log('Page', this.props);
 	}
 	loadMenu = true; // 是否加载菜单
 	// loading = true; //页面loading状态 存在时将不能加载内容
@@ -114,62 +114,72 @@ class Page extends Component {
 			showBreadcrumb,
 		} = this.state;
 		return (
-			<div className="yyPage">
-				{this.loadMenu && (
-					<SecondayClassfiy
-						tabChange={(item, index) => this.tabChange(item, index)}
-						tabs={menuTabs}
-						mouseEnterTab={(item, index) =>
-							this.mouseEnterTab(item, index)
-						}
-						selectOptions={(item, key, tags) =>
-							this.selectOptions(item, key, tags)
-						}
-						activeKey={activeKey}
-						selectedTags={selectedTags}
-						hideCate={hideCate}
-					/>
+			<div className='yyPage'>
+				{this.loadMenu && !!menuTabs.length ? null : null}
+				{this.loadMenu && !!menuTabs.length && (
+					<>
+						<SecondayClassfiy
+							tabChange={(item, index) =>
+								this.tabChange(item, index)
+							}
+							tabs={menuTabs}
+							mouseEnterTab={(item, index) =>
+								this.mouseEnterTab(item, index)
+							}
+							selectOptions={(item, key, tags) =>
+								this.selectOptions(item, key, tags)
+							}
+							activeKey={activeKey}
+							selectedTags={selectedTags}
+							hideCate={hideCate}
+						/>
+						<div
+							ref='container'
+							className={this.state.bodyClass}
+							onMouseEnter={() => {
+								!this.state.hideCate &&
+									this.setState({
+										hideCate: true,
+									});
+							}}>
+							{showBreadcrumb && (
+								<Breadcrumb
+									separator='>'
+									className='pageBreadcumb'>
+									{breadcrumb.map((item, index) => (
+										<Breadcrumb.Item
+											key={index}
+											href={'#' + item.path}>
+											{item.name}
+										</Breadcrumb.Item>
+									))}
+								</Breadcrumb>
+							)}
+							{empty ? (
+								<Empty
+									image={Empty.PRESENTED_IMAGE_SIMPLE}
+									description={
+										empty === true ? '暂无数据' : empty
+									}
+								/>
+							) : loading ? (
+								<Spin spinning={loading} size='large'></Spin>
+							) : (
+								this.renderBody()
+							)}
+						</div>
+					</>
 				)}
-
-				{
-					<div
-						ref="container"
-						className={this.state.bodyClass}
-						onMouseEnter={() => {
-							!this.state.hideCate &&
-								this.setState({
-									hideCate: true,
-								});
-						}}>
-						{showBreadcrumb && (
-							<Breadcrumb separator=">" className="pageBreadcumb">
-								{breadcrumb.map((item, index) => (
-									<Breadcrumb.Item
-										key={index}
-										href={'#' + item.path}>
-										{item.name}
-									</Breadcrumb.Item>
-								))}
-							</Breadcrumb>
-						)}
-						{empty ? (
-							<Empty
-								image={Empty.PRESENTED_IMAGE_SIMPLE}
-								description={
-									empty === true ? '暂无数据' : empty
-								}
-							/>
-						) : loading ? (
-							<Spin spinning={loading} size="large"></Spin>
-						) : (
-							this.renderBody()
-						)}
-					</div>
-				}
 				{this.renderFooter()}
 			</div>
 		);
 	}
+
+	renderMenus() {
+		return;
+	}
+
+	renderContent() {}
 	mouseEnterTab(item, index) {
 		// 没有子元素，或不是当前tab
 		if (item.sub === '0' || index !== this.state.activeKey * 1) return;
@@ -251,7 +261,7 @@ class Page extends Component {
 	 * @param {Number} index 默认 0  全部
 	 * @param {Function} callback 默认 false 是否加载图库数据
 	 */
-	async getCategory(id, index = 0, callback = () => {}) {
+	async getCategory(id, index = this.state.activeKey, callback = () => {}) {
 		console.log('getCategory', index);
 		let { menuTabs, selectedTags } = this.state;
 		let selectTags = []; // 三级初始选中的标签
@@ -341,14 +351,19 @@ class Page extends Component {
 		this.empty = status.empty;
 	}
 	// 获取菜单数据
-	getMenutabsData(props = this.props) {
-		const { menuTabs } = this.state;
+	async getMenutabsData(props = this.props) {
+		const { menuTabs, activeKey } = this.state;
 		const { secondaryMenu = [] } = props.menus || {};
 		const tabs = secondaryMenu[this.pageName] || [];
 		if (menuTabs.toString() !== tabs.toString()) {
-			this.setState({
-				menuTabs: tabs,
-			});
+			this.setState(
+				{
+					menuTabs: tabs,
+				},
+				() => {
+					this.getCategory(tabs[activeKey].id);
+				},
+			);
 		}
 	}
 
@@ -384,7 +399,7 @@ class Page extends Component {
 	// 组件接收参数
 	onReceive() {}
 	UNSAFE_componentWillReceiveProps(nextProps) {
-		// this.getMenutabsData(nextProps);
+		this.getMenutabsData(nextProps);
 		this.onReceive(...arguments);
 	}
 

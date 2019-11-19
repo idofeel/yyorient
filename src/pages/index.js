@@ -7,7 +7,6 @@ import { connect } from 'dva';
 // import Footer from './common/footer/index';
 // const { Header, Footer, Sider, Content } = Layout; //全局样式覆盖
 
-@connect()
 class index extends Component {
 	render() {
 		const { routes, app } = this.props;
@@ -28,12 +27,9 @@ class index extends Component {
 		);
 	}
 	componentDidMount() {
-		const { topCategory } = this.props.menus || {};
-		if (!topCategory.length) {
-			this.props.dispatch({
-				type: 'menus/setMenus',
-			});
-		}
+		this.props.dispatch({
+			type: 'menus/setMenus',
+		});
 	}
 	componentWillUnmount() {
 		this.setState = (state, callback) => {
@@ -42,4 +38,4 @@ class index extends Component {
 	}
 }
 
-export default connect((menus) => ({ ...menus }))(index);
+export default connect()(index);

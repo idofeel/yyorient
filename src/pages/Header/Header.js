@@ -4,6 +4,8 @@ import NavBar from '../NavBar/index';
 import logo from 'images/logo.png';
 import style from './header.less';
 import { Link } from 'dva/router';
+import { connect } from 'dva';
+
 const Search = Input.Search;
 
 class yyHeader extends React.Component {
@@ -11,7 +13,7 @@ class yyHeader extends React.Component {
 		const { isLogin = false } = this.props;
 		return (
 			<header className={style.header}>
-				<Row type="flex" justify="space-around" align="middle">
+				<Row type='flex' justify='space-around' align='middle'>
 					<Col
 						xs={8}
 						sm={6}
@@ -19,11 +21,11 @@ class yyHeader extends React.Component {
 						lg={4}
 						xl={3}
 						className={style.logo}>
-						<Link to="/">
+						<Link to='/'>
 							<img
 								src={logo}
-								title="雅韵东方官网"
-								alt="雅韵东方官网"
+								title='雅韵东方官网'
+								alt='雅韵东方官网'
 							/>
 						</Link>
 					</Col>
@@ -33,25 +35,25 @@ class yyHeader extends React.Component {
 					<Col xs={6} sm={5} md={4} lg={4} xl={4}>
 						<Col xs={24} sm={20} md={18} lg={16} xl={14}>
 							<Search
-								size="small"
-								placeholder=""
+								size='small'
+								placeholder=''
 								onSearch={(value) => console.log(value)}
 								enterButton
-								className="searchIcon"
+								className='searchIcon'
 							/>
 						</Col>
 						<Col span={24}>
 							{isLogin ? (
 								<>
-									<Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />
+									<Avatar src='https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png' />
 									<span>{this.props.uname}</span>
 								</>
 							) : (
 								<>
-									<Icon type="user" className={style.icon} />
-									<Link to="/login">登录</Link>
+									<Icon type='user' className={style.icon} />
+									<Link to='/login'>登录</Link>
 									<span>/</span>
-									<Link to="/register">注册</Link>
+									<Link to='/register'>注册</Link>
 								</>
 							)}
 						</Col>

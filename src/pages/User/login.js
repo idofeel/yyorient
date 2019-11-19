@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'dva';
 import { Form, Input, Button, Checkbox, Icon, Message } from 'antd';
-import { email_reg } from '../../utils/Regexp';
+import { email_reg, user_name } from '../../utils/Regexp';
 import './login.less';
 
 @connect()
@@ -15,7 +15,7 @@ class Login extends Component {
 						rules: [
 							{ required: true, message: '请输入您的用户名' },
 							{
-								pattern: email_reg,
+								pattern: user_name,
 								validator: this.validatorForm,
 								message:
 									'请输入正确的邮箱格式,如: 375163888@qq.com',
