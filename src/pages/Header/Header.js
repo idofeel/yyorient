@@ -7,7 +7,7 @@ import { Link } from 'dva/router';
 import { connect } from 'dva';
 
 const Search = Input.Search;
-
+@connect(({menus})=>({menus}))
 class yyHeader extends React.Component {
 	render() {
 		const { isLogin = false } = this.props;
@@ -62,6 +62,7 @@ class yyHeader extends React.Component {
 			</header>
 		);
 	}
+	
 }
 
 export default yyHeader;

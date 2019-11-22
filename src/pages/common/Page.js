@@ -262,7 +262,6 @@ class Page extends Component {
 	 * @param {Function} callback 默认 false 是否加载图库数据
 	 */
 	async getCategory(id, index = this.state.activeKey, callback = () => {}) {
-		console.log('getCategory', index);
 		let { menuTabs, selectedTags } = this.state;
 		let selectTags = []; // 三级初始选中的标签
 		const items = menuTabs[index];

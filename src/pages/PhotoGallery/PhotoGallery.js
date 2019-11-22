@@ -10,7 +10,9 @@ import PageConfig from '../common/PageConfig';
 import './photoGallery.less';
 import { Spin, Card, Typography, Icon, message, Divider } from 'antd';
 import ReactBarrel from '../../components/react-barrel';
+import index from './index';
 
+console.log(index);
 const { Meta } = Card;
 
 const IconFont = Icon.createFromIconfontCN({
@@ -114,8 +116,8 @@ class PhotoGallery extends Page {
 	renderBody() {
 		const { source, detailid, picLoading } = this.state;
 		return (
-			<div className="AutoresponsiveContainer">
-				<Spin spinning={picLoading} size="large">
+			<div className='AutoresponsiveContainer'>
+				<Spin spinning={picLoading} size='large'>
 					{this.renderPicList()}
 				</Spin>
 				{source.length ? (
@@ -152,7 +154,7 @@ class PhotoGallery extends Page {
 							this.loadMore();
 						}}
 						hasMore={hasMore}
-						loader={<Spin key="loader" />}>
+						loader={<Spin key='loader' />}>
 						<Autoresponsive {...AutoResponsiveProps}>
 							{picList.map((i, index) => (
 								// <div
@@ -171,7 +173,7 @@ class PhotoGallery extends Page {
 										width: i.imgw,
 										height: i.imgh * 1 + 80,
 									}}
-									className="picitem"
+									className='picitem'
 									cover={
 										<img
 											src={RootBase + i.img}
@@ -195,7 +197,7 @@ class PhotoGallery extends Page {
 										}}
 									/>
 									<IconFont
-										type="icon-collect"
+										type='icon-collect'
 										className={`yy-collect ${
 											i.fav ? 'yy-collect-active' : ''
 										}`}
@@ -213,7 +215,7 @@ class PhotoGallery extends Page {
 							))}
 						</Autoresponsive>
 					</InfiniteScroll>
-					<Divider hidden={hasMore} className="noMore">
+					<Divider hidden={hasMore} className='noMore'>
 						别扒拉了，我们是有底线的！
 					</Divider>
 				</div>

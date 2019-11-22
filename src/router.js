@@ -16,13 +16,18 @@ const RoutersConfig = [
 				model: [],
 			},
 			{
+				path: '/photo',
+				component: () => import('./pages/PhotoGallery'),
+				model: [],
+			},
+			{
 				path: '/home',
 				component: () => import('./pages/Home/Home'),
 				model: [],
 				redirect: true,
 			},
 			{
-				path: '/photo',
+				path: '/gallery',
 				component: () => import('./pages/PhotoGallery/PhotoGallery'),
 				model: [],
 			},
@@ -59,19 +64,19 @@ const RoutersConfig = [
 			},
 			{
 				path: '/famous',
-				component: () => import('./pages/Famous/Famous'),
+				component: () => import('./pages/Famous'),
 				authorty,
 				model: [],
 				routes: [
 					{
 						path: '/famous/list',
 						model: [import('./models/famous_model')],
-						component: () => import('./pages/Famous/FamousList'),
+						component: () => import('./pages/Famous/list'),
 					},
 					{
 						path: '/famous/detail',
 						model: [],
-						component: () => import('./pages/Famous/FamousDetails'),
+						component: () => import('./pages/Famous/detail'),
 					},
 				],
 			},

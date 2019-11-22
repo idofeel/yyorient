@@ -7,6 +7,7 @@ import { connect } from 'dva';
 // import Footer from './common/footer/index';
 // const { Header, Footer, Sider, Content } = Layout; //全局样式覆盖
 
+@connect()
 class index extends Component {
 	render() {
 		const { routes, app } = this.props;
@@ -38,4 +39,4 @@ class index extends Component {
 	}
 }
 
-export default connect()(index);
+export default index;

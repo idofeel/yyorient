@@ -1,38 +1,22 @@
 import React, { Component } from 'react';
-import { connect } from 'dva';
-import Page from '../common/Page';
 import { Message, Carousel, Row, Tabs, Card, Icon } from 'antd';
 import Video from '../../components/Video/Video';
-import './famousDetails.less';
 import AutoCard from '../common/autoCard/autoCard';
+import TopMenus from '../../layout/page/index';
+import { queryString } from '../../utils';
+
+import './famousDetails.less';
 
 const { TabPane } = Tabs;
 const { Meta } = Card;
-@connect()
-class FamousDetails extends Page {
-	constructor(props) {
-		super(props, {
-			source: 'https://media.w3.org/2010/05/sintel/trailer_hd.mp4',
-		});
 
-		this.detailId = this.getDetailId();
-	}
-
-	pageId = '5'; // 图库页对应名称
-	pageName = 'famous'; // 图库页对应名称
-
-	// 获取名家详情页id
-	getDetailId() {
-		if (!this.query.detailId) {
-			Message.error('缺少作家ID参数，无法获取详情！');
-			return this.props.history.length > 2
-				? this.props.history.go(-1)
-				: this.props.history.push('/famous');
-		}
-		return this.query.detailId;
-	}
-
-	renderBody() {
+class FamouseDetail extends Component {
+	pageName = 'famous';
+	state = {
+		loading: true,
+	};
+	detailId = this.getDetailId();
+	render() {
 		const famousTab = [
 			{ name: '艺术简历', id: '', resume: {} },
 			{ name: '作品欣赏', id: '' },
@@ -40,25 +24,37 @@ class FamousDetails extends Page {
 			{ name: '相关视频', id: '' },
 		];
 		return (
-			<div className='famousDetails'>
-				<Row className='famousContainer'>
-					<h3>这是谁来着</h3>
-					<Carousel autoplay>
-						<div>
-							<h3>1</h3>
-						</div>
-					</Carousel>
-					<div className='famous_tab'>
-						<Tabs defaultActiveKey='0' onChange={this.callback}>
-							{famousTab.map((item, index) => (
-								<TabPane tab={item.name} key={index}>
-									{this.renderTabItem(item, index)}
-								</TabPane>
-							))}
-						</Tabs>
+			<>
+				<TopMenus
+					pageName={this.pageName}
+					{...this.props}
+					cateIdsLoad={this.cateIdsLoad}
+					tabChange={this.tabChange}
+					showBreadcrumb={true}
+					loading={this.state.loading}>
+					<div className='famousDetails'>
+						<Row className='famousContainer'>
+							<h3>这是谁来着</h3>
+							<Carousel autoplay>
+								<div>
+									<h3>1</h3>
+								</div>
+							</Carousel>
+							<div className='famous_tab'>
+								<Tabs
+									defaultActiveKey='0'
+									onChange={this.callback}>
+									{famousTab.map((item, index) => (
+										<TabPane tab={item.name} key={index}>
+											{this.renderTabItem(item, index)}
+										</TabPane>
+									))}
+								</Tabs>
+							</div>
+						</Row>
 					</div>
-				</Row>
-			</div>
+				</TopMenus>
+			</>
 		);
 	}
 
@@ -86,14 +82,28 @@ class FamousDetails extends Page {
 		};
 		return component[index] || null;
 	}
-
-	callback() {}
-	selectTags(ids) {
-		this.setState({ loading: false });
-		if (!this.query.cateId) {
-			this.props.history.push('/famous/list' + this.getPath(ids));
+	// 获取名家详情页id
+	getDetailId() {
+		const { detailId, c, cid } = queryString(this.props.location.search);
+		if (!detailId) {
+			Message.error('缺少作家ID参数，无法获取详情！');
+			return this.props.history.length > 2
+				? this.props.history.go(-1)
+				: this.props.history.push('/famous');
 		}
+		return detailId;
 	}
+
+	cateIdsLoad = ({ selectIds, tabIndex }) => {
+		console.log(selectIds, tabIndex);
+		// this.lastIds = selectIds;
+		this.setState({ loading: false });
+		// if (!this.query.cateId) {
+		// 	this.props.history.push('/famous/list');
+		// }
+	};
+
+	tabChange() {}
 }
 
 class FamousVideo extends Component {
@@ -347,8 +357,6 @@ function FamouseResume(props) {
 	);
 }
 
-const detailsProps = ({ menus }) => ({ menus });
-
-export default connect(detailsProps)(FamousDetails);
-
 exports.VideoList = FamousVideo;
+
+export default FamouseDetail;

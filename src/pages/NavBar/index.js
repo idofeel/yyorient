@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { Menu } from 'antd';
 import { Link } from 'dva/router';
 import styles from './index.less';
-import routerKeys from '../common/PageConfig';
 import { connect } from 'dva';
 
 class NavBar extends Component {
@@ -19,8 +18,17 @@ class NavBar extends Component {
 					// defaultSelectedKeys={selectedKeys}
 					selectedKeys={[selectedKeys]}>
 					{topCategory.map(({ key, path, name, className }) => (
-						<Menu.Item key={key} className={className}>
-							<Link to={path}>{name}</Link>
+						<Menu.Item
+							key={key}
+							className={className}
+							onClick={() => {
+								this.props.dispatch({
+									type: 'menus/removeCategories',
+									payload: key,
+								});
+								this.props.history.push(path);
+							}}>
+							{name}
 						</Menu.Item>
 					))}
 				</Menu>
@@ -28,19 +36,10 @@ class NavBar extends Component {
 		);
 	}
 
-	getMenuData(item) {
-		const key = routerKeys[item.id] || 'home';
-		return {
-			...item,
-			path: '/' + key,
-			key,
-			name: item.name,
-		};
-	}
 	setSelectKeys(pathname) {
 		const path = pathname.split('/'),
 			key = path && !path[1] ? 'home' : path[1];
-		return key;
+		return key === 'gallery' ? 'photo' : key;
 	}
 
 	componentWillUnmount() {
@@ -48,12 +47,6 @@ class NavBar extends Component {
 			return;
 		};
 	}
-
-	// shouldComponentUpdate() {
-	// 	console.log(...arguments);
-
-	// 	return true;
-	// }
 }
 
-export default connect((menus) => ({ ...menus }))(NavBar);
+export default NavBar;
