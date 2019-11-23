@@ -27,38 +27,32 @@ const RoutersConfig = [
 				redirect: true,
 			},
 			{
-				path: '/gallery',
-				component: () => import('./pages/PhotoGallery/PhotoGallery'),
-				model: [],
-			},
-			{
 				path: '/zone',
-				component: () => import('./pages/YZone/YZone'),
+				component: () => import('./pages/YZone'),
 				authorty,
 				model: [],
 				routes: [
 					{
 						path: '/zone/list',
 						model: [],
-						component: () => import('./pages/YZone/list/ZoneList'),
+						component: () => import('./pages/YZone/list'),
 					},
 					{
 						path: '/zone/detail',
 						model: [],
-						component: () =>
-							import('./pages/YZone/detail/ZoneDetail'),
+						component: () => import('./pages/YZone/detail'),
 					},
 				],
 			},
 			{
 				path: '/city',
-				component: () => import('./pages/YCity/YCity'),
+				component: () => import('./pages/YCity'),
 				authorty,
 				model: [],
 			},
 			{
 				path: '/video',
-				component: () => import('./pages/YVideo/YVideo'),
+				component: () => import('./pages/YVideo'),
 				authorty,
 				model: [],
 			},

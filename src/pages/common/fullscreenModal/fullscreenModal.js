@@ -7,23 +7,20 @@ import './fullscreenModal.less';
 class FullscreenModal extends Component {
 	static defaultProps = {
 		title: '',
-		detailData: [
-			{
-				desc: '',
-			},
-		],
+		detailData: [],
 	};
 
 	constructor(props) {
 		super(props);
+		const { detailData } = props;
 		this.state = {
 			translateY: 0,
 			dataSource: [
 				{
 					currentIndex: 1,
-					totalLen: props.detailData.length,
+					totalLen: detailData.length,
 					title: props.title,
-					desc: props.detailData[0].desc,
+					desc: (detailData[0] && detailData[0].desc) || '',
 				},
 			],
 		};
@@ -35,6 +32,7 @@ class FullscreenModal extends Component {
 	render() {
 		const { title, detailData, visible, onCancel = () => {} } = this.props;
 		const { translateY, dataSource } = this.state;
+		if (!detailData.length) return null;
 		return (
 			<Modal
 				visible={visible}
@@ -49,12 +47,12 @@ class FullscreenModal extends Component {
 				title={null}
 				closable={false}
 				centered={true}
-				wrapClassName="Ymodal"
+				wrapClassName='Ymodal'
 				onCancel={() => onCancel()}
 				maskClosable={true}>
 				<Icon
-					type="close"
-					className="modalClose"
+					type='close'
+					className='modalClose'
 					onClick={() => onCancel()}
 				/>
 				<DetailCarousel
@@ -82,8 +80,8 @@ class FullscreenModal extends Component {
 					placement={'bottom'}
 					closable={false}
 					mask={false}
-					height="auto"
-					className="yDrawer"
+					height='auto'
+					className='yDrawer'
 					onClose={this.onClose}
 					afterVisibleChange={(visible) =>
 						visible && this.setTransLate()

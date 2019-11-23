@@ -53,6 +53,7 @@ class SecondayClassfiy extends Component {
 	}
 
 	changeHandle = ({ selectIds, track, tabIndex }) => {
+		console.log(selectIds);
 		this.props.cateIdsLoad({
 			selectIds,
 			breadcrumb: this.getBreadcrumb(tabIndex),

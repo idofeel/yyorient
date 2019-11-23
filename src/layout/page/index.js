@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
 import { connect } from 'dva';
 import SecondayClassfiy from '../../components/SecondayClassfiy/SecondayClassfiy';
-import { Breadcrumb, Spin } from 'antd';
+import { Breadcrumb, Spin, Empty } from 'antd';
 import Style from './index.less';
 
 @connect(({ menus }) => ({ menus }))
 class TopMenus extends Component {
 	static defaultProps = {
 		loading: false,
+		empty: false,
 		showBreadcrumb: false,
 		pageName: 'home',
 		cateIdsLoad: () => {},
@@ -19,7 +20,7 @@ class TopMenus extends Component {
 	};
 	render() {
 		const { breadcrumb } = this.state;
-		const { showBreadcrumb, loading, children } = this.props;
+		const { showBreadcrumb, loading, children, empty } = this.props;
 		return (
 			<div>
 				<SecondayClassfiy
@@ -39,7 +40,16 @@ class TopMenus extends Component {
 				)}
 				<div className={Style.menusContent}>
 					<Spin spinning={loading} size='large'>
-						{children}
+						{empty ? (
+							<Empty
+								image={Empty.PRESENTED_IMAGE_SIMPLE}
+								description={
+									empty === true ? '暂无数据' : empty
+								}
+							/>
+						) : (
+							children
+						)}
 					</Spin>
 				</div>
 			</div>
