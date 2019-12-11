@@ -3,13 +3,13 @@ import { connect } from 'dva';
 import { Form, Input, Button, Checkbox, Icon, Message } from 'antd';
 import { email_reg, user_name } from '../../utils/Regexp';
 import './login.less';
-
-@connect()
+import api, { RootBase } from '../../services/api';
+import { get } from '../../utils/request';
 class Login extends Component {
 	render() {
 		const { getFieldDecorator } = this.props.form;
 		return (
-			<Form onSubmit={this.handleSubmit} className="login-form">
+			<Form onSubmit={this.handleSubmit} className='login-form'>
 				<Form.Item>
 					{getFieldDecorator('username', {
 						rules: [
@@ -25,11 +25,11 @@ class Login extends Component {
 						<Input
 							prefix={
 								<Icon
-									type="user"
+									type='user'
 									style={{ color: 'rgba(0,0,0,.25)' }}
 								/>
 							}
-							placeholder="请输入您的手机号/邮箱"
+							placeholder='请输入您的手机号/邮箱'
 						/>,
 					)}
 				</Form.Item>
@@ -40,12 +40,12 @@ class Login extends Component {
 						<Input
 							prefix={
 								<Icon
-									type="lock"
+									type='lock'
 									style={{ color: 'rgba(0,0,0,.25)' }}
 								/>
 							}
-							type="password"
-							placeholder="请输入密码"
+							type='password'
+							placeholder='请输入密码'
 						/>,
 					)}
 				</Form.Item>
@@ -54,19 +54,33 @@ class Login extends Component {
 						valuePropName: 'checked',
 						initialValue: true,
 					})(<Checkbox>记住我</Checkbox>)}
-					<a className="login-form-forgot" href="">
+					<a className='login-form-forgot' href=''>
 						忘记密码
 					</a>
 					<Button
-						type="primary"
-						htmlType="submit"
+						type='primary'
+						htmlType='submit'
 						onClick={(e) => {
 							this.onSubmit(e);
 						}}
-						className="login-form-button">
+						className='login-form-button'>
 						登录
 					</Button>
-					<a href="#/register">现在注册！</a>
+					<a href='#/register'>现在注册！</a>
+					<a href={RootBase + api.auth.qqLogin} target='blank'>
+						现在注册！
+					</a>
+					<Icon
+						type='qq'
+						onClick={() => {
+							window.open(
+								RootBase + api.auth.qqLogin,
+								'_self',
+								'width=500,height=400,menubar=no,left=10,toolbar=no, status=no,scrollbars=yes',
+							);
+						}}
+					/>
+					{/* <iframe href={RootBase + api.auth.qqLogin} /> */}
 				</Form.Item>
 			</Form>
 		);
@@ -74,7 +88,7 @@ class Login extends Component {
 
 	// login
 	onSubmit() {
-		// console.log(this)
+		console.log(this);
 		this.props.form.validateFields((err, values) => {
 			if (err) return;
 			const { username, password } = values;

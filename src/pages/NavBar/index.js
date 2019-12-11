@@ -39,7 +39,7 @@ class NavBar extends Component {
 	setSelectKeys(pathname) {
 		const path = pathname.split('/'),
 			key = path && !path[1] ? 'home' : path[1];
-		return key === 'gallery' ? 'photo' : key;
+		return key;
 	}
 
 	componentWillUnmount() {

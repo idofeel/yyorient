@@ -142,6 +142,12 @@ export default class ZoneList extends Component {
 
 		// urlEncoded
 	}
+
+	componentWillUnmount() {
+		this.setState = (state, callback) => {
+			return;
+		};
+	}
 }
 
 function Special(props) {
@@ -186,7 +192,7 @@ class ZoneItem extends Component {
 							</h3>
 						}
 						bordered={false}>
-						<img src={RootBase + item.img} alt='' />
+						<img src={RootBase +'/'+ item.img} alt='' />
 					</Card>
 				))}
 			</div>

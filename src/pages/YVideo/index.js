@@ -105,9 +105,9 @@ class YVideo extends Component {
 			const poster = index
 				? 'http://img4.imgtn.bdimg.com/it/u=2891947786,1564100578&fm=26&gp=0.jpg'
 				: '';
-			RootBase + item.cover;
+			RootBase +'/' +  item.cover;
 			return {
-				src: RootBase + item.video,
+				src: RootBase +'/' + item.video,
 				poster,
 				vid: item.vid,
 				name: item.vname,

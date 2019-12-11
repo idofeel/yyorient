@@ -26,6 +26,12 @@ class TopMenusDemo extends Component {
 
 	cateIdsLoad = ({ selectids, tabIndex, breadcrumb }) => {};
 	tabChange = (item, index) => {};
+
+	componentWillUnmount() {
+		this.setState = (state, callback) => {
+			return;
+		};
+	}
 }
 
 export default TopMenusDemo;

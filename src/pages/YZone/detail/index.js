@@ -110,7 +110,7 @@ export default class ZoneDetail extends Component {
 		let data = [];
 		if (res.success) {
 			data = res.data.map((item) => ({
-				img: RootBase + item.url,
+				img: RootBase +'/' + item.url,
 				meta: [item.id],
 				desc: item.memo,
 			}));

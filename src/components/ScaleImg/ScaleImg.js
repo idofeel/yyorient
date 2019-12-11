@@ -108,7 +108,7 @@ export default class extends React.Component {
 	imageSource = {};
 	imageData = [];
 	url = (data) =>
-		`${RootBase}${data.baseurl}/${data.imgid}-${data.sizeid}_${data.row}_${
+		`${RootBase}/${data.baseurl}/${data.imgid}-${data.sizeid}_${data.row}_${
 			data.col
 		}.${data.ex || 'jpg'}`;
 	onReay() {}
@@ -322,21 +322,21 @@ export default class extends React.Component {
 		};
 		return (
 			<div
-				ref="visivbleArea"
-				className="visivbleArea"
+				ref='visivbleArea'
+				className='visivbleArea'
 				onMouseMove={this.touchMove.bind(this)}
 				onTouchEnd={this.touchEnd.bind(this)}
 				onMouseUp={this.touchEnd.bind(this)}
 				onTouchMove={this.touchMove.bind(this)}>
 				<div
-					ref="imgContainer"
-					className="pictureArea"
+					ref='imgContainer'
+					className='pictureArea'
 					onMouseDown={this.touchStrat.bind(this)}
 					onTouchStart={this.touchStrat.bind(this)}
 					onDoubleClick={this.doubleClick.bind(this)}
 					style={pictrueStyle}>
 					{/* 缩略图 */}
-					<img src={this.imgUrl} alt="" draggable={false} />
+					<img src={this.imgUrl} alt='' draggable={false} />
 					{/* 真实图片按比例加载区域图片*/}
 					{/* <div style={{ position: 'absolute', width: '100%', height: '100%', top: 0, left: 0 }}>
                         <div style={{ ...imgStyle, background: `url(${imgs}) ` }} ></div>
@@ -367,27 +367,27 @@ export default class extends React.Component {
 
 		return (
 			<div
-				ref="aerialView"
-				className="aerialView"
+				ref='aerialView'
+				className='aerialView'
 				style={{
 					width: this.AerialViewWidth,
 					height: this.AerialViewHeight,
 				}}>
-				<div className="aerialImgBox">
+				<div className='aerialImgBox'>
 					<div
-						ref="aerialImg"
-						className="aerialImg"
+						ref='aerialImg'
+						className='aerialImg'
 						style={this.aerialImgSize()}>
 						<img
 							src={this.imgUrl}
 							draggable={false}
-							className="notSelect"
-							alt=""
+							className='notSelect'
+							alt=''
 						/>
 					</div>
 					<div
-						ref="aerial"
-						className="aerial"
+						ref='aerial'
+						className='aerial'
 						style={{ ...pos }}
 						onMouseDown={this.AerialTouchStrat.bind(this)}
 						// onMouseMove={this.touchMove.bind(this)}
@@ -514,13 +514,13 @@ export default class extends React.Component {
 			return (
 				// <div className="imgStyle" style={{ width: item.w / meta.imgw * 100 + '%', height: item.h / meta.imgh * 100 + '%' }}
 				<div
-					className="imgStyle"
+					className='imgStyle'
 					style={{
 						width: (item.w / meta.imgw) * 100 + '%',
 						height: (item.h / meta.imgh) * 100 + '%',
 					}}
 					key={index}>
-					{<img src={item.img} lazy={item.img} alt="" />}
+					{<img src={item.img} lazy={item.img} alt='' />}
 				</div>
 			);
 		});
@@ -563,7 +563,7 @@ export default class extends React.Component {
 			return (
 				// <div className="imgStyle" style={{ width: item.w / meta.imgw * 100 + '%', height: item.h / meta.imgh * 100 + '%' }}
 				<div
-					className="imgStyle"
+					className='imgStyle'
 					style={{
 						width: (item.w / meta.imgw) * 100 + '%',
 						height: (item.h / meta.imgh) * 100 + '%',
@@ -572,7 +572,7 @@ export default class extends React.Component {
 					<img
 						src={item.img}
 						lazy={item.img}
-						alt=""
+						alt=''
 						draggable={false}
 					/>
 				</div>
@@ -595,13 +595,13 @@ export default class extends React.Component {
 					{items.map((item, index) => {
 						return (
 							<div
-								className="imgStyle"
+								className='imgStyle'
 								style={{
 									width: (item.w / item.imgw) * 100 + '%',
 									height: (item.h / item.imgh) * 100 + '%',
 								}}
 								key={index}>
-								{item.visible && <img src={item.img} alt="" />}
+								{item.visible && <img src={item.img} alt='' />}
 							</div>
 						);
 					})}

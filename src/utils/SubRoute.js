@@ -41,6 +41,8 @@ const dynamicComponent = ({
 			}),
 	});
 
+exports.DynamicComponent = dynamicComponent;
+
 // 子路由组件
 function SubRoutes(props) {
 	return <Route component={dynamicComponent(props)} />;

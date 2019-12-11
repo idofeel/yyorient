@@ -7,10 +7,11 @@ import { Link } from 'dva/router';
 import { connect } from 'dva';
 
 const Search = Input.Search;
-@connect(({menus})=>({menus}))
+@connect(({ menus }) => ({ menus }))
 class yyHeader extends React.Component {
 	render() {
-		const { isLogin = false } = this.props;
+		console.log(this.props);
+		const { userInfo } = this.props.global;
 		return (
 			<header className={style.header}>
 				<Row type='flex' justify='space-around' align='middle'>
@@ -43,10 +44,10 @@ class yyHeader extends React.Component {
 							/>
 						</Col>
 						<Col span={24}>
-							{isLogin ? (
+							{userInfo.uname ? (
 								<>
-									<Avatar src='https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png' />
-									<span>{this.props.uname}</span>
+									<Avatar src={userInfo.avatar} />
+									<span>{userInfo.uname}</span>
 								</>
 							) : (
 								<>
@@ -62,7 +63,6 @@ class yyHeader extends React.Component {
 			</header>
 		);
 	}
-	
 }
 
 export default yyHeader;

@@ -3,9 +3,11 @@ export default {
 
 	state: {
 		userInfo: {
-			uname: 'dofeel',
+			uname: '',
 			pwd: null,
 			id: null,
+			avatar:
+				'https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png',
 		},
 	},
 
@@ -22,6 +24,9 @@ export default {
 		},
 		*setUserInfo({ payload }, { put }) {
 			yield put({ type: 'set_userinfo', payload });
+		},
+		*getLoginState({ payload }, { put }) {
+			// 获得登录状态
 		},
 	},
 

@@ -86,8 +86,28 @@ const RoutersConfig = [
 			},
 			{
 				path: '/profile',
-				component: () => import('./pages/User/ProfilePage'),
+				component: () => import('./pages/profile'),
 				model: [],
+				routes: [
+					{
+						path: '/profile/photo',
+						model: [],
+						title: '图片收藏',
+						component: () => import('./pages/profile/photoCollect'),
+					},
+					{
+						path: '/profile/video',
+						model: [],
+						title: '视频收藏',
+						component: () => import('./pages/profile/videoCollect'),
+					},
+					{
+						path: '/profile/center',
+						model: [],
+						title: '个人中心',
+						component: () => import('./pages/Home/Home'),
+					},
+				],
 			},
 		],
 	},

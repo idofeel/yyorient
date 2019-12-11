@@ -1,4 +1,4 @@
-const domain = 'http://yy.aijk.xyz/';
+const domain = 'http://yy.aijk.xyz';
 
 exports.RootBase = domain;
 

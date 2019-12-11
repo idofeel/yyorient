@@ -132,7 +132,7 @@ class Gallery extends Component {
 									className='picitem'
 									cover={
 										<img
-											src={RootBase + i.img}
+											src={RootBase + '/' + i.img}
 											alt={i.pname}
 											onClick={() => {
 												this.clickItemHandle(i);

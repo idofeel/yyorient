@@ -282,6 +282,11 @@ class YYTabs extends Component {
 			cateIds: params.get('cid') || '',
 		};
 	}
+	componentWillUnmount() {
+		this.setState = (state, callback) => {
+			return;
+		};
+	}
 }
 export class ReclassifysItem extends Component {
 	static defaultProps = {
