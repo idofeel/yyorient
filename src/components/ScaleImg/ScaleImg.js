@@ -38,7 +38,7 @@
 import React from 'react';
 // import logo from 'Assets/abcdef/abcdef-1x_0_0.jpg';
 import './ScaleImg.less';
-import { RootBase } from '../../services/api';
+import { RootBase } from '@/services/api';
 
 // const imgs = require('../../assets/images/3.jpg')
 export default class extends React.Component {
@@ -108,7 +108,7 @@ export default class extends React.Component {
 	imageSource = {};
 	imageData = [];
 	url = (data) =>
-		`${RootBase}${data.baseurl}/${data.imgid}-${data.sizeid}_${data.row}_${
+		`${RootBase}${data.baseurl}/${data.imgid || data.pgid}-${data.sizeid}_${data.row}_${
 			data.col
 		}.${data.ex || 'jpg'}`;
 	onReay() {}

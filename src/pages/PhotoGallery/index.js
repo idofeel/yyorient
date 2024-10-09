@@ -275,14 +275,14 @@ class Gallery extends Component {
 	async clickItemHandle(item = {}) {
 		this.setState({ loading: true });
 
-		const { pid } = item;
-		const files = await get(api.photoGallery.files, { pid });
+		const { pgid } = item;
+		const files = await get(api.photoGallery.files, { pid:pgid });
 		files.data.splice(0, 1);
 		this.setState({
 			loading: false,
 			visible: true,
 			source: files.data,
-			detailid: pid,
+			detailid: pgid,
 		});
 		// this.handleImg(true);
 	}

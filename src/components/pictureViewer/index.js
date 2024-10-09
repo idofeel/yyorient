@@ -363,7 +363,7 @@ class AuthorInfo extends Component {
 			this.setState({
 				title: data.pname,
 				data: [
-					{ title: '年代', content: details.data.eraname },
+					// { title: '年代', content: details.data.eraname },
 					...author,
 					...detail,
 				],

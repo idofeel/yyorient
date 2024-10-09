@@ -5,10 +5,15 @@ import logo from 'images/logo.png';
 import style from './header.less';
 import { Link } from 'dva/router';
 import { connect } from 'dva';
+import { queryString, joinUrlEncoded } from '@/utils';
 
 const Search = Input.Search;
 @connect(({menus})=>({menus}))
 class yyHeader extends React.Component {
+	state={
+        keyword: queryString(this.props.location.search).k || ''
+
+	}
 	render() {
 		const { isLogin = false } = this.props;
 		return (
@@ -24,8 +29,8 @@ class yyHeader extends React.Component {
 						<Link to='/'>
 							<img
 								src={logo}
-								title='雅韵东方官网'
-								alt='雅韵东方官网'
+								title='圣瞳艺览官方网站'
+								alt='圣瞳艺览官方网站'
 							/>
 						</Link>
 					</Col>
@@ -37,7 +42,15 @@ class yyHeader extends React.Component {
 							<Search
 								size='small'
 								placeholder=''
-								onSearch={(value) => console.log(value)}
+								value={this.state.keyword}
+								onChange={e=>{
+									this.setState({keyword:e.target.value})
+
+								}}
+								onSearch={(keyword) => {
+									this.props.history.push('/search?k='+keyword);
+
+								}}
 								enterButton
 								className='searchIcon'
 							/>

@@ -113,9 +113,9 @@ export default class ZoneList extends Component {
 				};
 			});
 
-			for (let i = 0; i < 20; i++) {
-				source[i] = source[0];
-			}
+			// for (let i = 0; i < 20; i++) {
+			// 	source[i] = source[0];
+			// }
 
 			this.setState({ source, loading: false, empty: false }, () => {});
 		}
@@ -144,8 +144,10 @@ export default class ZoneList extends Component {
 	}
 }
 
-function Special(props) {
+export function Special(props) {
 	const { title = null } = props;
+
+
 	return (
 		<div className='specialPage'>
 			{title}

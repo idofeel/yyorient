@@ -14,18 +14,18 @@ class index extends Component {
 		// if (!this.state.menus.length) return null;
 		return (
 			<>
-				<Header {...this.props} />
-				{/* 一级路由 */}
-				<Switch>
-					{routes.map((route, i) => (
-						<SubRoutes key={i} {...route} app={app} />
-					))}
-					<RedirectRoute exact={true} from={'/'} routes={routes} />
-					<NoMatchRoute />
-				</Switch>
-				{/* <Footer /> */}
-			</>
-		);
+			<Header {...this.props} />
+			{/* 一级路由 */}
+			<Switch className="r">
+				{routes.map((route, i) => (
+					<SubRoutes key={i} {...route} app={app} />
+				))}
+				<RedirectRoute exact={true} from={'/'} routes={routes} />
+				<NoMatchRoute />
+			</Switch>
+			{/* <Footer /> */}
+		</>
+		)
 	}
 	componentDidMount() {
 		this.props.dispatch({

@@ -1,6 +1,6 @@
-const domain = 'http://yy.aijk.xyz/';
+const domain = 'https://hw.aijk.xyz/';
 
-exports.RootBase = domain;
+exports.RootBase = '';
 
 export default {
 	menus: '/?y=common&d=menu', // 无   一级、二级菜单
@@ -9,6 +9,7 @@ export default {
 	footer: '/?y=common&d=footer', // 底部
 	// 图库类接口
 	photoGallery: {
+		search:'/?y=pic&d=search', // 图片搜索
 		list: '/?y=pic&d=list', //  {ids} 图库列表
 		detail: '/?y=pic&d=detail', // {pid}   图片详情
 		files: '/?y=pic&d=files', //  {pid}    图片文件信息

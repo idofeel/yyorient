@@ -89,6 +89,11 @@ const RoutersConfig = [
 				component: () => import('./pages/User/ProfilePage'),
 				model: [],
 			},
+			{
+				path: '/search',
+				component: () => import('./pages/Search/index'),
+				model: [],
+			},
 		],
 	},
 ];

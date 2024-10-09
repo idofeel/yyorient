@@ -1,7 +1,9 @@
 import fetch from 'dva/fetch';
-import { RootBase } from '../services/api';
+// import { RootBase } from '../services/api';
 import { joinUrlEncoded } from '.';
 import { Message } from 'antd';
+const RootBase = window.location.host.indexOf('localhost') > -1 ? 'https://hw.aijk.xyz/' : '';
+
 Message.config({
 	top: 100,
 	duration: 2,

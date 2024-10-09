@@ -128,11 +128,11 @@ class YYTabs extends Component {
 						);
 					})}
 				</Tabs>
-				<div
+				{showCate?<div
 					className='cateBoxMask'
 					onClick={() => this.toggleCate(false)}
 					hidden={showCate}
-				/>
+				/>:null}
 			</>
 		);
 	}
